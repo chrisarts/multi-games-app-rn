@@ -1,0 +1,7 @@
+{
+  "name": "@games/tetris",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  }
+}
