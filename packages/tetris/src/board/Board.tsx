@@ -3,7 +3,7 @@ import { TetrisCell } from "./components/TetrisCell";
 import { useTetrisBoard } from "../hooks/useTetrisStore";
 import { usePlayer } from "../hooks/usePlayer";
 import { useInterval } from "../hooks/useInterval";
-import { GameState } from "../models/Store.model";
+import { GameState } from "../models";
 import { hasCollisions } from "../utils";
 
 export const TetrisBoard = () => {

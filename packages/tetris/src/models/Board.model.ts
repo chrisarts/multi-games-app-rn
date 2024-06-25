@@ -1,9 +1,13 @@
 import { BlockShape, Block } from "./Block.model";
-import { BoardPosition } from "./Point.model";
+
+export interface BoardPosition {
+  row: number;
+  column: number;
+}
 
 export type BoardCell = [Block | null, CellState];
 
-/** Board 2D Matrix Cell[][] */
+/** Board 2D Matrix BoardCell[][] */
 export type BoardMatrix = BoardCell[][];
 
 export enum CellState {
@@ -21,4 +25,14 @@ export interface BoardState {
 export interface BoardConfig {
   HEIGHT: number;
   WIDTH: number;
+}
+
+export enum GameState {
+  PLAYING,
+  STOP,
+}
+
+export enum TickSpeed {
+  Normal = 800,
+  Sliding = 200,
 }
