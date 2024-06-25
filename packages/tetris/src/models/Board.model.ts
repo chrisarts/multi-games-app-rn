@@ -1,13 +1,14 @@
 import { BlockShape, Block } from "./Block.model";
 import { BoardPosition } from "./Point.model";
 
-export type BoardCell = CellState | Block;
+export type BoardCell = [Block | null, CellState];
 
 /** Board 2D Matrix Cell[][] */
 export type BoardMatrix = BoardCell[][];
 
 export enum CellState {
   EMPTY,
+  MERGED,
 }
 
 export interface BoardState {

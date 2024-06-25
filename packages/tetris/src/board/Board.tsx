@@ -1,10 +1,43 @@
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { TetrisCell } from "./components/TetrisCell";
-import { useTetris } from "./useTetris";
-import { MoveDirection } from "../models/Block.model";
+import { useTetrisBoard } from "./useTetrisStore";
+import { usePlayer } from "./usePlayer";
+import { useInterval } from "./useInterval";
+import { GameState } from "../models/Store.model";
+import { hasCollisions } from "./board.utils";
 
 export const TetrisBoard = () => {
-  const { board, startGame, moveBlock } = useTetris();
+  const { player, updatePlayerPosition, resetPlayer } = usePlayer();
+  const { board, startGame, tickSpeed, gameState } = useTetrisBoard(
+    player,
+    resetPlayer
+  );
+  // console.log("STATE: ", store.getState().cells);
+
+  const drop = () => {
+    if (
+      !hasCollisions(board, player, {
+        column: 0,
+        row: 1,
+      })
+    ) {
+      updatePlayerPosition({ column: 0, row: 1 }, false);
+    } else {
+      console.log("HAS_COLLISION");
+      updatePlayerPosition({ column: 0, row: 0 }, true);
+    }
+  };
+
+  const movePlayer = (dir: number) => {
+    if (!hasCollisions(board, player, { row: dir, column: 0 })) {
+      updatePlayerPosition({ row: dir, column: 0 }, false);
+    }
+  };
+
+  useInterval(() => {
+    if (gameState !== GameState.PLAYING) return;
+    drop();
+  }, tickSpeed);
 
   return (
     <FlatList
@@ -35,7 +68,7 @@ export const TetrisBoard = () => {
             <Text style={{ color: "white" }}>Start Game</Text>
           </Pressable>
           <Pressable
-            onPress={() => moveBlock(MoveDirection.LEFT)}
+            // onPress={() => moveBlock(MoveDirection.LEFT)}
             style={{
               margin: 5,
               padding: 5,
@@ -46,7 +79,7 @@ export const TetrisBoard = () => {
             <Text style={{ color: "white" }}>Left</Text>
           </Pressable>
           <Pressable
-            onPress={() => moveBlock(MoveDirection.DOWN)}
+            // onPress={() => moveBlock(MoveDirection.DOWN)}
             style={{
               margin: 5,
               padding: 5,
@@ -57,7 +90,7 @@ export const TetrisBoard = () => {
             <Text style={{ color: "white" }}>Down</Text>
           </Pressable>
           <Pressable
-            onPress={() => moveBlock(MoveDirection.RIGHT)}
+            // onPress={() => moveBlock(MoveDirection.RIGHT)}
             style={{
               margin: 5,
               padding: 5,
@@ -68,7 +101,7 @@ export const TetrisBoard = () => {
             <Text style={{ color: "white" }}>Right</Text>
           </Pressable>
           <Pressable
-            onPress={() => moveBlock(MoveDirection.ROTATE)}
+            onPress={() => movePlayer(1)}
             style={{
               margin: 5,
               padding: 5,

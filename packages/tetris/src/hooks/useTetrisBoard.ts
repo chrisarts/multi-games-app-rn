@@ -1,5 +1,5 @@
 import { useReducer } from "react";
-import { createTetrisBoard, getStartPoint } from "./board.utils";
+import { createTetrisBoard, getStartPoint } from "../board/board.utils";
 import { BoardMatrix, BoardState } from "../models/Board.model";
 import {
   BlockShapes,

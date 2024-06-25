@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useTetrisBoard } from "./useTetrisBoard";
+import { useTetrisBoard } from "../hooks/useTetrisBoard";
 import { useInterval } from "./useInterval";
 import { addShapeToBoard, hasCollisions, structuredClone } from "./board.utils";
 import { MoveDirection } from "../models/Block.model";

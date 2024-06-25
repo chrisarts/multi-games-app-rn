@@ -1,8 +1,6 @@
-import { useSyncExternalStore } from "react";
 import { Text, View, StyleSheet } from "react-native";
-import { CellState, BoardCell } from "../../models/Board.model";
+import { BoardCell } from "../../models/Board.model";
 import { BlockShapes } from "../../models/Block.model";
-import { registerCell, store } from "../../models/Store.model";
 import { BoardPosition } from "../../models/Point.model";
 
 interface TetrisCellProps {
@@ -10,16 +8,10 @@ interface TetrisCellProps {
   position: BoardPosition;
 }
 export const TetrisCell = ({ cell, position }: TetrisCellProps) => {
-  console.log("POSITION: ", position);
-  // const state = useSyncExternalStore(
-  //   store.subscribe,
-  //   () => registerCell(position, cell),
-  //   () => registerCell(position, cell)
-  // );
   let cellColor = "lightgray";
   let textColor = "black";
-  if (cell !== CellState.EMPTY) {
-    cellColor = BlockShapes[cell].color;
+  if (cell[0]) {
+    cellColor = BlockShapes[cell[0]].color;
     textColor = "white";
   }
 
