@@ -1,7 +1,10 @@
-import { BlockShapes } from "../models/Block.model";
-import { CellState, BoardConfig, BoardMatrix } from "../models/Board.model";
-import { BoardPosition } from "../models/Point.model";
-import { PlayerState } from "../hooks/usePlayer";
+import {
+  PlayerState,
+  CellState,
+  BoardConfig,
+  BoardMatrix,
+  BoardPosition,
+} from "../models";
 
 export const BOARD_CONFIG: BoardConfig = {
   HEIGHT: 15,
@@ -22,7 +25,7 @@ export const hasCollisions = (
   player: PlayerState,
   move: BoardPosition
 ) => {
-  const shape = BlockShapes[player.currentShape].shape;
+  const shape = player.currentShape.shape;
   for (let row = 0; row < shape.length; row += 1) {
     for (let column = 0; column < shape[row].length; column += 1) {
       // 1. Check that we're on an actual Tetromino cell

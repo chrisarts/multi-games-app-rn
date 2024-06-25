@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react";
 import { createTetrisBoard } from "../utils";
 import {
+  PlayerState,
   BoardMatrix,
   CellState,
-  BlockShapes,
   GameState,
   TickSpeed,
+  BoardConfig,
 } from "../models";
-import { PlayerState } from "./usePlayer";
 import { BOARD_CONFIG } from "../utils/board.utils";
 
 export const useTetrisBoard = (
   player: PlayerState,
-  resetPlayer: () => void
+  resetPlayer: (boardConfig: BoardConfig) => void
 ) => {
-  const [board, setBoard] = useState(createTetrisBoard(BOARD_CONFIG));
+  const [boardConfig] = useState(BOARD_CONFIG);
+  const [board, setBoard] = useState(createTetrisBoard(boardConfig));
   const [gameState, setGameState] = useState(GameState.STOP);
   const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
 
@@ -45,13 +46,13 @@ export const useTetrisBoard = (
         )
       );
 
-      BlockShapes[player.currentShape].shape.forEach((row, rowIndex) => {
+      player.currentShape.shape.forEach((row, rowIndex) => {
         row.forEach((col, colIndex) => {
           if (col !== 0) {
             newBoard[rowIndex + player.position.row][
               colIndex + player.position.column
             ] = [
-              player.currentShape,
+              player.currentBlock,
               player.collided ? CellState.MERGED : CellState.EMPTY,
             ];
           }
@@ -59,7 +60,7 @@ export const useTetrisBoard = (
       });
 
       if (player.collided) {
-        resetPlayer();
+        resetPlayer(boardConfig);
         return sweepRows(newBoard);
       }
 
@@ -69,17 +70,19 @@ export const useTetrisBoard = (
   }, [
     player.position?.column,
     player.position?.row,
-    player.currentShape,
+    player.currentBlock,
     player.collided,
     player.position,
     resetPlayer,
+    player.currentShape?.shape,
+    boardConfig,
   ]);
 
   const startGame = () => {
-    setBoard(createTetrisBoard(BOARD_CONFIG));
+    setBoard(createTetrisBoard(boardConfig));
     setGameState(GameState.PLAYING);
     setTickSpeed(TickSpeed.Normal);
-    resetPlayer();
+    resetPlayer(boardConfig);
   };
 
   const stopGame = () => {
@@ -94,5 +97,6 @@ export const useTetrisBoard = (
     tickSpeed,
     setGameState,
     setTickSpeed,
+    boardConfig,
   };
 };

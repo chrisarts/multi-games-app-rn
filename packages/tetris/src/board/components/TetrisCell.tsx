@@ -1,24 +1,12 @@
 import { View, StyleSheet } from "react-native";
-import { BoardPosition, BoardCell, BlockShapes } from "../../models";
+import { BoardCell } from "../../models";
+import { getCellColors } from "../../utils/block.utils";
 
 interface TetrisCellProps {
   cell: BoardCell;
-  position: BoardPosition;
 }
 export const TetrisCell = ({ cell }: TetrisCellProps) => {
-  let cellColor = "lightgray";
-  if (cell[0]) {
-    cellColor = BlockShapes[cell[0]].color;
-  }
-
-  return (
-    <View
-      style={[
-        styles.cell,
-        { backgroundColor: cellColor, borderColor: cellColor },
-      ]}
-    />
-  );
+  return <View style={[styles.cell, getCellColors(cell)]} />;
 };
 
 const styles = StyleSheet.create({

@@ -1,3 +1,6 @@
 {
-  "name": "@games/shared"
+  "name": "@games/shared",
+  "peerDependencies": {
+    "react-native": "*"
+  }
 }

@@ -1,23 +1,16 @@
 import { useCallback, useState } from "react";
 import {
   BoardPosition,
-  Block,
   getRandomBlock,
   MoveDirection,
   BoardMatrix,
+  PlayerState,
+  PlayerMoveAction,
+  BoardConfig,
+  BlockShape,
 } from "../models";
-import { hasCollisions } from "../utils";
+import { getBlockShape, hasCollisions, playerMoves } from "../utils";
 
-export interface PlayerState {
-  position: BoardPosition;
-  currentShape: Block;
-  collided: boolean;
-}
-interface PlayerMoveAction {
-  dir: MoveDirection;
-  value: number;
-  board: BoardMatrix;
-}
 export const usePlayer = () => {
   const [player, setPlayer] = useState({} as PlayerState);
 
@@ -32,19 +25,48 @@ export const usePlayer = () => {
     }));
   };
 
-  const resetPlayer = useCallback(() => {
+  const resetPlayer = useCallback((boardConfig: BoardConfig) => {
+    const block = getRandomBlock();
     setPlayer({
       collided: false,
-      currentShape: getRandomBlock(),
-      position: { row: 0, column: 3 },
+      currentBlock: block,
+      position: { row: 0, column: boardConfig.WIDTH / 2 - 2 },
+      currentShape: getBlockShape(block),
     });
   }, []);
 
+  const rotateShape = (matrix: BlockShape["shape"]) => {
+    // Make the rows to become cols (transpose)
+    const shape = matrix.map((_, i) => matrix.map((column) => column[i]));
+    // Reverse each row to get a rotated matrix
+    return shape.map((row) => row.reverse());
+  };
+
+  const playerRotate = (board: BoardMatrix) => {
+    const clonedPlayer: PlayerState = JSON.parse(JSON.stringify(player));
+    clonedPlayer.currentShape.shape = rotateShape(
+      clonedPlayer.currentShape.shape
+    );
+
+    const posX = clonedPlayer.position.column;
+    let offset = 1;
+
+    while (hasCollisions(board, clonedPlayer, playerMoves.zero())) {
+      clonedPlayer.position.column += offset;
+      offset = -(offset + (offset > 0 ? 1 : -1));
+      console.log("POS: ", posX, offset);
+
+      if (offset > clonedPlayer.currentShape.shape[0].length) {
+        clonedPlayer.position.column = posX;
+        return;
+      }
+    }
+
+    setPlayer(clonedPlayer);
+  };
+
   const movePlayer = ({ dir, value, board }: PlayerMoveAction) => {
-    let newPosition: BoardPosition = {
-      column: 0,
-      row: 0,
-    };
+    let newPosition: BoardPosition = playerMoves.zero();
     switch (dir) {
       case MoveDirection.LEFT:
       case MoveDirection.RIGHT:
@@ -66,5 +88,6 @@ export const usePlayer = () => {
     updatePlayerPosition,
     resetPlayer,
     movePlayer,
+    rotateShape: playerRotate,
   };
 };

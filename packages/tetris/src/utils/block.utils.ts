@@ -1,9 +1,21 @@
-import { Block, BlockShape, BlockShapes } from "../models";
+import { Block, BlockShape, BlockShapes, BoardCell } from "../models";
 
-export const getBlockShape = (block: Block): BlockShape["shape"] => {
-  return BlockShapes[block].shape;
+export const getBlockShape = (block: Block): BlockShape => {
+  return BlockShapes[block];
 };
 
-export const getBlockColor = (block: Block): string => {
-  return BlockShapes[block].color;
+interface CellColors {
+  backgroundColor: string;
+  borderColor: string;
+}
+export const getCellColors = (cell: BoardCell): CellColors => {
+  if (!cell[0])
+    return {
+      backgroundColor: "lightgray",
+      borderColor: "lightgray",
+    };
+  return {
+    backgroundColor: BlockShapes[cell[0]].color,
+    borderColor: BlockShapes[cell[0]].color,
+  };
 };
