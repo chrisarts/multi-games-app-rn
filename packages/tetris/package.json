@@ -1,5 +1,9 @@
 {
   "name": "@games/tetris",
+  "main": "./src/index.tsx",
+  "dependencies": {
+    "@games/shared": "workspace:*"
+  },
   "peerDependencies": {
     "react": "*",
     "react-native": "*"

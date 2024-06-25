@@ -1109,6 +1109,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@effect/schema@npm:^0.68.9":
+  version: 0.68.9
+  resolution: "@effect/schema@npm:0.68.9"
+  dependencies:
+    fast-check: "npm:^3.17.2"
+  peerDependencies:
+    effect: ^3.4.2
+  checksum: 10c0/51f64ce6bb51f6096b0b5ebea90688ec17920113c087356b623080fbdbfcc93f658cbac1ab5d5156cd58390ccca57b1044ccb7013ed091bd314d3babd937402b
+  languageName: node
+  linkType: hard
+
 "@expo/bunyan@npm:^4.0.0":
   version: 4.0.0
   resolution: "@expo/bunyan@npm:4.0.0"
@@ -1495,9 +1506,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@games/tetris@workspace:packages/tetris":
+"@games/shared@workspace:*, @games/shared@workspace:packages/shared":
+  version: 0.0.0-use.local
+  resolution: "@games/shared@workspace:packages/shared"
+  languageName: unknown
+  linkType: soft
+
+"@games/tetris@workspace:*, @games/tetris@workspace:packages/tetris":
   version: 0.0.0-use.local
   resolution: "@games/tetris@workspace:packages/tetris"
+  dependencies:
+    "@games/shared": "workspace:*"
   peerDependencies:
     react: "*"
     react-native: "*"
@@ -3547,6 +3566,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"effect@npm:^3.4.2":
+  version: 3.4.2
+  resolution: "effect@npm:3.4.2"
+  checksum: 10c0/c3779fb2cc55abe6cc35196bf4a48dab7a69ee26f4a6e64d2cdf11edc89b07f6777fea3b76071847af8ddfd4225c9df86c9d3edf7f18595d6456b7e028a8c43d
+  languageName: node
+  linkType: hard
+
 "electron-to-chromium@npm:^1.4.796":
   version: 1.4.810
   resolution: "electron-to-chromium@npm:1.4.810"
@@ -3862,6 +3888,7 @@ __metadata:
   resolution: "expo-app@workspace:apps/expo-app"
   dependencies:
     "@babel/core": "npm:^7.20.0"
+    "@games/tetris": "workspace:*"
     expo: "npm:~51.0.14"
     expo-status-bar: "npm:~1.12.1"
     react: "npm:18.2.0"
@@ -3983,6 +4010,15 @@ __metadata:
   version: 3.1.1
   resolution: "exponential-backoff@npm:3.1.1"
   checksum: 10c0/160456d2d647e6019640bd07111634d8c353038d9fa40176afb7cd49b0548bdae83b56d05e907c2cce2300b81cae35d800ef92fefb9d0208e190fa3b7d6bb579
+  languageName: node
+  linkType: hard
+
+"fast-check@npm:^3.17.2":
+  version: 3.19.0
+  resolution: "fast-check@npm:3.19.0"
+  dependencies:
+    pure-rand: "npm:^6.1.0"
+  checksum: 10c0/5a15484d380fb5a3e94ec951c97e59b940ac4f2e1f3f7a05578d67851e5cb5283121bcf08c57e3238bc85899ce691b47ab477a6dd481a6f520e2e7ab4952d1ee
   languageName: node
   linkType: hard
 
@@ -6987,6 +7023,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pure-rand@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "pure-rand@npm:6.1.0"
+  checksum: 10c0/1abe217897bf74dcb3a0c9aba3555fe975023147b48db540aa2faf507aee91c03bf54f6aef0eb2bf59cc259a16d06b28eca37f0dc426d94f4692aeff02fb0e65
+  languageName: node
+  linkType: hard
+
 "qrcode-terminal@npm:0.11.0":
   version: 0.11.0
   resolution: "qrcode-terminal@npm:0.11.0"
@@ -7450,7 +7493,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root@workspace:."
   dependencies:
+    "@effect/schema": "npm:^0.68.9"
     "@types/react": "npm:^18.3.3"
+    effect: "npm:^3.4.2"
+    text-decoding: "npm:^1.0.0"
+    text-encoding-polyfill: "npm:^0.6.7"
     typescript: "npm:~5.3.3"
   languageName: unknown
   linkType: soft
@@ -8217,6 +8264,20 @@ __metadata:
   bin:
     terser: bin/terser
   checksum: 10c0/4d49a58f64c11f3742e779a0a03aff69972ca5739decb361d909d22c8f3f7d8e2ec982a928d987d56737ad50229e8ab3f62d8ba993e4b5f360a53ed487d3c06c
+  languageName: node
+  linkType: hard
+
+"text-decoding@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "text-decoding@npm:1.0.0"
+  checksum: 10c0/290dbd6111f39a4020b3e2384de614f90051eff3cd11176329fda0a40ac0b0a07e6820b9aeb4b0b7c2cc7869b62cd3b25944c71e9e16b628bcf57299ab84e311
+  languageName: node
+  linkType: hard
+
+"text-encoding-polyfill@npm:^0.6.7":
+  version: 0.6.7
+  resolution: "text-encoding-polyfill@npm:0.6.7"
+  checksum: 10c0/5486a2320e2384b0153d2835a8e6e3a643ff28fcd05c2e9fa5d69c7879a2b8fdb7faa44708792a9205f074f10606ee3b6470c8f3f4da1be90a014b79057008d0
   languageName: node
   linkType: hard
 
