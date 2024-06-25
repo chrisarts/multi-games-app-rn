@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { BoardCell } from "../../models/Board.model";
 import { BlockShapes } from "../../models/Block.model";
 import { BoardPosition } from "../../models/Point.model";
@@ -7,12 +7,10 @@ interface TetrisCellProps {
   cell: BoardCell;
   position: BoardPosition;
 }
-export const TetrisCell = ({ cell, position }: TetrisCellProps) => {
+export const TetrisCell = ({ cell }: TetrisCellProps) => {
   let cellColor = "lightgray";
-  let textColor = "black";
   if (cell[0]) {
     cellColor = BlockShapes[cell[0]].color;
-    textColor = "white";
   }
 
   return (
@@ -21,9 +19,7 @@ export const TetrisCell = ({ cell, position }: TetrisCellProps) => {
         styles.cell,
         { backgroundColor: cellColor, borderColor: cellColor },
       ]}
-    >
-      <Text style={[styles.cellText, { color: textColor }]}>{cell}</Text>
-    </View>
+    />
   );
 };
 
@@ -39,8 +35,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 0.5,
     borderRadius: 3,
-  },
-  cellText: {
-    fontSize: 8,
   },
 });

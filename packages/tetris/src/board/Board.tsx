@@ -1,10 +1,10 @@
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { TetrisCell } from "./components/TetrisCell";
-import { useTetrisBoard } from "./useTetrisStore";
-import { usePlayer } from "./usePlayer";
-import { useInterval } from "./useInterval";
+import { useTetrisBoard } from "../hooks/useTetrisStore";
+import { usePlayer } from "../hooks/usePlayer";
+import { useInterval } from "../hooks/useInterval";
 import { GameState } from "../models/Store.model";
-import { hasCollisions } from "./board.utils";
+import { hasCollisions } from "../utils";
 
 export const TetrisBoard = () => {
   const { player, updatePlayerPosition, resetPlayer } = usePlayer();
@@ -12,7 +12,6 @@ export const TetrisBoard = () => {
     player,
     resetPlayer
   );
-  // console.log("STATE: ", store.getState().cells);
 
   const drop = () => {
     if (
@@ -23,7 +22,6 @@ export const TetrisBoard = () => {
     ) {
       updatePlayerPosition({ column: 0, row: 1 }, false);
     } else {
-      console.log("HAS_COLLISION");
       updatePlayerPosition({ column: 0, row: 0 }, true);
     }
   };

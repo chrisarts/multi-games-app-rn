@@ -1,12 +1,12 @@
 import { BlockShapes } from "../models/Block.model";
-import {
-  CellState,
-  BoardConfig,
-  BoardState,
-  BoardMatrix,
-} from "../models/Board.model";
+import { CellState, BoardConfig, BoardMatrix } from "../models/Board.model";
 import { BoardPosition } from "../models/Point.model";
-import { PlayerState } from "./usePlayer";
+import { PlayerState } from "../hooks/usePlayer";
+
+export const BOARD_CONFIG: BoardConfig = {
+  HEIGHT: 15,
+  WIDTH: 10,
+};
 
 export const createTetrisBoard = ({
   WIDTH,
@@ -15,10 +15,6 @@ export const createTetrisBoard = ({
   return Array(HEIGHT)
     .fill(null)
     .map(() => Array(WIDTH).fill([null, CellState.EMPTY]));
-};
-
-export const getStartPoint = (WIDTH: number): BoardPosition => {
-  return { column: WIDTH / 2 - 2, row: 0 };
 };
 
 export const hasCollisions = (
@@ -52,24 +48,6 @@ export const hasCollisions = (
     }
   }
   return false;
-};
-
-export const addShapeToBoard = ({
-  droppingShape,
-  board,
-  dropPosition,
-  droppingBlock,
-}: BoardState) => {
-  // droppingShape.shape
-  //   .filter((row) => row.some((x) => x === 1))
-  //   .forEach((row, rowIndex) => {
-  //     row.forEach((value, colIndex) => {
-  //       if (value === 1) {
-  //         board[dropPosition.row + rowIndex][dropPosition.column + colIndex] =
-  //           droppingBlock;
-  //       }
-  //     });
-  //   });
 };
 
 export const structuredClone = <A>(a: A[]): A[] => {

@@ -1,21 +1,16 @@
 import { useEffect, useState } from "react";
-import { createTetrisBoard } from "./board.utils";
+import { createTetrisBoard } from "../utils";
 import { GameState, TickSpeed } from "../models/Store.model";
-import { useInterval } from "./useInterval";
 import { BlockShapes } from "../models/Block.model";
 import { BoardMatrix, CellState } from "../models/Board.model";
-import { PlayerState } from "./usePlayer";
-
-const boardConfig = {
-  HEIGHT: 15,
-  WIDTH: 10,
-};
+import { PlayerState } from "../hooks/usePlayer";
+import { BOARD_CONFIG } from "../utils/board.utils";
 
 export const useTetrisBoard = (
   player: PlayerState,
   resetPlayer: () => void
 ) => {
-  const [board, setBoard] = useState(createTetrisBoard(boardConfig));
+  const [board, setBoard] = useState(createTetrisBoard(BOARD_CONFIG));
   const [gameState, setGameState] = useState(GameState.STOP);
   const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
   useEffect(() => {
@@ -73,6 +68,8 @@ export const useTetrisBoard = (
     player.position?.row,
     player.currentShape,
     player.collided,
+    player.position,
+    resetPlayer,
   ]);
 
   const startGame = () => {
