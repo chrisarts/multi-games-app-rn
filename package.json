@@ -8,7 +8,8 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "yarn workspace expo-app run start"
+    "start": "yarn workspace expo-app run start",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@effect/schema": "^0.68.9",
@@ -18,6 +19,8 @@
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "eslint-config-expo": "^7.0.0",
     "typescript": "~5.3.3"
   },
   "packageManager": "yarn@4.3.1"

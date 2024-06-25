@@ -1,6 +1,6 @@
 import { useReducer } from "react";
 import { createTetrisBoard, getStartPoint } from "./board.utils";
-import { BoardState } from "../models/Board.model";
+import { BoardMatrix, BoardState } from "../models/Board.model";
 import { BlockShapes, getRandomBlock } from "../models/Block.model";
 
 const boardConfig = {
@@ -26,11 +26,19 @@ export const useTetrisBoard = () => {
   return [board, dispatch] as const;
 };
 
-type Action = {
-  type: "start" | "drop" | "move" | "commit";
-};
+interface Action {
+  type: "start" | "move" | "drop";
+}
 
-const reducer = (state: BoardState, action: Action): BoardState => {
+interface CommitAction {
+  type: "commit";
+  newBoard: BoardMatrix;
+}
+
+const reducer = (
+  state: BoardState,
+  action: Action | CommitAction
+): BoardState => {
   let newState = { ...state };
   switch (action.type) {
     case "start":
@@ -38,21 +46,26 @@ const reducer = (state: BoardState, action: Action): BoardState => {
       return {
         board: createTetrisBoard(boardConfig),
         dropPosition: getStartPoint(boardConfig.WIDTH),
-        droppingShape: firstBlock,
-        droppingBlock: firstBlock.name,
+        droppingShape: BlockShapes[firstBlock],
+        droppingBlock: firstBlock,
       };
     case "drop":
-      newState.dropPosition.y++;
+      newState.dropPosition.row += 1;
       break;
     case "commit":
-      newState.dropPosition.y++;
-      break;
+      const nextBlock = getRandomBlock();
+      return {
+        board: [...action.newBoard],
+        droppingBlock: nextBlock,
+        droppingShape: BlockShapes[nextBlock],
+        dropPosition: getStartPoint(boardConfig.WIDTH),
+      };
     case "move":
-      newState.dropPosition.y++;
+      newState.dropPosition.column++;
       break;
     default:
       throw new Error("Unhandled action type");
   }
 
-  return state;
+  return newState;
 };

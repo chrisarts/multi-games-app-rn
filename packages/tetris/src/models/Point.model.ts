@@ -1,4 +1,4 @@
 export interface BoardPosition {
-  x: number;
-  y: number;
+  row: number;
+  column: number;
 }

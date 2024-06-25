@@ -1,6 +1,7 @@
 const { getDefaultConfig } = require("@expo/metro-config");
 const path = require("path");
 
+// eslint-disable-next-line no-undef
 const projectRoot = __dirname;
 
 const workspaceRoot = path.resolve("../..");

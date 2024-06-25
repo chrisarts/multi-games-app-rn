@@ -4,24 +4,6 @@ import { useTetris } from "./useTetris";
 
 export const TetrisBoard = () => {
   const { board, startGame } = useTetris();
-  //   const interval = setInterval(() => {
-  //     console.log("POSITION: ", position);
-  //     const collide = checkCollision(tetrisShape, board, position, {
-  //       x: 0,
-  //       y: 1,
-  //     });
-  //     if (collide) {
-  //       clearInterval(interval);
-  //     } else {
-  //       setPosition((pos) => ({
-  //         ...pos,
-  //         x: pos.x,
-  //         y: pos.y + 1,
-  //       }));
-  //     }
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, [position]);
 
   return (
     <FlatList

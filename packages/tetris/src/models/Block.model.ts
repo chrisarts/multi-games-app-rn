@@ -1,20 +1,32 @@
 import { keysOf } from "@games/shared";
 
+export enum Block {
+  O = "O",
+  I = "I",
+  J = "J",
+  L = "L",
+  S = "S",
+  T = "T",
+  Z = "Z",
+}
+
 export interface BlockShape {
   shape: number[][];
   color: string;
-  name: BlockNames;
 }
 
-export const BlockShapes = {
+type ShapesObj = {
+  [key in Block]: BlockShape;
+};
+
+export const BlockShapes: ShapesObj = {
   // 🟥
   O: {
     shape: [
       [1, 1],
       [1, 1],
     ],
-    color: "gold",
-    name: "O",
+    color: "rgba(223, 217, 36,1)",
   },
   I: {
     shape: [
@@ -23,8 +35,7 @@ export const BlockShapes = {
       [0, 1, 0, 0],
       [0, 1, 0, 0],
     ],
-    color: "purple",
-    name: "I",
+    color: "rgba(80, 227, 230, 1)",
   },
   J: {
     shape: [
@@ -32,8 +43,7 @@ export const BlockShapes = {
       [0, 1, 0],
       [1, 1, 0],
     ],
-    color: "gray",
-    name: "J",
+    color: "rgba(36, 95, 223,1)",
   },
   L: {
     shape: [
@@ -41,43 +51,37 @@ export const BlockShapes = {
       [0, 1, 0],
       [0, 1, 1],
     ],
-    color: "red",
-    name: "L",
+    color: "rgba(223, 173, 36,1)",
   },
   S: {
     shape: [
-      [0, 0, 0],
       [0, 1, 1],
       [1, 1, 0],
+      [0, 0, 0],
     ],
-    color: "blueviolet",
-    name: "S",
+    color: "rgba(48, 211, 56,1)",
   },
   T: {
     shape: [
-      [0, 0, 0],
       [1, 1, 1],
       [0, 1, 0],
+      [0, 0, 0],
     ],
-    color: "orange",
-    name: "T",
+    color: "rgba(132, 61, 198,1)",
   },
   Z: {
     shape: [
-      [0, 0, 0],
       [1, 1, 0],
       [0, 1, 1],
+      [0, 0, 0],
     ],
-    color: "darkblue",
-    name: "Z",
+    color: "rgba(227, 78, 78,1)",
   },
 };
 
 export const blockNames = keysOf(BlockShapes);
 
-export type BlockNames = (typeof blockNames)[number];
-
-export const getRandomBlock = (): BlockShape => {
+export const getRandomBlock = (): Block => {
   const randomKey = blockNames[Math.floor(Math.random() * blockNames.length)];
-  return BlockShapes[randomKey] as BlockShape;
+  return randomKey;
 };

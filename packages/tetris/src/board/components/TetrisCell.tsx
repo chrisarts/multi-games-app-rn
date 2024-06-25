@@ -1,19 +1,24 @@
 import { useMemo } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { CellState, BoardCell } from "../../models/Board.model";
+import { BlockShapes } from "../../models/Block.model";
 
 interface TetrisCellProps {
   cell: BoardCell;
 }
 export const TetrisCell = ({ cell }: TetrisCellProps) => {
-  const { x, y, state, color } = cell;
   const point = useMemo(() => {
     return {
-      text: `(${x},${y})`,
+      text: cell,
     };
-  }, [x, y]);
-  const cellColor = state === CellState.CLEAR ? "lightgray" : color;
-  const textColor = state === CellState.CLEAR ? "black" : "white";
+  }, [cell]);
+  let cellColor = "lightgray";
+  let textColor = "black";
+  if (cell === CellState.EMPTY) {
+  } else {
+    cellColor = BlockShapes[cell].color;
+    textColor = "white";
+  }
   return (
     <View
       style={[

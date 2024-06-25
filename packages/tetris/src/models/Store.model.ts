@@ -1,3 +1,3 @@
-class TetrisStore {
-  readonly shapes: number = 1;
-}
+// class TetrisStore {
+//   readonly shapes: number = 1;
+// }
