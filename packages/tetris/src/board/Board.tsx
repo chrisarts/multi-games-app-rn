@@ -1,15 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
-import { pipe } from "effect/Function";
-import * as ReadOnlyArray from "effect/Array";
-import * as Option from "effect/Option";
-import { FlatList, SafeAreaView, Text, View, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { FlatList, StyleSheet } from "react-native";
 import { TetrisCell } from "./components/TetrisCell";
 import { randomShape } from "../models/Block.model";
 import {
   checkCollision,
   createTetrisBoard,
   updateBoardForShape,
-} from "../models/Board.model";
+} from "./board.utils";
 
 let tetrisShape = randomShape();
 export const TetrisBoard = () => {

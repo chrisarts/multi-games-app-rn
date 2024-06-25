@@ -1,4 +1,3 @@
-import { Schema } from "@effect/schema";
 import { keysOf } from "@games/shared";
 
 export interface TetrisShape {
