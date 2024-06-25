@@ -1,13 +1,12 @@
 import { useMemo } from "react";
 import { Text, View, StyleSheet } from "react-native";
-import { CellState, TetrisBoardCell } from "../../models/Board.model";
+import { CellState, BoardCell } from "../../models/Board.model";
 
 interface TetrisCellProps {
-  cell: TetrisBoardCell;
-  color: string;
+  cell: BoardCell;
 }
-export const TetrisCell = ({ cell, color }: TetrisCellProps) => {
-  const { x, y, state } = cell;
+export const TetrisCell = ({ cell }: TetrisCellProps) => {
+  const { x, y, state, color } = cell;
   const point = useMemo(() => {
     return {
       text: `(${x},${y})`,

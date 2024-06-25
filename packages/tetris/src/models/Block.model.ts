@@ -1,17 +1,20 @@
 import { keysOf } from "@games/shared";
 
-export interface TetrisShape {
+export interface BlockShape {
   shape: number[][];
   color: string;
+  name: BlockNames;
 }
 
-const TetrisShapes = {
+export const BlockShapes = {
+  // 🟥
   O: {
     shape: [
       [1, 1],
       [1, 1],
     ],
-    color: "red",
+    color: "gold",
+    name: "O",
   },
   I: {
     shape: [
@@ -20,7 +23,8 @@ const TetrisShapes = {
       [0, 1, 0, 0],
       [0, 1, 0, 0],
     ],
-    color: "blue",
+    color: "purple",
+    name: "I",
   },
   J: {
     shape: [
@@ -28,23 +32,26 @@ const TetrisShapes = {
       [0, 1, 0],
       [1, 1, 0],
     ],
-    color: "cyan",
+    color: "gray",
+    name: "J",
   },
-
   L: {
     shape: [
       [0, 1, 0],
       [0, 1, 0],
       [0, 1, 1],
     ],
-    color: "green",
+    color: "red",
+    name: "L",
   },
   S: {
     shape: [
+      [0, 0, 0],
       [0, 1, 1],
       [1, 1, 0],
     ],
-    color: "green",
+    color: "blueviolet",
+    name: "S",
   },
   T: {
     shape: [
@@ -52,19 +59,25 @@ const TetrisShapes = {
       [1, 1, 1],
       [0, 1, 0],
     ],
-    color: "green",
+    color: "orange",
+    name: "T",
   },
   Z: {
     shape: [
+      [0, 0, 0],
       [1, 1, 0],
       [0, 1, 1],
     ],
-    color: "green",
+    color: "darkblue",
+    name: "Z",
   },
 };
 
-export const randomShape = () => {
-  const shapesKeys = keysOf(TetrisShapes);
-  const randomKey = shapesKeys[Math.floor(Math.random() * shapesKeys.length)];
-  return TetrisShapes[randomKey];
+export const blockNames = keysOf(BlockShapes);
+
+export type BlockNames = (typeof blockNames)[number];
+
+export const getRandomBlock = (): BlockShape => {
+  const randomKey = blockNames[Math.floor(Math.random() * blockNames.length)];
+  return BlockShapes[randomKey] as BlockShape;
 };

@@ -1,4 +1,4 @@
-export interface CellPosition {
+export interface BoardPosition {
   x: number;
   y: number;
 }

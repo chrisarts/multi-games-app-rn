@@ -1,26 +1,35 @@
 import * as ReadOnlyArray from "effect/Array";
 import { pipe } from "effect/Function";
-import { TetrisShape } from "../models/Block.model";
-import { CellState, TetrisBoardCell } from "../models/Board.model";
+import { BlockShape } from "../models/Block.model";
+import { CellState, BoardCell, BoardConfig } from "../models/Board.model";
+import { BoardPosition } from "../models/Point.model";
 
-export const createTetrisBoard = (rows: number, columns: number) => {
-  const matrix: TetrisBoardCell[][] = pipe(
-    ReadOnlyArray.makeBy(rows, (x) => x),
-    ReadOnlyArray.map((_, x) => {
+export const createTetrisBoard = ({ WIDTH, HEIGHT }: BoardConfig) => {
+  const matrix: BoardCell[][] = pipe(
+    ReadOnlyArray.makeBy(HEIGHT, (x) => x),
+    ReadOnlyArray.map((_, y) => {
       return pipe(
-        ReadOnlyArray.makeBy(columns, (x) => x),
-        ReadOnlyArray.map((_, y) => ({ x, y, state: CellState.CLEAR }))
+        ReadOnlyArray.makeBy(WIDTH, (x) => x),
+        ReadOnlyArray.map((_, x) => ({
+          x,
+          y,
+          state: CellState.CLEAR,
+          color: undefined,
+        }))
       );
     })
   );
-  const startPoint = { x: columns / 2 - 2, y: 0 };
-  return { matrix, startPoint };
+  return matrix;
+};
+
+export const getStartPoint = (WIDTH: number): BoardPosition => {
+  return { y: 0, x: WIDTH / 2 - 2 };
 };
 
 export const updateBoardForShape = (
-  board: TetrisBoardCell[][],
-  position: { x: number; y: number },
-  shape: TetrisShape
+  board: BoardCell[][],
+  position: BoardPosition,
+  shape: BlockShape
 ) => {
   const boardPosition = board[position.x][position.y];
   board = board.map((rows) =>
@@ -44,10 +53,10 @@ export const updateBoardForShape = (
 };
 
 export const checkCollision = (
-  shape: TetrisShape,
-  board: TetrisBoardCell[][],
-  position: { x: number; y: number },
-  move: { x: number; y: number }
+  shape: BlockShape,
+  board: BoardCell[][],
+  position: BoardPosition,
+  move: BoardPosition
 ) => {
   for (let y = 0; y < shape.shape.length; y += 1) {
     for (let x = 0; x < shape.shape[y].length; x += 1) {

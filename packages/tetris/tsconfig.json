@@ -2,6 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-native",
-    "exactOptionalPropertyTypes": true
-  }
+    "exactOptionalPropertyTypes": true,
+    "rootDir": "src"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ]
 }
