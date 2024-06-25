@@ -7,7 +7,7 @@ import {
   GameState,
   TickSpeed,
 } from "../models";
-import { PlayerState } from "../hooks/usePlayer";
+import { PlayerState } from "./usePlayer";
 import { BOARD_CONFIG } from "../utils/board.utils";
 
 export const useTetrisBoard = (
@@ -17,6 +17,7 @@ export const useTetrisBoard = (
   const [board, setBoard] = useState(createTetrisBoard(BOARD_CONFIG));
   const [gameState, setGameState] = useState(GameState.STOP);
   const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
+
   useEffect(() => {
     if (!player.position) return;
     const sweepRows = (newStage: BoardMatrix): BoardMatrix => {
@@ -46,8 +47,6 @@ export const useTetrisBoard = (
 
       BlockShapes[player.currentShape].shape.forEach((row, rowIndex) => {
         row.forEach((col, colIndex) => {
-          console.log("UPDATE_ROW ", rowIndex + player.position.row);
-          console.log("UPDATE_COL ", colIndex + player.position.column);
           if (col !== 0) {
             newBoard[rowIndex + player.position.row][
               colIndex + player.position.column
@@ -77,6 +76,7 @@ export const useTetrisBoard = (
   ]);
 
   const startGame = () => {
+    setBoard(createTetrisBoard(BOARD_CONFIG));
     setGameState(GameState.PLAYING);
     setTickSpeed(TickSpeed.Normal);
     resetPlayer();

@@ -1,6 +1,6 @@
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { TetrisCell } from "./components/TetrisCell";
-import { useTetrisBoard } from "../hooks/useTetrisStore";
+import { useTetrisBoard } from "../hooks/useTetrisBoard";
 import { usePlayer } from "../hooks/usePlayer";
 import { useInterval } from "../hooks/useInterval";
 import { GameState } from "../models";
