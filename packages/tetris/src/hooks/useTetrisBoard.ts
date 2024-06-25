@@ -92,5 +92,7 @@ export const useTetrisBoard = (
     startGame,
     stopGame,
     tickSpeed,
+    setGameState,
+    setTickSpeed,
   };
 };
