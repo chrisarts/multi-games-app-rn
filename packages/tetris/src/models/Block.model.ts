@@ -1,5 +1,13 @@
 import { keysOf } from "@games/shared";
 
+export enum MoveDirection {
+  LEFT,
+  RIGHT,
+  DOWN,
+  UP,
+  ROTATE,
+}
+
 export enum Block {
   O = "O",
   I = "I",

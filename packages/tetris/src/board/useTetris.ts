@@ -2,11 +2,13 @@ import { useCallback, useState } from "react";
 import { useTetrisBoard } from "./useTetrisBoard";
 import { useInterval } from "./useInterval";
 import { addShapeToBoard, hasCollisions, structuredClone } from "./board.utils";
+import { MoveDirection } from "../models/Block.model";
 
 enum TickSpeed {
   Normal = 800,
   Sliding = 200,
 }
+
 export const useTetris = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
@@ -80,6 +82,13 @@ export const useTetris = () => {
     gameTick();
   }, tickSpeed);
 
+  const moveBlock = useCallback(
+    (direction: MoveDirection) => {
+      dispatchBoardState({ type: "move", direction });
+    },
+    [dispatchBoardState]
+  );
+
   const renderedBoard = structuredClone(board);
 
   if (isPlaying) {
@@ -91,5 +100,5 @@ export const useTetris = () => {
     });
   }
 
-  return { board: renderedBoard, startGame };
+  return { board: renderedBoard, startGame, moveBlock };
 };
