@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react";
-import { BoardPosition } from "../models/Point.model";
-import { Block, getRandomBlock } from "../models/Block.model";
+import { BoardPosition, Block, getRandomBlock } from "../models";
 
 export interface PlayerState {
   position: BoardPosition;

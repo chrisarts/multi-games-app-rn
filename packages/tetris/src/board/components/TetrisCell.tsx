@@ -1,7 +1,5 @@
 import { View, StyleSheet } from "react-native";
-import { BoardCell } from "../../models/Board.model";
-import { BlockShapes } from "../../models/Block.model";
-import { BoardPosition } from "../../models/Point.model";
+import { BoardPosition, BoardCell, BlockShapes } from "../../models";
 
 interface TetrisCellProps {
   cell: BoardCell;

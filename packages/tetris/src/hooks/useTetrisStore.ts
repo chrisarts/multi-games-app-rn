@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { createTetrisBoard } from "../utils";
-import { GameState, TickSpeed } from "../models/Store.model";
-import { BlockShapes } from "../models/Block.model";
-import { BoardMatrix, CellState } from "../models/Board.model";
+import {
+  BoardMatrix,
+  CellState,
+  BlockShapes,
+  GameState,
+  TickSpeed,
+} from "../models";
 import { PlayerState } from "../hooks/usePlayer";
 import { BOARD_CONFIG } from "../utils/board.utils";
 
