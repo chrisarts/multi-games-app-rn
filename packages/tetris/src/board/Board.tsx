@@ -3,9 +3,11 @@ import { TetrisCell } from "./components/TetrisCell";
 import { BoardControls } from "./components/BoardControls";
 import { MoveDirection } from "../models";
 import { useTetris } from "../hooks/useTetris";
+import { BoardHeader } from "./components/BoardHeader";
 
 export const TetrisBoard = () => {
-  const { board, gameState, startGame, movePlayer, rotateShape } = useTetris();
+  const { board, gameState, startGame, movePlayer, rotateShape, status } =
+    useTetris();
   return (
     <FlatList
       scrollEnabled={false}
@@ -21,6 +23,7 @@ export const TetrisBoard = () => {
           }}
         />
       )}
+      ListHeaderComponent={() => <BoardHeader gameState={status} />}
       ListFooterComponent={() => (
         <BoardControls
           gameState={gameState}

@@ -1,5 +1,7 @@
 import { BlockShape, Block } from "./Block.model";
 
+export const ROW_POINTS = [40, 100, 300, 1200];
+
 export interface BoardPosition {
   row: number;
   column: number;

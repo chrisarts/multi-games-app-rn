@@ -3,12 +3,21 @@ import { usePlayer } from "./usePlayer";
 import { useInterval } from "./useInterval";
 import { GameState } from "../models";
 import { hasCollisions, playerMoves } from "../utils";
+import { useGameStatus } from "./useGameStatus";
 
 export const useTetris = () => {
   const { player, updatePlayerPosition, resetPlayer, movePlayer, rotateShape } =
     usePlayer();
-  const { board, startGame, tickSpeed, gameState, setGameState, setTickSpeed } =
-    useTetrisBoard(player, resetPlayer);
+  const {
+    board,
+    startGame,
+    rowsCleared,
+    tickSpeed,
+    gameState,
+    setGameState,
+    setTickSpeed,
+  } = useTetrisBoard(player, resetPlayer);
+  const status = useGameStatus(rowsCleared);
 
   const drop = () => {
     const dropMove = playerMoves.down(1);
@@ -34,5 +43,6 @@ export const useTetris = () => {
     gameState,
     movePlayer,
     rotateShape,
+    status,
   };
 };

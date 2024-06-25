@@ -18,16 +18,19 @@ export const useTetrisBoard = (
   const [board, setBoard] = useState(createTetrisBoard(boardConfig));
   const [gameState, setGameState] = useState(GameState.STOP);
   const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
+  const [rowsCleared, setRowsCleared] = useState(0);
 
   useEffect(() => {
     if (!player.position) return;
+    setRowsCleared(0);
+
     const sweepRows = (newStage: BoardMatrix): BoardMatrix => {
       return newStage.reduce((ack, row) => {
         // If we don't find a 0 it means that the row is full and should be cleared
         if (row.findIndex((cell) => cell[0] === null) === -1) {
-          // setRowsCleared((prev) => prev + 1);
-          // Create an empty row at the beginning of the array to push the Tetrominos down
-          // instead of returning the cleared row
+          setRowsCleared((prev) => prev + 1);
+          /* Create an empty row at the beginning of the array 
+          to push the Tetrominos down instead of returning the cleared row */
           ack.unshift(
             new Array(newStage[0].length).fill([null, CellState.EMPTY])
           );
@@ -98,5 +101,6 @@ export const useTetrisBoard = (
     setGameState,
     setTickSpeed,
     boardConfig,
+    rowsCleared,
   };
 };
