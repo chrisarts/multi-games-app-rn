@@ -1,36 +1,11 @@
 import { FlatList, StyleSheet } from "react-native";
 import { TetrisCell } from "./components/TetrisCell";
-import { useTetrisBoard } from "../hooks/useTetrisBoard";
-import { usePlayer } from "../hooks/usePlayer";
-import { useInterval } from "../hooks/useInterval";
-import { GameState, MoveDirection } from "../models";
-import { hasCollisions, playerMoves } from "../utils";
 import { BoardControls } from "./components/BoardControls";
+import { MoveDirection } from "../models";
+import { useTetris } from "../hooks/useTetris";
 
 export const TetrisBoard = () => {
-  const { player, updatePlayerPosition, resetPlayer, movePlayer, rotateShape } =
-    usePlayer();
-  const { board, startGame, tickSpeed, gameState, setGameState, setTickSpeed } =
-    useTetrisBoard(player, resetPlayer);
-
-  const drop = () => {
-    const dropMove = playerMoves.down(1);
-    if (!hasCollisions(board, player, dropMove)) {
-      updatePlayerPosition(dropMove, false);
-    } else {
-      if (player.position.row < 1) {
-        setGameState(GameState.STOP);
-        setTickSpeed(null);
-      }
-      updatePlayerPosition(playerMoves.zero(), true);
-    }
-  };
-
-  useInterval(() => {
-    if (gameState !== GameState.PLAYING) return;
-    drop();
-  }, tickSpeed);
-
+  const { board, gameState, startGame, movePlayer, rotateShape } = useTetris();
   return (
     <FlatList
       scrollEnabled={false}
