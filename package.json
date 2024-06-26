@@ -8,8 +8,8 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "yarn workspace expo-app run start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "start": "yarn workspace expo-app run start"
   },
   "dependencies": {
     "@effect/schema": "^0.68.9",
@@ -18,9 +18,11 @@
     "text-encoding-polyfill": "^0.6.7"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/react": "^18.3.3",
     "eslint": "^8.57.0",
     "eslint-config-expo": "^7.0.0",
+    "prettier": "^3.2.5",
     "typescript": "~5.3.3"
   },
   "packageManager": "yarn@4.3.1"

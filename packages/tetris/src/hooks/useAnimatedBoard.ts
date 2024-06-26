@@ -1,9 +1,5 @@
-import {
-  runOnJS,
-  useDerivedValue,
-  useSharedValue,
-} from "react-native-reanimated";
-import { BOARD_CONFIG, createTetrisBoard } from "../utils/board.utils";
+import { useState } from 'react';
+import { runOnJS, useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import {
   AnimatedPlayerState,
   BoardMatrix,
@@ -11,10 +7,10 @@ import {
   GameState,
   getRandomBlock,
   TickSpeed,
-} from "../models";
-import { getBlockShape } from "../utils";
-import { useState } from "react";
-import { useGameStatus } from "./useGameStatus";
+} from '../models';
+import { getBlockShape } from '../utils';
+import { BOARD_CONFIG, createTetrisBoard } from '../utils/board.utils';
+import { useGameStatus } from './useGameStatus';
 
 const firstBoard = createTetrisBoard(BOARD_CONFIG);
 
@@ -51,23 +47,21 @@ export const useAnimatedBoard = ({
   const animatedBoard = useDerivedValue(() => {
     if (gameState === GameState.STOP) return boardValue.value;
     const newBoard: BoardMatrix = boardValue.value.map((row) =>
-      row.map((cell) =>
-        cell[1] === CellState.EMPTY ? [null, CellState.EMPTY] : cell
-      )
+      row.map((cell) => (cell[1] === CellState.EMPTY ? [null, CellState.EMPTY] : cell)),
     );
 
-    currentShape.value.shape.forEach((row, rowIndex) => {
-      row.forEach((col, colIndex) => {
-        if (col !== 0) {
-          newBoard[rowIndex + position.value.row][
-            colIndex + position.value.column
-          ] = [
-            currentBlock.value,
-            collided.value ? CellState.MERGED : CellState.EMPTY,
-          ];
-        }
-      });
-    });
+    // currentShape.value.shape.forEach((row, rowIndex) => {
+    //   row.forEach((col, colIndex) => {
+    //     if (col !== 0) {
+    //       newBoard[rowIndex + position.value.row][
+    //         colIndex + position.value.column
+    //       ] = [
+    //         currentBlock.value,
+    //         collided.value ? CellState.MERGED : CellState.EMPTY,
+    //       ];
+    //     }
+    //   });
+    // });
 
     const sweepRows = (newStage: BoardMatrix) => {
       let cleared = 0;
@@ -77,9 +71,7 @@ export const useAnimatedBoard = ({
           cleared += 1;
           /* Create an empty row at the beginning of the array 
           to push the Tetrominos down instead of returning the cleared row */
-          ack.unshift(
-            new Array(newStage[0].length).fill([null, CellState.EMPTY])
-          );
+          ack.unshift(new Array(newStage[0].length).fill([null, CellState.EMPTY]));
           return ack;
         }
 
@@ -91,6 +83,16 @@ export const useAnimatedBoard = ({
     };
 
     if (collided.value) {
+      currentShape.value.shape.forEach((row, rowIndex) => {
+        row.forEach((col, colIndex) => {
+          if (col !== 0) {
+            newBoard[rowIndex + position.value.row][colIndex + position.value.column] = [
+              currentBlock.value,
+              CellState.MERGED,
+            ];
+          }
+        });
+      });
       position.value = { column: 3, row: 0 };
       currentBlock.value = nextBlock.value;
       currentShape.value = nextShape.value;

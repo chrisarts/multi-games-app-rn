@@ -1,6 +1,6 @@
-import { SharedValue } from "react-native-reanimated";
-import { Block, BlockShape, MoveDirection } from "./Block.model";
-import { BoardMatrix, BoardPosition } from "./Board.model";
+import { SharedValue } from 'react-native-reanimated';
+import { Block, BlockShape, MoveDirection } from './Block.model';
+import { BoardMatrix, BoardPosition } from './Board.model';
 
 export interface PlayerState {
   position: BoardPosition;

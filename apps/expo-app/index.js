@@ -1,5 +1,5 @@
-import "text-encoding-polyfill";
-import App from "./App";
-import { registerRootComponent } from "expo";
+import { registerRootComponent } from 'expo';
+import 'text-encoding-polyfill';
+import App from './App';
 
 registerRootComponent(App);

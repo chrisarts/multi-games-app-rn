@@ -1,9 +1,9 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
-import { useGameStatus } from "../../hooks/useGameStatus";
-import { BoardMatrix } from "../../models";
-import { SharedValue } from "react-native-reanimated";
-import { TetrisCell } from "./TetrisCell";
-import { getDeviceDimensions } from "@games/shared";
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { getDeviceDimensions } from '@games/shared';
+import { SharedValue } from 'react-native-reanimated';
+import { useGameStatus } from '../../hooks/useGameStatus';
+import { BoardMatrix } from '../../models';
+import { TetrisCell } from './TetrisCell';
 
 interface BoardHeaderProps {
   gameState: ReturnType<typeof useGameStatus>;
@@ -23,8 +23,8 @@ export const BoardHeader = ({ gameState, nextShape }: BoardHeaderProps) => {
   return (
     <View style={styles.container}>
       <View style={{ gap: 5 }}>
-        {getItem("SCORE", score)}
-        {getItem("LINES", rows)}
+        {getItem('SCORE', score)}
+        {getItem('LINES', rows)}
       </View>
       <View style={{ gap: 5 }}>
         <View style={[styles.content, styles.nextContainer]}>
@@ -43,7 +43,7 @@ export const BoardHeader = ({ gameState, nextShape }: BoardHeaderProps) => {
                     board={nextShape}
                     cell={item}
                     coords={{ row: rowIndex, column: index }}
-                    size="small"
+                    size='small'
                   />
                 )}
               />
@@ -56,7 +56,7 @@ export const BoardHeader = ({ gameState, nextShape }: BoardHeaderProps) => {
           gap: 5,
         }}
       >
-        {getItem("LEVEL", level)}
+        {getItem('LEVEL', level)}
       </View>
     </View>
   );
@@ -64,38 +64,38 @@ export const BoardHeader = ({ gameState, nextShape }: BoardHeaderProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     gap: 10,
     marginBottom: 10,
   },
   nextContainer: {
-    paddingTop: "5%",
-    overflow: "visible",
+    paddingTop: '5%',
+    overflow: 'visible',
     height: getDeviceDimensions().WIDTH * 0.2,
   },
   content: {
-    paddingVertical: "10%",
+    paddingVertical: '10%',
     paddingHorizontal: 10,
     width: getDeviceDimensions().WIDTH * 0.3,
     height: getDeviceDimensions().WIDTH * 0.15,
     borderRadius: 10,
-    borderColor: "white",
+    borderColor: 'white',
     borderWidth: 1,
-    justifyContent: "space-between",
-    alignItems: "center",
+    justifyContent: 'space-between',
+    alignItems: 'center',
     gap: 5,
   },
   title: {
-    color: "white",
-    fontWeight: "bold",
-    fontFamily: "Digital-Bold",
+    color: 'white',
+    fontWeight: 'bold',
+    fontFamily: 'Digital-Bold',
     fontSize: 16,
   },
   valueText: {
-    color: "white",
-    fontFamily: "Digital-Italic",
+    color: 'white',
+    fontFamily: 'Digital-Italic',
     fontSize: 14,
   },
 });

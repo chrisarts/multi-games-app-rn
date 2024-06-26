@@ -1,4 +1,4 @@
-import { useDerivedValue, useSharedValue } from "react-native-reanimated";
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import {
   BlockShape,
   BoardMatrix,
@@ -7,13 +7,8 @@ import {
   getRandomBlock,
   MoveDirection,
   PlayerMoveAction,
-} from "../models";
-import {
-  createTetrisBoard,
-  getBlockShape,
-  hasCollisions,
-  playerMoves,
-} from "../utils";
+} from '../models';
+import { createTetrisBoard, getBlockShape, hasCollisions, playerMoves } from '../utils';
 
 const firstBlock = getRandomBlock();
 const firstShape = getBlockShape(firstBlock);
@@ -31,11 +26,8 @@ export const useAnimatedPlayer = () => {
   const nextShape = useSharedValue(getBlockShape(nextBlock.value));
   const collided = useSharedValue(false);
 
-  const updatePosition = (
-    nextPosition: BoardPosition,
-    hasCollided: boolean
-  ) => {
-    "worklet";
+  const updatePosition = (nextPosition: BoardPosition, hasCollided: boolean) => {
+    'worklet';
     position.value = {
       column: position.value.column + nextPosition.column,
       row: position.value.row + nextPosition.row,
@@ -43,7 +35,7 @@ export const useAnimatedPlayer = () => {
     collided.value = hasCollided;
   };
 
-  const rotateShape = (matrix: BlockShape["shape"]) => {
+  const rotateShape = (matrix: BlockShape['shape']) => {
     // Make the rows to become cols (transpose)
     const shape = matrix.map((_, i) => matrix.map((column) => column[i]));
     // Reverse each row to get a rotated matrix
@@ -51,17 +43,13 @@ export const useAnimatedPlayer = () => {
   };
 
   const playerRotate = (board: BoardMatrix) => {
-    const clonedShape: BlockShape = JSON.parse(
-      JSON.stringify(currentShape.value)
-    );
+    const clonedShape: BlockShape = JSON.parse(JSON.stringify(currentShape.value));
     clonedShape.shape = rotateShape(clonedShape.shape);
 
     const posX = position.value.column;
     let offset = 1;
 
-    const clonedPosition: BoardPosition = JSON.parse(
-      JSON.stringify(position.value)
-    );
+    const clonedPosition: BoardPosition = JSON.parse(JSON.stringify(position.value));
 
     while (
       hasCollisions(
@@ -72,7 +60,7 @@ export const useAnimatedPlayer = () => {
           currentShape: clonedShape,
           position: position.value,
         },
-        playerMoves.zero()
+        playerMoves.zero(),
       )
     ) {
       clonedPosition.column += offset;
@@ -89,7 +77,7 @@ export const useAnimatedPlayer = () => {
   };
 
   const movePosition = ({ dir, value, board }: PlayerMoveAction) => {
-    "worklet";
+    'worklet';
     let newPosition: BoardPosition = playerMoves.zero();
     switch (dir) {
       case MoveDirection.LEFT:
@@ -112,7 +100,7 @@ export const useAnimatedPlayer = () => {
           currentShape: currentShape.value,
           position: position.value,
         },
-        newPosition
+        newPosition,
       )
     ) {
       updatePosition(newPosition, false);
@@ -121,16 +109,13 @@ export const useAnimatedPlayer = () => {
 
   const nextShapeMatrix = useDerivedValue(() => {
     const newBoard: BoardMatrix = nextShapeBoard.value.map((row) =>
-      row.map((cell) =>
-        cell[1] === CellState.EMPTY ? [null, CellState.EMPTY] : cell
-      )
+      row.map((cell) => (cell[1] === CellState.EMPTY ? [null, CellState.EMPTY] : cell)),
     );
 
     nextShape.value.shape.forEach((row, rowIndex) => {
       row.forEach((col, colIndex) => {
         if (col !== 0) {
-          newBoard[rowIndex][colIndex] =
-            [nextBlock.value, CellState.EMPTY];
+          newBoard[rowIndex][colIndex] = [nextBlock.value, CellState.EMPTY];
         }
       });
     });

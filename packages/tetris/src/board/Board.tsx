@@ -1,20 +1,20 @@
-import { FlatList, StyleSheet, View } from "react-native";
-import { TetrisCell } from "./components/TetrisCell";
-import { useAnimatedTetris } from "../hooks/useAnimatedTetris";
-import { BoardHeader } from "./components/BoardHeader";
-import { GestureDetector } from "react-native-gesture-handler";
-import { BoardControls } from "./components/BoardControls";
-import { useBoardGestures } from "../hooks/useBoardGestures";
+import { GestureDetector } from 'react-native-gesture-handler';
+import { FlatList, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { useAnimatedTetris } from '../hooks/useAnimatedTetris';
+import { useBoardGestures } from '../hooks/useBoardGestures';
+import { BoardControls } from './components/BoardControls';
+import { BoardHeader } from './components/BoardHeader';
+import { TetrisCell } from './components/TetrisCell';
 
 export const TetrisBoard = () => {
   const tetris = useAnimatedTetris();
-
-  const { gesture } = useBoardGestures(tetris);
+  const { gesture } = useBoardGestures(tetris, () => {});
 
   return (
     <View style={styles.container}>
       <GestureDetector gesture={gesture}>
-        <View style={styles.listContainer}>
+        <Animated.View style={styles.listContainer}>
           <FlatList
             scrollEnabled={false}
             data={tetris.animatedBoard.value}
@@ -48,14 +48,12 @@ export const TetrisBoard = () => {
                 moveLeft={tetris.playerMovements.moveLeft}
                 moveDown={tetris.playerMovements.moveDown}
                 moveRight={tetris.playerMovements.moveRight}
-                rotate={() =>
-                  tetris.player.playerRotate(tetris.animatedBoard.value)
-                }
+                rotate={() => tetris.player.playerRotate(tetris.animatedBoard.value)}
                 startGame={tetris.startGame}
               />
             }
           />
-        </View>
+        </Animated.View>
       </GestureDetector>
     </View>
   );
@@ -68,5 +66,5 @@ const styles = StyleSheet.create({
   listContainer: {
     marginTop: 10,
   },
-  rowContainer: { alignItems: "center" },
+  rowContainer: { alignItems: 'center' },
 });

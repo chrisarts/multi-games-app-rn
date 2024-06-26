@@ -4,17 +4,14 @@ import {
   BoardConfig,
   BoardMatrix,
   BoardPosition,
-} from "../models";
+} from '../models';
 
 export const BOARD_CONFIG: BoardConfig = {
   HEIGHT: 15,
   WIDTH: 10,
 };
 
-export const createTetrisBoard = ({
-  WIDTH,
-  HEIGHT,
-}: BoardConfig): BoardMatrix => {
+export const createTetrisBoard = ({ WIDTH, HEIGHT }: BoardConfig): BoardMatrix => {
   return Array(HEIGHT)
     .fill(null)
     .map(() => Array(WIDTH).fill([null, CellState.EMPTY]));
@@ -23,7 +20,7 @@ export const createTetrisBoard = ({
 export const hasCollisions = (
   board: BoardMatrix,
   player: PlayerState,
-  move: BoardPosition
+  move: BoardPosition,
 ) => {
   const shape = player.currentShape.shape;
   for (let row = 0; row < shape.length; row += 1) {

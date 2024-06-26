@@ -1,20 +1,18 @@
-import { SafeAreaView, View, StyleSheet } from "react-native";
-import { TetrisBoard } from "./board/Board";
+import { SafeAreaView, View, StyleSheet } from 'react-native';
+import { CanvasBoard } from './board/CanvasBoard';
 
-export const TetrisGame = () =>{
+export const TetrisGame = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <TetrisBoard />
+        <CanvasBoard />
       </View>
-      </SafeAreaView>
-  )
-}
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

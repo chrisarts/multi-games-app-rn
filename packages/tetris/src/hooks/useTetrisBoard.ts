@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { createTetrisBoard } from "../utils";
+import { useEffect, useState } from 'react';
 import {
   PlayerState,
   BoardMatrix,
@@ -7,12 +6,13 @@ import {
   GameState,
   TickSpeed,
   BoardConfig,
-} from "../models";
-import { BOARD_CONFIG } from "../utils/board.utils";
+} from '../models';
+import { createTetrisBoard } from '../utils';
+import { BOARD_CONFIG } from '../utils/board.utils';
 
 export const useTetrisBoard = (
   player: PlayerState,
-  resetPlayer: (boardConfig: BoardConfig) => void
+  resetPlayer: (boardConfig: BoardConfig) => void,
 ) => {
   const [boardConfig] = useState(BOARD_CONFIG);
   const [board, setBoard] = useState(createTetrisBoard(boardConfig));
@@ -31,9 +31,7 @@ export const useTetrisBoard = (
           setRowsCleared((prev) => prev + 1);
           /* Create an empty row at the beginning of the array 
           to push the Tetrominos down instead of returning the cleared row */
-          ack.unshift(
-            new Array(newStage[0].length).fill([null, CellState.EMPTY])
-          );
+          ack.unshift(new Array(newStage[0].length).fill([null, CellState.EMPTY]));
           return ack;
         }
 
@@ -44,20 +42,14 @@ export const useTetrisBoard = (
 
     const updateBoard = (prevBoard: BoardMatrix): BoardMatrix => {
       const newBoard: BoardMatrix = prevBoard.map((row) =>
-        row.map((cell) =>
-          cell[1] === CellState.EMPTY ? [null, CellState.EMPTY] : cell
-        )
+        row.map((cell) => (cell[1] === CellState.EMPTY ? [null, CellState.EMPTY] : cell)),
       );
 
       player.currentShape.shape.forEach((row, rowIndex) => {
         row.forEach((col, colIndex) => {
           if (col !== 0) {
-            newBoard[rowIndex + player.position.row][
-              colIndex + player.position.column
-            ] = [
-              player.currentBlock,
-              player.collided ? CellState.MERGED : CellState.EMPTY,
-            ];
+            newBoard[rowIndex + player.position.row][colIndex + player.position.column] =
+              [player.currentBlock, player.collided ? CellState.MERGED : CellState.EMPTY];
           }
         });
       });

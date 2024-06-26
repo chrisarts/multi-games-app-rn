@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react';
 import {
   BoardPosition,
   getRandomBlock,
@@ -8,8 +8,8 @@ import {
   PlayerMoveAction,
   BoardConfig,
   BlockShape,
-} from "../models";
-import { getBlockShape, hasCollisions, playerMoves } from "../utils";
+} from '../models';
+import { getBlockShape, hasCollisions, playerMoves } from '../utils';
 
 export const usePlayer = () => {
   const [player, setPlayer] = useState({} as PlayerState);
@@ -35,7 +35,7 @@ export const usePlayer = () => {
     });
   }, []);
 
-  const rotateShape = (matrix: BlockShape["shape"]) => {
+  const rotateShape = (matrix: BlockShape['shape']) => {
     // Make the rows to become cols (transpose)
     const shape = matrix.map((_, i) => matrix.map((column) => column[i]));
     // Reverse each row to get a rotated matrix
@@ -44,9 +44,7 @@ export const usePlayer = () => {
 
   const playerRotate = (board: BoardMatrix) => {
     const clonedPlayer: PlayerState = JSON.parse(JSON.stringify(player));
-    clonedPlayer.currentShape.shape = rotateShape(
-      clonedPlayer.currentShape.shape
-    );
+    clonedPlayer.currentShape.shape = rotateShape(clonedPlayer.currentShape.shape);
 
     const posX = clonedPlayer.position.column;
     let offset = 1;
@@ -54,7 +52,7 @@ export const usePlayer = () => {
     while (hasCollisions(board, clonedPlayer, playerMoves.zero())) {
       clonedPlayer.position.column += offset;
       offset = -(offset + (offset > 0 ? 1 : -1));
-      console.log("POS: ", posX, offset);
+      console.log('POS: ', posX, offset);
 
       if (offset > clonedPlayer.currentShape.shape[0].length) {
         clonedPlayer.position.column = posX;

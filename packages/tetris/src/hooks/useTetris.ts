@@ -1,9 +1,9 @@
-import { useTetrisBoard } from "./useTetrisBoard";
-import { usePlayer } from "./usePlayer";
-import { useInterval } from "./useInterval";
-import { GameState } from "../models";
-import { hasCollisions, playerMoves } from "../utils";
-import { useGameStatus } from "./useGameStatus";
+import { GameState } from '../models';
+import { hasCollisions, playerMoves } from '../utils';
+import { useGameStatus } from './useGameStatus';
+import { useInterval } from './useInterval';
+import { usePlayer } from './usePlayer';
+import { useTetrisBoard } from './useTetrisBoard';
 
 export const useTetris = () => {
   const { player, updatePlayerPosition, resetPlayer, movePlayer, rotateShape } =

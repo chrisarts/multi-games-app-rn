@@ -1,9 +1,9 @@
-import { useEffect } from "react";
-import { GameState, MoveDirection } from "../models";
-import { hasCollisions, playerMoves } from "../utils";
-import { useAnimatedBoard } from "./useAnimatedBoard";
-import { useAnimatedPlayer } from "./useAnimatedPosition";
-import { useInterval } from "./useInterval";
+import { useEffect } from 'react';
+import { GameState, MoveDirection, TickSpeed } from '../models';
+import { hasCollisions, playerMoves } from '../utils';
+import { useAnimatedBoard } from './useAnimatedBoard';
+import { useAnimatedPlayer } from './useAnimatedPosition';
+import { useInterval } from './useInterval';
 
 export const useAnimatedTetris = () => {
   const player = useAnimatedPlayer();
@@ -23,7 +23,7 @@ export const useAnimatedTetris = () => {
     if (status.rows > status.level * 5) {
       status.setLevel((prev) => prev + 1);
       // Also increase speed
-      setTickSpeed(1000 / status.level + 200);
+      setTickSpeed(TickSpeed.Normal / status.level + 200);
     }
   }, [status, setTickSpeed]);
 
@@ -39,7 +39,7 @@ export const useAnimatedTetris = () => {
           currentShape: currentShape.value,
           position: player.position.value,
         },
-        dropMove
+        dropMove,
       )
     ) {
       player.updatePosition(dropMove, false);
@@ -53,7 +53,7 @@ export const useAnimatedTetris = () => {
   };
 
   useInterval(() => {
-    "worklet";
+    'worklet';
     if (gameState !== GameState.PLAYING) return;
     drop();
   }, tickSpeed);

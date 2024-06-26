@@ -1,16 +1,16 @@
-import { Pressable, StyleSheet } from "react-native";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { Pressable, StyleSheet } from 'react-native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 interface BoardButtonProps {
   action: () => void;
-  icon: keyof (typeof MaterialCommunityIcons)["glyphMap"];
+  icon: keyof (typeof MaterialCommunityIcons)['glyphMap'];
 }
 export const BoardButton = ({ action, icon }: BoardButtonProps) => {
   return (
     <Pressable onPress={action} style={styles.container}>
       <MaterialCommunityIcons
         name={icon}
-        color="rgba(131, 126, 126, 1)"
+        color='rgba(131, 126, 126, 1)'
         size={80}
         style={{
           paddingRight: 4,
