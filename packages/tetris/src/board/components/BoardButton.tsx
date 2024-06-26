@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 interface BoardButtonProps {
@@ -7,7 +7,7 @@ interface BoardButtonProps {
 }
 export const BoardButton = ({ action, icon }: BoardButtonProps) => {
   return (
-    <Pressable onPress={action} style={styles.container}>
+    <Pressable onPress={action}>
       <MaterialCommunityIcons
         name={icon}
         color='rgba(131, 126, 126, 1)'
@@ -20,16 +20,3 @@ export const BoardButton = ({ action, icon }: BoardButtonProps) => {
     </Pressable>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    // borderRadius: 140,
-    // width: 70,
-    // height: 70,
-    // borderColor: ,
-    // borderWidth: 2,
-    // aspectRatio: 1,
-    // justifyContent: "center",
-    // alignItems: "center",
-  },
-});
