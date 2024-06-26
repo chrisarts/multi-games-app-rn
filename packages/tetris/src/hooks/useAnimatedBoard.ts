@@ -23,6 +23,8 @@ export const useAnimatedBoard = ({
   currentBlock,
   collided,
   currentShape,
+  nextBlock,
+  nextShape,
 }: AnimatedPlayerState) => {
   const boardValue = useSharedValue(firstBoard);
   const [tickSpeed, setTickSpeed] = useState<null | TickSpeed>(null);
@@ -37,6 +39,8 @@ export const useAnimatedBoard = ({
     currentShape.value = getBlockShape(block);
     collided.value = false;
     position.value = { column: 3, row: 0 };
+    nextBlock.value = getRandomBlock();
+    nextShape.value = getBlockShape(nextBlock.value);
     setGameState(GameState.PLAYING);
     setTickSpeed(TickSpeed.Normal);
     status.setLevel(1);
@@ -88,11 +92,13 @@ export const useAnimatedBoard = ({
 
     if (collided.value) {
       position.value = { column: 3, row: 0 };
-      currentBlock.value = getRandomBlock();
-      currentShape.value = getBlockShape(currentBlock.value);
+      currentBlock.value = nextBlock.value;
+      currentShape.value = nextShape.value;
       collided.value = false;
       const result = sweepRows(newBoard);
       boardValue.value = result.newMatrix;
+      nextBlock.value = getRandomBlock();
+      nextShape.value = getBlockShape(nextBlock.value);
       runOnJS(setRowsCleared)(result.cleared);
       return result.newMatrix;
     }

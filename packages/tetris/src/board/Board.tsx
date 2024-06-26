@@ -12,7 +12,7 @@ export const TetrisBoard = () => {
   return (
     <View>
       <View style={{ flex: 1, flexGrow: 10, justifyContent: "flex-end" }}>
-        <BoardHeader gameState={status} />
+        <BoardHeader gameState={status} nextShape={position.nextShapeBoard} />
       </View>
       <View style={{ flex: 1, flexGrow: 80 }}>
         <FlatList

@@ -1,21 +1,34 @@
-import { useSharedValue } from "react-native-reanimated";
+import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 import {
   BlockShape,
   BoardMatrix,
   BoardPosition,
+  CellState,
   getRandomBlock,
   MoveDirection,
   PlayerMoveAction,
 } from "../models";
-import { getBlockShape, hasCollisions, playerMoves } from "../utils";
+import {
+  createTetrisBoard,
+  getBlockShape,
+  hasCollisions,
+  playerMoves,
+} from "../utils";
 
 const firstBlock = getRandomBlock();
 const firstShape = getBlockShape(firstBlock);
+const config = {
+  WIDTH: 4,
+  HEIGHT: 4,
+};
 
 export const useAnimatedPlayer = () => {
   const position = useSharedValue(playerMoves.left(3));
   const currentBlock = useSharedValue(firstBlock);
   const currentShape = useSharedValue(firstShape);
+  const nextShapeBoard = useSharedValue(createTetrisBoard(config));
+  const nextBlock = useSharedValue(getRandomBlock());
+  const nextShape = useSharedValue(getBlockShape(nextBlock.value));
   const collided = useSharedValue(false);
 
   const updatePosition = (
@@ -106,6 +119,25 @@ export const useAnimatedPlayer = () => {
     }
   };
 
+  const nextShapeMatrix = useDerivedValue(() => {
+    const newBoard: BoardMatrix = nextShapeBoard.value.map((row) =>
+      row.map((cell) =>
+        cell[1] === CellState.EMPTY ? [null, CellState.EMPTY] : cell
+      )
+    );
+
+    nextShape.value.shape.forEach((row, rowIndex) => {
+      row.forEach((col, colIndex) => {
+        if (col !== 0) {
+          newBoard[rowIndex][colIndex] =
+            [nextBlock.value, CellState.EMPTY];
+        }
+      });
+    });
+
+    return newBoard;
+  });
+
   return {
     position,
     updatePosition,
@@ -114,5 +146,8 @@ export const useAnimatedPlayer = () => {
     currentShape,
     playerRotate,
     movePosition,
+    nextBlock,
+    nextShape,
+    nextShapeBoard: nextShapeMatrix,
   };
 };

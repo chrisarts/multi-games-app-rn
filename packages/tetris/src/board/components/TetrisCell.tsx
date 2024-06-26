@@ -14,16 +14,29 @@ interface TetrisCellProps {
   cell: BoardCell;
   board: SharedValue<BoardMatrix>;
   coords: BoardPosition;
+  size?: "small" | "normal";
 }
 
 const cellDefaultColor = "rgba(131, 126, 126, 0.3)";
 
-export const TetrisCell = ({ cell, board, coords }: TetrisCellProps) => {
+export const TetrisCell = ({
+  cell,
+  board,
+  coords,
+  size = "normal",
+}: TetrisCellProps) => {
   const value = useDerivedValue(() => {
     return board.value[coords.row][coords.column];
   });
   const animatedStyles = useAnimatedStyle(() => {
+    const square = size === "normal" ? 30 : 8;
+    const margin = size === "normal" ? 3 : 1;
+    const borderRadius =  size === 'normal' ? 3 : 1;
     return {
+      margin,
+      width: square,
+      height: square,
+      borderRadius,
       backgroundColor: withTiming(
         value.value[0] === null
           ? cellDefaultColor
@@ -52,8 +65,6 @@ export const TetrisCell = ({ cell, board, coords }: TetrisCellProps) => {
 const styles = StyleSheet.create({
   cell: {
     aspectRatio: 1,
-    width: 30,
-    height: 30,
     borderColor: cellDefaultColor,
     borderWidth: 0.3,
     padding: 2,

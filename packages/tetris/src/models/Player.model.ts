@@ -13,6 +13,8 @@ export interface AnimatedPlayerState {
   position: SharedValue<BoardPosition>;
   currentBlock: SharedValue<Block>;
   currentShape: SharedValue<BlockShape>;
+  nextBlock: SharedValue<Block>;
+  nextShape: SharedValue<BlockShape>;
   collided: SharedValue<boolean>;
 }
 

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { GameState } from "../models";
 import { hasCollisions, playerMoves } from "../utils";
 import { useAnimatedBoard } from "./useAnimatedBoard";
@@ -18,8 +19,15 @@ export const useAnimatedTetris = () => {
     status,
   } = useAnimatedBoard(player);
 
+  useEffect(() => {
+    if (status.rows > status.level * 5) {
+      status.setLevel((prev) => prev + 1);
+      // Also increase speed
+      setTickSpeed(1000 / status.level + 200);
+    }
+  }, [status, setTickSpeed]);
+
   const drop = () => {
-    "worklet";
     const dropMove = playerMoves.down(1);
     player.updatePosition(dropMove, false);
     if (

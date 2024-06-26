@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { SafeAreaView, StyleSheet, View } from "react-native";
 import { TetrisGame } from "@games/tetris";
 import { useFonts } from "expo-font";
 
@@ -13,7 +13,9 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <TetrisGame />
+      <SafeAreaView style={{ flex: 1 }}>
+        <TetrisGame />
+      </SafeAreaView>
     </View>
   );
 }
