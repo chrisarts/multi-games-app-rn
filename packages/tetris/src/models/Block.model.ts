@@ -90,6 +90,7 @@ export const BlockShapes: ShapesObj = {
 export const blockNames = keysOf(BlockShapes);
 
 export const getRandomBlock = (): Block => {
+  "worklet";
   const randomKey = blockNames[Math.floor(Math.random() * blockNames.length)];
   return randomKey;
 };

@@ -2,41 +2,59 @@ import { FlatList, StyleSheet } from "react-native";
 import { TetrisCell } from "./components/TetrisCell";
 import { BoardControls } from "./components/BoardControls";
 import { MoveDirection } from "../models";
-import { useTetris } from "../hooks/useTetris";
-import { BoardHeader } from "./components/BoardHeader";
+import { useAnimatedTetris } from "../hooks/useAnimatedTetris";
 
 export const TetrisBoard = () => {
-  const { board, gameState, startGame, movePlayer, rotateShape, status } =
-    useTetris();
+  const { gameState, startGame, animatedBoard, movePosition, playerRotate } =
+    useAnimatedTetris();
+
   return (
     <FlatList
       scrollEnabled={false}
-      data={board}
+      data={animatedBoard.value}
       contentContainerStyle={styles.listContainer}
-      renderItem={({ item: columns }) => (
+      renderItem={({ item: columns, index: rowIndex }) => (
         <FlatList
           scrollEnabled={false}
           data={columns}
           horizontal
-          renderItem={({ item: cell }) => {
-            return <TetrisCell cell={cell} />;
+          renderItem={({ item: cell, index: colIndex }) => {
+            return (
+              <TetrisCell
+                cell={cell}
+                board={animatedBoard}
+                coords={{ column: colIndex, row: rowIndex }}
+              />
+            );
           }}
         />
       )}
-      ListHeaderComponent={() => <BoardHeader gameState={status} />}
+      // ListHeaderComponent={() => <BoardHeader gameState={status} />}
       ListFooterComponent={() => (
         <BoardControls
           gameState={gameState}
           moveLeft={() =>
-            movePlayer({ board, dir: MoveDirection.LEFT, value: -1 })
+            movePosition({
+              board: animatedBoard.value,
+              dir: MoveDirection.LEFT,
+              value: -1,
+            })
           }
           moveDown={() =>
-            movePlayer({ board, dir: MoveDirection.DOWN, value: 1 })
+            movePosition({
+              board: animatedBoard.value,
+              dir: MoveDirection.DOWN,
+              value: 1,
+            })
           }
           moveRight={() =>
-            movePlayer({ board, dir: MoveDirection.RIGHT, value: 1 })
+            movePosition({
+              board: animatedBoard.value,
+              dir: MoveDirection.RIGHT,
+              value: 1,
+            })
           }
-          rotate={() => rotateShape(board)}
+          rotate={() => playerRotate(animatedBoard.value)}
           startGame={startGame}
         />
       )}

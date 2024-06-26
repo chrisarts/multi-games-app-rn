@@ -1,9 +1,12 @@
-import { View } from "react-native";
 import { BoardButton } from "./BoardButton";
 import { GameState } from "../../models";
+import Animated, {
+  SharedValue,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 
 interface BoardControlsProps {
-  gameState: GameState;
+  gameState: SharedValue<GameState>;
   startGame: () => void;
   moveLeft: () => void;
   moveRight: () => void;
@@ -18,26 +21,44 @@ export const BoardControls = ({
   startGame,
   moveDown,
 }: BoardControlsProps) => {
+  const controlStyles = useAnimatedStyle(() => {
+    return {
+      display: gameState.value === GameState.PLAYING ? "flex" : "none",
+    };
+  });
+  const startStyles = useAnimatedStyle(() => {
+    return {
+      display: gameState.value === GameState.STOP ? "flex" : "none",
+    };
+  });
   return (
-    <View
+    <Animated.View
       style={{
-        flexDirection: "row",
         marginTop: 10,
         justifyContent: "space-between",
+        alignItems: "center",
       }}
     >
-      {gameState === GameState.PLAYING ? (
-        <>
-          <BoardButton label="Left" action={moveLeft} />
-          <BoardButton label="Down" action={moveDown} />
-          <BoardButton label="Right" action={moveRight} />
-          <BoardButton label="Rotate" action={rotate} />
-        </>
-      ) : (
-        <>
-          <BoardButton label="Start" action={startGame} />
-        </>
-      )}
-    </View>
+      <Animated.View
+        style={[
+          { justifyContent: "space-between", flexDirection: "row" },
+          controlStyles,
+        ]}
+      >
+        <BoardButton label="Left" action={moveLeft} />
+        <BoardButton label="Down" action={moveDown} />
+        <BoardButton label="Right" action={moveRight} />
+        <BoardButton label="Rotate" action={rotate} />
+      </Animated.View>
+
+      <Animated.View
+        style={[
+          { justifyContent: "space-between", flexDirection: "row" },
+          startStyles,
+        ]}
+      >
+        <BoardButton label="Start" action={startGame} />
+      </Animated.View>
+    </Animated.View>
   );
 };

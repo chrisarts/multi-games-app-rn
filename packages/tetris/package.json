@@ -5,7 +5,9 @@
     "@games/shared": "workspace:*"
   },
   "peerDependencies": {
+    "@shopify/react-native-skia": "*",
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-reanimated": "*"
   }
 }

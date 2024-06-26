@@ -1,6 +1,7 @@
 import { Block, BlockShape, BlockShapes, BoardCell } from "../models";
 
 export const getBlockShape = (block: Block): BlockShape => {
+  "worklet";
   return BlockShapes[block];
 };
 
