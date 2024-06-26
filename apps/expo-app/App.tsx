@@ -1,6 +1,7 @@
-import { SafeAreaView, StyleSheet, View } from "react-native";
+import { SafeAreaView, StyleSheet } from "react-native";
 import { TetrisGame } from "@games/tetris";
 import { useFonts } from "expo-font";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -12,11 +13,11 @@ export default function App() {
   if (!fontsLoaded) return null;
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
         <TetrisGame />
       </SafeAreaView>
-    </View>
+    </GestureHandlerRootView>
   );
 }
 

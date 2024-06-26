@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { GameState } from "../models";
+import { GameState, MoveDirection } from "../models";
 import { hasCollisions, playerMoves } from "../utils";
 import { useAnimatedBoard } from "./useAnimatedBoard";
 import { useAnimatedPlayer } from "./useAnimatedPosition";
@@ -58,11 +58,40 @@ export const useAnimatedTetris = () => {
     drop();
   }, tickSpeed);
 
+  const moveLeft = () => {
+    player.movePosition({
+      board: animatedBoard.value,
+      dir: MoveDirection.LEFT,
+      value: -1,
+    });
+  };
+
+  const moveDown = () => {
+    player.movePosition({
+      board: animatedBoard.value,
+      dir: MoveDirection.DOWN,
+      value: 1,
+    });
+  };
+
+  const moveRight = () => {
+    player.movePosition({
+      board: animatedBoard.value,
+      dir: MoveDirection.RIGHT,
+      value: 1,
+    });
+  };
+
   return {
     startGame,
     animatedBoard,
-    position: player,
+    player,
     gameState,
     status,
+    playerMovements: {
+      moveLeft,
+      moveDown,
+      moveRight,
+    },
   };
 };

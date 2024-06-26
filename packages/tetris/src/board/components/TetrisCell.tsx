@@ -42,7 +42,7 @@ export const TetrisCell = ({
           ? cellDefaultColor
           : getBlockShape(value.value[0]).color,
         {
-          duration: 100,
+          duration: 10,
           easing: Easing.cubic,
           reduceMotion: ReduceMotion.System,
         }
@@ -52,7 +52,7 @@ export const TetrisCell = ({
           ? cellDefaultColor
           : getBlockShape(value.value[0]).color,
         {
-          duration: 200,
+          duration: 10,
           easing: Easing.in(Easing.linear),
           reduceMotion: ReduceMotion.System,
         }

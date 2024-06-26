@@ -9,6 +9,7 @@
     "@shopify/react-native-skia": "*",
     "react": "*",
     "react-native": "*",
+    "react-native-gesture-handler": "*",
     "react-native-reanimated": "*"
   }
 }
