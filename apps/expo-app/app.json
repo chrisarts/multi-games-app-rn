@@ -22,6 +22,19 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Digital-Regular.ttf",
+            "./assets/fonts/Digital-Bold.ttf",
+            "./assets/fonts/Digital-Italic.ttf",
+            "./assets/fonts/Digital-ItalicBold.ttf"
+          ]
+        }
+      ]
+    ]
   }
 }

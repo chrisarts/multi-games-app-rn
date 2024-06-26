@@ -5,6 +5,7 @@
     "@games/shared": "workspace:*"
   },
   "peerDependencies": {
+    "@expo/vector-icons": "*",
     "@shopify/react-native-skia": "*",
     "react": "*",
     "react-native": "*",

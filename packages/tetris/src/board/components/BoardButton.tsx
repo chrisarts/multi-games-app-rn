@@ -1,30 +1,35 @@
-import { getDeviceDimensions } from "@games/shared";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface BoardButtonProps {
-  label: string;
   action: () => void;
+  icon: keyof (typeof MaterialCommunityIcons)["glyphMap"];
 }
-export const BoardButton = ({ action, label }: BoardButtonProps) => {
+export const BoardButton = ({ action, icon }: BoardButtonProps) => {
   return (
     <Pressable onPress={action} style={styles.container}>
-      <Text style={styles.text}>{label}</Text>
+      <MaterialCommunityIcons
+        name={icon}
+        color="rgba(131, 126, 126, 1)"
+        size={80}
+        style={{
+          paddingRight: 4,
+          paddingTop: 3,
+        }}
+      />
     </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
-    aspectRatio: 1,
-    borderRadius: getDeviceDimensions().WIDTH,
-    borderColor: "lightgray",
-    borderWidth: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  text: {
-    color: "white",
-    fontSize: 16,
+    // borderRadius: 140,
+    // width: 70,
+    // height: 70,
+    // borderColor: ,
+    // borderWidth: 2,
+    // aspectRatio: 1,
+    // justifyContent: "center",
+    // alignItems: "center",
   },
 });

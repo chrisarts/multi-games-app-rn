@@ -1,64 +1,71 @@
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import { TetrisCell } from "./components/TetrisCell";
 import { BoardControls } from "./components/BoardControls";
 import { MoveDirection } from "../models";
 import { useAnimatedTetris } from "../hooks/useAnimatedTetris";
+import { BoardHeader } from "./components/BoardHeader";
 
 export const TetrisBoard = () => {
-  const { gameState, startGame, animatedBoard, movePosition, playerRotate } =
+  const { gameState, startGame, animatedBoard, status, position } =
     useAnimatedTetris();
 
   return (
-    <FlatList
-      scrollEnabled={false}
-      data={animatedBoard.value}
-      contentContainerStyle={styles.listContainer}
-      renderItem={({ item: columns, index: rowIndex }) => (
+    <View>
+      <View style={{ flex: 1, flexGrow: 10, justifyContent: "flex-end" }}>
+        <BoardHeader gameState={status} />
+      </View>
+      <View style={{ flex: 1, flexGrow: 80 }}>
         <FlatList
           scrollEnabled={false}
-          data={columns}
-          horizontal
-          renderItem={({ item: cell, index: colIndex }) => {
-            return (
-              <TetrisCell
-                cell={cell}
-                board={animatedBoard}
-                coords={{ column: colIndex, row: rowIndex }}
-              />
-            );
-          }}
+          data={animatedBoard.value}
+          contentContainerStyle={styles.listContainer}
+          renderItem={({ item: columns, index: rowIndex }) => (
+            <FlatList
+              scrollEnabled={false}
+              data={columns}
+              horizontal
+              renderItem={({ item: cell, index: colIndex }) => {
+                return (
+                  <TetrisCell
+                    cell={cell}
+                    board={animatedBoard}
+                    coords={{ column: colIndex, row: rowIndex }}
+                  />
+                );
+              }}
+            />
+          )}
         />
-      )}
-      // ListHeaderComponent={() => <BoardHeader gameState={status} />}
-      ListFooterComponent={() => (
+      </View>
+      <View style={{ flex: 1, flexGrow: 10, justifyContent: "flex-end" }}>
         <BoardControls
           gameState={gameState}
           moveLeft={() =>
-            movePosition({
+            position.movePosition({
               board: animatedBoard.value,
               dir: MoveDirection.LEFT,
               value: -1,
             })
           }
           moveDown={() =>
-            movePosition({
+            position.movePosition({
               board: animatedBoard.value,
               dir: MoveDirection.DOWN,
               value: 1,
             })
           }
           moveRight={() =>
-            movePosition({
+            position.movePosition({
               board: animatedBoard.value,
               dir: MoveDirection.RIGHT,
               value: 1,
             })
           }
-          rotate={() => playerRotate(animatedBoard.value)}
+          rotate={() => position.playerRotate(animatedBoard.value)}
           startGame={startGame}
         />
-      )}
-    />
+      </View>
+    </View>
   );
 };
 

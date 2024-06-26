@@ -10,18 +10,35 @@ export const BoardHeader = ({ gameState }: BoardHeaderProps) => {
     return (
       <View
         style={{
-          paddingVertical: 10,
-          paddingHorizontal: 20,
+          paddingVertical: 15,
+          paddingHorizontal: 25,
           borderRadius: 10,
           borderColor: "white",
           borderWidth: 1,
           justifyContent: "center",
           alignItems: "center",
-          gap: 5,
+          gap: 8,
         }}
       >
-        <Text style={{ color: "white", fontWeight: "bold" }}>{label}</Text>
-        <Text style={{ color: "white" }}>{value}</Text>
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            fontFamily: "Digital-Bold",
+            fontSize: 16,
+          }}
+        >
+          {label}
+        </Text>
+        <Text
+          style={{
+            color: "white",
+            fontFamily: "Digital-Italic",
+            fontSize: 16,
+          }}
+        >
+          {value}
+        </Text>
       </View>
     );
   };

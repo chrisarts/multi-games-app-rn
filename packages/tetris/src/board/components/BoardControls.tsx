@@ -1,12 +1,9 @@
 import { BoardButton } from "./BoardButton";
 import { GameState } from "../../models";
-import Animated, {
-  SharedValue,
-  useAnimatedStyle,
-} from "react-native-reanimated";
+import Animated, { SlideOutLeft, SlideInRight } from "react-native-reanimated";
 
 interface BoardControlsProps {
-  gameState: SharedValue<GameState>;
+  gameState: GameState;
   startGame: () => void;
   moveLeft: () => void;
   moveRight: () => void;
@@ -21,44 +18,41 @@ export const BoardControls = ({
   startGame,
   moveDown,
 }: BoardControlsProps) => {
-  const controlStyles = useAnimatedStyle(() => {
-    return {
-      display: gameState.value === GameState.PLAYING ? "flex" : "none",
-    };
-  });
-  const startStyles = useAnimatedStyle(() => {
-    return {
-      display: gameState.value === GameState.STOP ? "flex" : "none",
-    };
-  });
   return (
     <Animated.View
       style={{
-        marginTop: 10,
-        justifyContent: "space-between",
+        justifyContent: "center",
         alignItems: "center",
       }}
     >
-      <Animated.View
-        style={[
-          { justifyContent: "space-between", flexDirection: "row" },
-          controlStyles,
-        ]}
-      >
-        <BoardButton label="Left" action={moveLeft} />
-        <BoardButton label="Down" action={moveDown} />
-        <BoardButton label="Right" action={moveRight} />
-        <BoardButton label="Rotate" action={rotate} />
-      </Animated.View>
+      {gameState === GameState.PLAYING && (
+        <Animated.View
+          style={{
+            justifyContent: "space-around",
+            flexDirection: "row",
+          }}
+          entering={SlideInRight}
+          exiting={SlideOutLeft}
+        >
+          <BoardButton icon="arrow-left-circle-outline" action={moveLeft} />
+          <BoardButton icon="arrow-down-circle-outline" action={moveDown} />
+          <BoardButton icon="arrow-right-circle-outline" action={moveRight} />
+          <BoardButton
+            icon="rotate-left-variant"
+            action={rotate}
+          />
+        </Animated.View>
+      )}
 
-      <Animated.View
-        style={[
-          { justifyContent: "space-between", flexDirection: "row" },
-          startStyles,
-        ]}
-      >
-        <BoardButton label="Start" action={startGame} />
-      </Animated.View>
+      {gameState === GameState.STOP && (
+        <Animated.View
+          style={{ justifyContent: "center", alignItems: "center" }}
+          entering={SlideInRight}
+          exiting={SlideOutLeft}
+        >
+          <BoardButton icon="play-circle-outline" action={startGame} />
+        </Animated.View>
+      )}
     </Animated.View>
   );
 };
