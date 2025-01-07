@@ -18,7 +18,7 @@ const config = {
 };
 
 export const useAnimatedPlayer = () => {
-  const position = useSharedValue(playerMoves.left(3));
+  const position = useSharedValue(playerMoves.right(3));
   const currentBlock = useSharedValue(firstBlock);
   const currentShape = useSharedValue(firstShape);
   const nextShapeBoard = useSharedValue(createTetrisBoard(config));
@@ -123,6 +123,16 @@ export const useAnimatedPlayer = () => {
     return newBoard;
   });
 
+  const resetPlayer = () => {
+    const block = getRandomBlock();
+    currentBlock.value = block;
+    currentShape.value = getBlockShape(block);
+    collided.value = false;
+    position.value = { column: 3, row: 0 };
+    nextBlock.value = getRandomBlock();
+    nextShape.value = getBlockShape(nextBlock.value);
+  };
+
   return {
     position,
     updatePosition,
@@ -131,6 +141,7 @@ export const useAnimatedPlayer = () => {
     currentShape,
     playerRotate,
     movePosition,
+    resetPlayer,
     nextBlock,
     nextShape,
     nextShapeBoard: nextShapeMatrix,

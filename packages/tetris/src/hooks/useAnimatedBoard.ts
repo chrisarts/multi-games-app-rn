@@ -28,40 +28,22 @@ export const useAnimatedBoard = ({
   const [rowsCleared, setRowsCleared] = useState(0);
   const status = useGameStatus(rowsCleared);
 
-  const startGame = () => {
-    const block = getRandomBlock();
-    boardValue.value = createTetrisBoard(BOARD_CONFIG);
-    currentBlock.value = block;
-    currentShape.value = getBlockShape(block);
-    collided.value = false;
-    position.value = { column: 3, row: 0 };
-    nextBlock.value = getRandomBlock();
-    nextShape.value = getBlockShape(nextBlock.value);
-    setGameState(GameState.PLAYING);
-    setTickSpeed(TickSpeed.Normal);
-    status.setLevel(1);
-    status.setRows(0);
-    status.setScore(0);
-  };
-
   const animatedBoard = useDerivedValue(() => {
     if (gameState === GameState.STOP) return boardValue.value;
     const newBoard: BoardMatrix = boardValue.value.map((row) =>
       row.map((cell) => (cell[1] === CellState.EMPTY ? [null, CellState.EMPTY] : cell)),
     );
 
-    // currentShape.value.shape.forEach((row, rowIndex) => {
-    //   row.forEach((col, colIndex) => {
-    //     if (col !== 0) {
-    //       newBoard[rowIndex + position.value.row][
-    //         colIndex + position.value.column
-    //       ] = [
-    //         currentBlock.value,
-    //         collided.value ? CellState.MERGED : CellState.EMPTY,
-    //       ];
-    //     }
-    //   });
-    // });
+    currentShape.value.shape.forEach((row, rowIndex) => {
+      row.forEach((col, colIndex) => {
+        if (col !== 0) {
+          newBoard[rowIndex + position.value.row][colIndex + position.value.column] = [
+            currentBlock.value,
+            collided.value ? CellState.MERGED : CellState.EMPTY,
+          ];
+        }
+      });
+    });
 
     const sweepRows = (newStage: BoardMatrix) => {
       let cleared = 0;
@@ -83,16 +65,6 @@ export const useAnimatedBoard = ({
     };
 
     if (collided.value) {
-      currentShape.value.shape.forEach((row, rowIndex) => {
-        row.forEach((col, colIndex) => {
-          if (col !== 0) {
-            newBoard[rowIndex + position.value.row][colIndex + position.value.column] = [
-              currentBlock.value,
-              CellState.MERGED,
-            ];
-          }
-        });
-      });
       position.value = { column: 3, row: 0 };
       currentBlock.value = nextBlock.value;
       currentShape.value = nextShape.value;
@@ -108,15 +80,25 @@ export const useAnimatedBoard = ({
     return newBoard;
   });
 
+  const resetBoard = () => {
+    boardValue.value = createTetrisBoard(BOARD_CONFIG);
+    status.setLevel(1);
+    status.setRows(0);
+    status.setScore(0);
+    setTickSpeed(TickSpeed.Normal);
+    setGameState(GameState.PLAYING);
+  };
+
   return {
     animatedBoard,
     gameState,
-    startGame,
+    boardValue,
     currentBlock,
     currentShape,
     tickSpeed,
     setTickSpeed,
     setGameState,
     status,
+    resetBoard,
   };
 };

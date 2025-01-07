@@ -1,4 +1,4 @@
-import { RoundedRect } from '@shopify/react-native-skia';
+import { RoundedRect,vec } from '@shopify/react-native-skia';
 import { SharedValue, useDerivedValue } from 'react-native-reanimated';
 import { BoardMatrix, BoardPosition } from '../../models';
 import { getBlockShape } from '../../utils';
@@ -24,6 +24,7 @@ export const TetrisCellSvg = ({
   width: number;
   height: number;
 }) => {
+  
   const color = useDerivedValue(() => {
     const cell = board.value[coords.row][coords.column];
     if (cell[0]) {

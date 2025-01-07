@@ -13,6 +13,7 @@ export const TetrisBoard = () => {
 
   return (
     <View style={styles.container}>
+      <BoardHeader gameState={tetris.status} nextShape={tetris.player.nextShapeBoard} />
       <GestureDetector gesture={gesture}>
         <Animated.View style={styles.listContainer}>
           <FlatList
@@ -24,37 +25,27 @@ export const TetrisBoard = () => {
                   scrollEnabled={false}
                   data={columns}
                   horizontal
-                  renderItem={({ item: cell, index: colIndex }) => {
-                    return (
-                      <TetrisCell
-                        cell={cell}
-                        board={tetris.animatedBoard}
-                        coords={{ column: colIndex, row: rowIndex }}
-                      />
-                    );
-                  }}
+                  renderItem={({ item: cell, index: colIndex }) => (
+                    <TetrisCell
+                      cell={cell}
+                      board={tetris.animatedBoard}
+                      coords={{ column: colIndex, row: rowIndex }}
+                    />
+                  )}
                 />
               </View>
             )}
-            ListHeaderComponent={
-              <BoardHeader
-                gameState={tetris.status}
-                nextShape={tetris.player.nextShapeBoard}
-              />
-            }
-            ListFooterComponent={
-              <BoardControls
-                gameState={tetris.gameState}
-                moveLeft={tetris.playerMovements.moveLeft}
-                moveDown={tetris.playerMovements.moveDown}
-                moveRight={tetris.playerMovements.moveRight}
-                rotate={() => tetris.player.playerRotate(tetris.animatedBoard.value)}
-                startGame={tetris.startGame}
-              />
-            }
           />
         </Animated.View>
       </GestureDetector>
+      <BoardControls
+        gameState={tetris.gameState}
+        moveLeft={tetris.playerMovements.moveLeft}
+        moveDown={tetris.playerMovements.moveDown}
+        moveRight={tetris.playerMovements.moveRight}
+        rotate={() => tetris.player.playerRotate(tetris.animatedBoard.value)}
+        startGame={tetris.startGame}
+      />
     </View>
   );
 };

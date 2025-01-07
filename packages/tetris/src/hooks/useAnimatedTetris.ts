@@ -10,7 +10,7 @@ export const useAnimatedTetris = () => {
   const {
     animatedBoard,
     gameState,
-    startGame,
+    resetBoard,
     currentBlock,
     currentShape,
     tickSpeed,
@@ -80,6 +80,11 @@ export const useAnimatedTetris = () => {
       dir: MoveDirection.RIGHT,
       value: 1,
     });
+  };
+
+  const startGame = () => {
+    resetBoard();
+    player.resetPlayer();
   };
 
   return {
