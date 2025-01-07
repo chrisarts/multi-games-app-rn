@@ -1,30 +1,19 @@
-import { GestureDetector } from 'react-native-gesture-handler';
-import { StyleSheet, View } from 'react-native';
-import { pre } from '@effect/schema/FastCheck';
 import { getDeviceDimensions } from '@games/shared';
 import {
   Canvas,
-  Fill,
-  Group,
-  Mask,
-  Path,
-  Points,
-  Skia,
-  SkPoint,
-  SweepGradient,
-  useVectorInterpolation,
-  vec,
 } from '@shopify/react-native-skia';
 import { pipe } from 'effect';
 import * as ReadOnlyArray from 'effect/Array';
+import { StyleSheet, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 import { useAnimatedTetris } from '../hooks/useAnimatedTetris';
 import { useBoardGestures } from '../hooks/useBoardGestures';
-import { BlockShape, BlockShapes } from '../models';
+import type { BlockShape } from '../models/Block.model';
 import { TetrisCellSvg } from './SVG/CellSvg';
 import { BoardControls } from './components/BoardControls';
 import { BoardHeader } from './components/BoardHeader';
 
-const shapeToVectors = (shape: BlockShape['shape']) => {
+export const shapeToVectors = (shape: BlockShape['shape']) => {
   // const path = Skia.Path.Make();
   const cartesian = pipe(shape, ReadOnlyArray.cartesian(shape));
   console.log('cartesian: ', cartesian);

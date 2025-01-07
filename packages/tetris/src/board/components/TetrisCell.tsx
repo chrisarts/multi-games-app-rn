@@ -2,12 +2,12 @@ import { StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   ReduceMotion,
-  SharedValue,
+  type SharedValue,
   useAnimatedStyle,
   useDerivedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { BoardCell, BoardMatrix, BoardPosition } from '../../models';
+import type { BoardCell, BoardMatrix, BoardPosition } from '../../models/Board.model';
 import { getBlockShape } from '../../utils/block.utils';
 
 interface TetrisCellProps {

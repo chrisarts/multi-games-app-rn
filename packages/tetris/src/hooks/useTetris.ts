@@ -1,4 +1,4 @@
-import { GameState } from '../models';
+import { GameState } from '../models/Board.model';
 import { hasCollisions, playerMoves } from '../utils';
 import { useGameStatus } from './useGameStatus';
 import { useInterval } from './useInterval';

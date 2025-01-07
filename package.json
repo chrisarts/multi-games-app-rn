@@ -12,8 +12,7 @@
     "start": "yarn workspace expo-app run start"
   },
   "dependencies": {
-    "@effect/schema": "^0.68.9",
-    "effect": "^3.4.2",
+    "effect": "^3.12.1",
     "text-decoding": "^1.0.0",
     "text-encoding-polyfill": "^0.6.7"
   },

@@ -1,4 +1,4 @@
-import { BlockShape, Block } from './Block.model';
+import type { Block, BlockShape } from './Block.model';
 
 export const ROW_POINTS = [40, 100, 300, 1200];
 
@@ -13,8 +13,8 @@ export type BoardCell = [Block | null, CellState];
 export type BoardMatrix = BoardCell[][];
 
 export enum CellState {
-  EMPTY,
-  MERGED,
+  EMPTY = 0,
+  MERGED = 1,
 }
 
 export interface BoardState {
@@ -30,8 +30,8 @@ export interface BoardConfig {
 }
 
 export enum GameState {
-  PLAYING,
-  STOP,
+  PLAYING = 0,
+  STOP = 1,
 }
 
 export enum TickSpeed {

@@ -1,5 +1,6 @@
-import { SharedValue, useDerivedValue } from 'react-native-reanimated';
-import { BlockShape, BoardPosition } from '../../models';
+import { type SharedValue, useDerivedValue } from 'react-native-reanimated';
+import type { BlockShape } from '../../models/Block.model';
+import type { BoardPosition } from '../../models/Board.model';
 import { TetrisShapeCellSvg } from './CellSvg';
 
 interface DroppingShapeProps {

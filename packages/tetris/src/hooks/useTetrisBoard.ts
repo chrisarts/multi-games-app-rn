@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import {
-  PlayerState,
-  BoardMatrix,
+  type BoardConfig,
+  type BoardMatrix,
   CellState,
   GameState,
   TickSpeed,
-  BoardConfig,
-} from '../models';
+} from '../models/Board.model';
+import type { PlayerState } from '../models/Player.model';
 import { createTetrisBoard } from '../utils';
 import { BOARD_CONFIG } from '../utils/board.utils';
 

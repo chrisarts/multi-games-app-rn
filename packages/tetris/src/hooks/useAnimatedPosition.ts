@@ -1,13 +1,7 @@
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
-import {
-  BlockShape,
-  BoardMatrix,
-  BoardPosition,
-  CellState,
-  getRandomBlock,
-  MoveDirection,
-  PlayerMoveAction,
-} from '../models';
+import { type BlockShape, MoveDirection, getRandomBlock } from '../models/Block.model';
+import { type BoardMatrix, type BoardPosition, CellState } from '../models/Board.model';
+import type { PlayerMoveAction } from '../models/Player.model';
 import { createTetrisBoard, getBlockShape, hasCollisions, playerMoves } from '../utils';
 
 const firstBlock = getRandomBlock();
@@ -26,6 +20,9 @@ export const useAnimatedPlayer = () => {
   const nextShape = useSharedValue(getBlockShape(nextBlock.value));
   const collided = useSharedValue(false);
 
+  /**
+   * @memberof `worklet`
+   */
   const updatePosition = (nextPosition: BoardPosition, hasCollided: boolean) => {
     'worklet';
     position.value = {
@@ -76,9 +73,12 @@ export const useAnimatedPlayer = () => {
     currentShape.value = clonedShape;
   };
 
+  /**
+   * @memberof `worklet`
+   */
   const movePosition = ({ dir, value, board }: PlayerMoveAction) => {
     'worklet';
-    let newPosition: BoardPosition = playerMoves.zero();
+    const newPosition: BoardPosition = playerMoves.zero();
     switch (dir) {
       case MoveDirection.LEFT:
       case MoveDirection.RIGHT:

@@ -1,5 +1,9 @@
-import { Block, BlockShape, BlockShapes, BoardCell } from '../models';
+import { type Block, type BlockShape, BlockShapes } from '../models/Block.model';
+import type { BoardCell } from '../models/Board.model';
 
+/**
+ * @memberof `worklet`
+ */
 export const getBlockShape = (block: Block): BlockShape => {
   'worklet';
   return BlockShapes[block];

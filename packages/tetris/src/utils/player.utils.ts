@@ -1,4 +1,4 @@
-import { BoardPosition } from '../models';
+import type { BoardPosition } from '../models/Board.model';
 
 export const playerMoves = {
   zero: (): BoardPosition => ({ column: 0, row: 0 }),

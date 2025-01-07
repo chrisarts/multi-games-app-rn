@@ -1,8 +1,8 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { getDeviceDimensions } from '@games/shared';
-import { SharedValue } from 'react-native-reanimated';
-import { useGameStatus } from '../../hooks/useGameStatus';
-import { BoardMatrix } from '../../models';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import type { SharedValue } from 'react-native-reanimated';
+import type { useGameStatus } from '../../hooks/useGameStatus';
+import type { BoardMatrix } from '../../models/Board.model';
 import { TetrisCell } from './TetrisCell';
 
 interface BoardHeaderProps {

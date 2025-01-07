@@ -1,17 +1,8 @@
-node_modules/
-.expo/
-dist/
-npm-debug.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
-
-# macOS
-.DS_Store
+# dependencies
+**node_modules
+/.pnp
+.pnp.js
+**/.turbo
 
 # Yarn Berry
 .pnp.*
@@ -23,3 +14,45 @@ web-build/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# ESLint
+lint-results/
+
+**/build/
+**dist/
+
+**.next/
+
+**/.swc
+.env
+.npmrc
+*.tgz
+*.log
+**/_release
+
+# VITE
+**benchmark/
+**coverage/
+**.cache/
+
+#VSCODE
+.vscode-test
+out
+
+# TypeScript cache
+*.tsbuildinfo
+
+.nx/
+*.vsix
+# Turborepo
+.turbo
+
+metro-test/
+bck
+.expo/
+docs/
+.tsup
+
+
+.nx/cache
+.nx/workspace-data

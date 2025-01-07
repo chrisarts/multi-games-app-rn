@@ -1,6 +1,6 @@
 import { RoundedRect,vec } from '@shopify/react-native-skia';
-import { SharedValue, useDerivedValue } from 'react-native-reanimated';
-import { BoardMatrix, BoardPosition } from '../../models';
+import { type SharedValue, useDerivedValue } from 'react-native-reanimated';
+import type { BoardMatrix, BoardPosition } from '../../models/Board.model';
 import { getBlockShape } from '../../utils';
 
 interface TetrisCellSvgProps {

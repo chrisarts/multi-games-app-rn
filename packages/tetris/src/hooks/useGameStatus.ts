@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ROW_POINTS } from '../models';
+import { ROW_POINTS } from '../models/Board.model';
 
 export const useGameStatus = (rowsCleared: number) => {
   const [score, setScore] = useState(0);

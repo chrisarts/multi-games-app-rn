@@ -1,10 +1,10 @@
 import {
-  PlayerState,
+  type BoardConfig,
+  type BoardMatrix,
+  type BoardPosition,
   CellState,
-  BoardConfig,
-  BoardMatrix,
-  BoardPosition,
-} from '../models';
+} from '../models/Board.model';
+import type { PlayerState } from '../models/Player.model';
 
 export const BOARD_CONFIG: BoardConfig = {
   HEIGHT: 15,

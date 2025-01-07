@@ -1,14 +1,7 @@
 import { useCallback, useState } from 'react';
-import {
-  BoardPosition,
-  getRandomBlock,
-  MoveDirection,
-  BoardMatrix,
-  PlayerState,
-  PlayerMoveAction,
-  BoardConfig,
-  BlockShape,
-} from '../models';
+import { type BlockShape, MoveDirection, getRandomBlock } from '../models/Block.model';
+import type { BoardConfig, BoardMatrix, BoardPosition } from '../models/Board.model';
+import type { PlayerMoveAction, PlayerState } from '../models/Player.model';
 import { getBlockShape, hasCollisions, playerMoves } from '../utils';
 
 export const usePlayer = () => {
@@ -64,7 +57,7 @@ export const usePlayer = () => {
   };
 
   const movePlayer = ({ dir, value, board }: PlayerMoveAction) => {
-    let newPosition: BoardPosition = playerMoves.zero();
+    const newPosition: BoardPosition = playerMoves.zero();
     switch (dir) {
       case MoveDirection.LEFT:
       case MoveDirection.RIGHT:

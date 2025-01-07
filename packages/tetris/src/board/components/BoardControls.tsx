@@ -1,5 +1,5 @@
 import Animated, { SlideOutLeft, SlideInRight } from 'react-native-reanimated';
-import { GameState } from '../../models';
+import { GameState } from '../../models/Board.model';
 import { BoardButton } from './BoardButton';
 
 interface BoardControlsProps {

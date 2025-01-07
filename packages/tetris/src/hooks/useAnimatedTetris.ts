@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { GameState, MoveDirection, TickSpeed } from '../models';
+import { MoveDirection } from '../models/Block.model';
+import { GameState, TickSpeed } from '../models/Board.model';
 import { hasCollisions, playerMoves } from '../utils';
 import { useAnimatedBoard } from './useAnimatedBoard';
 import { useAnimatedPlayer } from './useAnimatedPosition';

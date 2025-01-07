@@ -1,4 +1,4 @@
-import { SafeAreaView, View, StyleSheet } from 'react-native';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { CanvasBoard } from './board/CanvasBoard';
 
 export const TetrisGame = () => {

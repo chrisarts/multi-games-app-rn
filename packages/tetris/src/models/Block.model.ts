@@ -1,11 +1,11 @@
 import { keysOf } from '@games/shared';
 
 export enum MoveDirection {
-  LEFT,
-  RIGHT,
-  DOWN,
-  UP,
-  ROTATE,
+  LEFT = 0,
+  RIGHT = 1,
+  DOWN = 2,
+  UP = 3,
+  ROTATE = 4,
 }
 
 export enum Block {
@@ -89,6 +89,9 @@ export const BlockShapes: ShapesObj = {
 
 export const blockNames = keysOf(BlockShapes);
 
+/**
+ * @memberof `worklet`
+ */
 export const getRandomBlock = (): Block => {
   'worklet';
   const randomKey = blockNames[Math.floor(Math.random() * blockNames.length)];
