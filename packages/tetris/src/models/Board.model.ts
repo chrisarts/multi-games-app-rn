@@ -18,10 +18,10 @@ export enum CellState {
 }
 
 export interface BoardState {
-  board: BoardMatrix;
-  dropPosition: BoardPosition;
-  droppingBlock: Block;
-  droppingShape: BlockShape;
+  position: BoardPosition;
+  currentBlock: Block;
+  currentShape: BlockShape;
+  collided: boolean;
 }
 
 export interface BoardConfig {

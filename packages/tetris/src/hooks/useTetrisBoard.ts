@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react';
 import {
   type BoardConfig,
   type BoardMatrix,
+  type BoardState,
   CellState,
   GameState,
   TickSpeed,
 } from '../models/Board.model';
-import type { PlayerState } from '../models/Player.model';
 import { createTetrisBoard } from '../utils';
 import { BOARD_CONFIG } from '../utils/board.utils';
 
 export const useTetrisBoard = (
-  player: PlayerState,
+  player: BoardState,
   resetPlayer: (boardConfig: BoardConfig) => void,
 ) => {
   const [boardConfig] = useState(BOARD_CONFIG);

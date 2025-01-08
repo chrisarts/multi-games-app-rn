@@ -1,11 +1,18 @@
+import * as Match from 'effect/Match';
 import { useCallback, useState } from 'react';
+import type { MoveDirectionEnum } from '../models/Action.model';
 import { type BlockShape, MoveDirection, getRandomBlock } from '../models/Block.model';
-import type { BoardConfig, BoardMatrix, BoardPosition } from '../models/Board.model';
-import type { PlayerMoveAction, PlayerState } from '../models/Player.model';
+import type {
+  BoardConfig,
+  BoardMatrix,
+  BoardPosition,
+  BoardState,
+} from '../models/Board.model';
+import type { PlayerMoveAction } from '../models/Player.model';
 import { getBlockShape, hasCollisions, playerMoves } from '../utils';
 
 export const usePlayer = () => {
-  const [player, setPlayer] = useState({} as PlayerState);
+  const [player, setPlayer] = useState({} as BoardState);
 
   const updatePlayerPosition = (position: BoardPosition, collided: boolean) => {
     setPlayer((x) => ({
@@ -36,7 +43,7 @@ export const usePlayer = () => {
   };
 
   const playerRotate = (board: BoardMatrix) => {
-    const clonedPlayer: PlayerState = JSON.parse(JSON.stringify(player));
+    const clonedPlayer: BoardState = JSON.parse(JSON.stringify(player));
     clonedPlayer.currentShape.shape = rotateShape(clonedPlayer.currentShape.shape);
 
     const posX = clonedPlayer.position.column;
@@ -70,8 +77,9 @@ export const usePlayer = () => {
       case MoveDirection.ROTATE:
     }
 
-    if (!hasCollisions(board, player, newPosition))
-      updatePlayerPosition(newPosition, false);
+    // TODO: Restore
+    // if (!hasCollisions(board, player, newPosition))
+    //   updatePlayerPosition(newPosition, false);
   };
 
   return {

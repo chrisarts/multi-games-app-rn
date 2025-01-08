@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { MoveDirection } from '../models/Block.model';
-import { GameState, TickSpeed } from '../models/Board.model';
-import { hasCollisions, playerMoves } from '../utils';
+import { MoveDirection } from '../../models/Block.model';
+import { GameState, TickSpeed } from '../../models/Board.model';
+import { hasCollisions, playerMoves } from '../../utils';
+import { useInterval } from '../useInterval';
 import { useAnimatedBoard } from './useAnimatedBoard';
 import { useAnimatedPlayer } from './useAnimatedPosition';
-import { useInterval } from './useInterval';
 
 export const useAnimatedTetris = () => {
   const player = useAnimatedPlayer();

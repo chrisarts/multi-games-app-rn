@@ -1,7 +1,7 @@
-import { GestureDetector } from 'react-native-gesture-handler';
 import { FlatList, StyleSheet, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
-import { useAnimatedTetris } from '../hooks/useAnimatedTetris';
+import { useAnimatedTetris } from '../hooks/animated/useAnimatedTetris';
 import { useBoardGestures } from '../hooks/useBoardGestures';
 import { BoardControls } from './components/BoardControls';
 import { BoardHeader } from './components/BoardHeader';

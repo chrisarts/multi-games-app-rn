@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { runOnJS, useDerivedValue, useSharedValue } from 'react-native-reanimated';
-import { getRandomBlock } from '../models/Block.model';
-import { type BoardMatrix, CellState, GameState, TickSpeed } from '../models/Board.model';
-import type { AnimatedPlayerState } from '../models/Player.model';
-import { getBlockShape } from '../utils';
-import { BOARD_CONFIG, createTetrisBoard } from '../utils/board.utils';
-import { useGameStatus } from './useGameStatus';
+import { getRandomBlock } from '../../models/Block.model';
+import { type BoardMatrix, CellState, GameState, TickSpeed } from '../../models/Board.model';
+import type { AnimatedPlayerState } from '../../models/Player.model';
+import { getBlockShape } from '../../utils';
+import { BOARD_CONFIG, createTetrisBoard } from '../../utils/board.utils';
+import { useGameStatus } from '../useGameStatus';
 
 const firstBoard = createTetrisBoard(BOARD_CONFIG);
 

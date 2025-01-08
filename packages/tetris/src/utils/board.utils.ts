@@ -2,9 +2,9 @@ import {
   type BoardConfig,
   type BoardMatrix,
   type BoardPosition,
+  type BoardState,
   CellState,
 } from '../models/Board.model';
-import type { PlayerState } from '../models/Player.model';
 
 export const BOARD_CONFIG: BoardConfig = {
   HEIGHT: 15,
@@ -19,7 +19,7 @@ export const createTetrisBoard = ({ WIDTH, HEIGHT }: BoardConfig): BoardMatrix =
 
 export const hasCollisions = (
   board: BoardMatrix,
-  player: PlayerState,
+  player: BoardState,
   move: BoardPosition,
 ) => {
   const shape = player.currentShape.shape;

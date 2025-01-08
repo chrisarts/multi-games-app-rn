@@ -1,12 +1,10 @@
 import { getDeviceDimensions } from '@games/shared';
-import {
-  Canvas,
-} from '@shopify/react-native-skia';
+import { Canvas } from '@shopify/react-native-skia';
 import { pipe } from 'effect';
 import * as ReadOnlyArray from 'effect/Array';
 import { StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
-import { useAnimatedTetris } from '../hooks/useAnimatedTetris';
+import { useAnimatedTetris } from '../hooks/animated/useAnimatedTetris';
 import { useBoardGestures } from '../hooks/useBoardGestures';
 import type { BlockShape } from '../models/Block.model';
 import { TetrisCellSvg } from './SVG/CellSvg';
