@@ -3,8 +3,10 @@ import type { Block, BlockShape } from './Block.model';
 export const ROW_POINTS = [40, 100, 300, 1200];
 
 export interface BoardPosition {
-  row: number;
-  column: number;
+  /** row */
+  x: number;
+  /** column */
+  y: number;
 }
 
 export type BoardCell = [Block | null, CellState];

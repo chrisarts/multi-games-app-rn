@@ -13,9 +13,9 @@ export type __MoveDirectionEnum = Data.TaggedEnum<{
 const { DOWN, LEFT, RIGHT, ROTATE, UP, ZERO } = Data.taggedEnum<__MoveDirectionEnum>();
 
 export const playerMoves = {
-  zero: (): BoardPosition => ZERO({ column: 0, row: 0 }),
-  up: (x: number): BoardPosition => UP({ column: 0, row: x }),
-  down: (x: number): BoardPosition => DOWN({ column: 0, row: x }),
-  left: (x: number): BoardPosition => LEFT({ column: x, row: 0 }),
-  right: (x: number): BoardPosition => RIGHT({ column: x, row: 0 }),
+  zero: (): BoardPosition => ZERO({ y: 0, x: 0 }),
+  up: (x: number): BoardPosition => UP({ y: 0, x: x }),
+  down: (x: number): BoardPosition => DOWN({ y: 0, x: x }),
+  left: (x: number): BoardPosition => LEFT({ y: x, x: 0 }),
+  right: (x: number): BoardPosition => RIGHT({ y: x, x: 0 }),
 };

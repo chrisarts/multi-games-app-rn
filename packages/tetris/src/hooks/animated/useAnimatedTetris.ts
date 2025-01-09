@@ -45,7 +45,7 @@ export const useAnimatedTetris = () => {
     ) {
       player.updatePosition(dropMove, false);
     } else {
-      if (player.position.value.row < 1) {
+      if (player.position.value.x < 1) {
         setGameState(GameState.STOP);
         setTickSpeed(null);
       }

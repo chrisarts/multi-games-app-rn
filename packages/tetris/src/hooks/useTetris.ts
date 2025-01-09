@@ -1,3 +1,4 @@
+import { MoveDirection } from '../models/Block.model';
 import { GameState } from '../models/Board.model';
 import { hasCollisions, playerMoves } from '../utils';
 import { useGameStatus } from './useGameStatus';
@@ -24,7 +25,7 @@ export const useTetris = () => {
     if (!hasCollisions(board, player, dropMove)) {
       updatePlayerPosition(dropMove, false);
     } else {
-      if (player.position.row < 1) {
+      if (player.position.x < 1) {
         setGameState(GameState.STOP);
         setTickSpeed(null);
       }
@@ -37,6 +38,30 @@ export const useTetris = () => {
     drop();
   }, tickSpeed);
 
+  const moveLeft = () => {
+    movePlayer({
+      board: board,
+      dir: MoveDirection.LEFT,
+      value: -1,
+    });
+  };
+
+  const moveDown = () => {
+    movePlayer({
+      board: board,
+      dir: MoveDirection.DOWN,
+      value: 1,
+    });
+  };
+
+  const moveRight = () => {
+    movePlayer({
+      board: board,
+      dir: MoveDirection.RIGHT,
+      value: 1,
+    });
+  };
+
   return {
     board,
     startGame,
@@ -44,5 +69,11 @@ export const useTetris = () => {
     movePlayer,
     rotateShape,
     status,
+    player,
+    playerMovements: {
+      moveLeft,
+      moveDown,
+      moveRight,
+    },
   };
 };

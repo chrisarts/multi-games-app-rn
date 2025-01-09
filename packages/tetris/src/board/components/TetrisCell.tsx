@@ -12,7 +12,7 @@ import { getBlockShape } from '../../utils/block.utils';
 
 interface TetrisCellProps {
   cell: BoardCell;
-  board: SharedValue<BoardMatrix>;
+  board: BoardMatrix;
   coords: BoardPosition;
   size?: 'small' | 'normal';
 }
@@ -21,7 +21,7 @@ export const cellDefaultColor = 'rgba(131, 126, 126, 0.3)';
 
 export const TetrisCell = ({ cell, board, coords, size = 'normal' }: TetrisCellProps) => {
   const value = useDerivedValue(() => {
-    return board.value[coords.row][coords.column];
+    return board[coords.x][coords.y];
   });
   const animatedStyles = useAnimatedStyle(() => {
     const square = size === 'normal' ? 30 : 8;

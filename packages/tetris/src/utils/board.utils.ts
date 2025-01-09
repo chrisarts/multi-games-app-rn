@@ -27,8 +27,8 @@ export const hasCollisions = (
     for (let column = 0; column < shape[row].length; column += 1) {
       // 1. Check that we're on an actual Tetromino cell
       if (shape[row][column] !== 0) {
-        const rowIndex = row + player.position.row + move.row;
-        const colIndex = column + player.position.column + move.column;
+        const rowIndex = row + player.position.x + move.x;
+        const colIndex = column + player.position.y + move.y;
         const rowCells = board[rowIndex];
         // 2. Check that our move is inside the game areas height (y)
         // That we're not moving through the bottom of the grid

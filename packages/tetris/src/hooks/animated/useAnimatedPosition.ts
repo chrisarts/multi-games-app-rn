@@ -26,8 +26,8 @@ export const useAnimatedPlayer = () => {
   const updatePosition = (nextPosition: BoardPosition, hasCollided: boolean) => {
     'worklet';
     position.value = {
-      column: position.value.column + nextPosition.column,
-      row: position.value.row + nextPosition.row,
+      y: position.value.y + nextPosition.y,
+      x: position.value.x + nextPosition.x,
     };
     collided.value = hasCollided;
   };
@@ -43,7 +43,7 @@ export const useAnimatedPlayer = () => {
     const clonedShape: BlockShape = JSON.parse(JSON.stringify(currentShape.value));
     clonedShape.shape = rotateShape(clonedShape.shape);
 
-    const posX = position.value.column;
+    const posX = position.value.y;
     let offset = 1;
 
     const clonedPosition: BoardPosition = JSON.parse(JSON.stringify(position.value));
@@ -60,11 +60,11 @@ export const useAnimatedPlayer = () => {
         playerMoves.zero(),
       )
     ) {
-      clonedPosition.column += offset;
+      clonedPosition.y += offset;
       offset = -(offset + (offset > 0 ? 1 : -1));
 
       if (offset > clonedShape.shape[0].length) {
-        clonedPosition.column = posX;
+        clonedPosition.y = posX;
         return;
       }
     }
@@ -82,11 +82,11 @@ export const useAnimatedPlayer = () => {
     switch (dir) {
       case MoveDirection.LEFT:
       case MoveDirection.RIGHT:
-        newPosition.column = value;
+        newPosition.y = value;
         break;
       case MoveDirection.DOWN:
       case MoveDirection.UP:
-        newPosition.row = value;
+        newPosition.x = value;
         break;
       case MoveDirection.ROTATE:
     }
@@ -128,7 +128,7 @@ export const useAnimatedPlayer = () => {
     currentBlock.value = block;
     currentShape.value = getBlockShape(block);
     collided.value = false;
-    position.value = { column: 3, row: 0 };
+    position.value = { y: 3, x: 0 };
     nextBlock.value = getRandomBlock();
     nextShape.value = getBlockShape(nextBlock.value);
   };

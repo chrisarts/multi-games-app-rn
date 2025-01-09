@@ -1,6 +1,4 @@
-import * as Match from 'effect/Match';
 import { useCallback, useState } from 'react';
-import type { MoveDirectionEnum } from '../models/Action.model';
 import { type BlockShape, MoveDirection, getRandomBlock } from '../models/Block.model';
 import type {
   BoardConfig,
@@ -19,8 +17,8 @@ export const usePlayer = () => {
       ...x,
       collided,
       position: {
-        column: (x.position.column += position.column),
-        row: (x.position.row += position.row),
+        y: (x.position.y += position.y),
+        x: (x.position.x += position.x),
       },
     }));
   };
@@ -30,7 +28,7 @@ export const usePlayer = () => {
     setPlayer({
       collided: false,
       currentBlock: block,
-      position: { row: 0, column: boardConfig.WIDTH / 2 - 2 },
+      position: { x: 0, y: boardConfig.WIDTH / 2 - 2 },
       currentShape: getBlockShape(block),
     });
   }, []);
@@ -46,16 +44,16 @@ export const usePlayer = () => {
     const clonedPlayer: BoardState = JSON.parse(JSON.stringify(player));
     clonedPlayer.currentShape.shape = rotateShape(clonedPlayer.currentShape.shape);
 
-    const posX = clonedPlayer.position.column;
+    const posX = clonedPlayer.position.y;
     let offset = 1;
 
     while (hasCollisions(board, clonedPlayer, playerMoves.zero())) {
-      clonedPlayer.position.column += offset;
+      clonedPlayer.position.y += offset;
       offset = -(offset + (offset > 0 ? 1 : -1));
       console.log('POS: ', posX, offset);
 
       if (offset > clonedPlayer.currentShape.shape[0].length) {
-        clonedPlayer.position.column = posX;
+        clonedPlayer.position.y = posX;
         return;
       }
     }
@@ -68,18 +66,18 @@ export const usePlayer = () => {
     switch (dir) {
       case MoveDirection.LEFT:
       case MoveDirection.RIGHT:
-        newPosition.column = value;
+        newPosition.y = value;
         break;
       case MoveDirection.DOWN:
       case MoveDirection.UP:
-        newPosition.row = value;
+        newPosition.x = value;
         break;
       case MoveDirection.ROTATE:
     }
 
     // TODO: Restore
-    // if (!hasCollisions(board, player, newPosition))
-    //   updatePlayerPosition(newPosition, false);
+    if (!hasCollisions(board, player, newPosition))
+      updatePlayerPosition(newPosition, false);
   };
 
   return {

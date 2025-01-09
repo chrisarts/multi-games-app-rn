@@ -1,106 +1,45 @@
-import { getDeviceDimensions } from '@games/shared';
 import { Canvas } from '@shopify/react-native-skia';
-import { pipe } from 'effect';
-import * as ReadOnlyArray from 'effect/Array';
+import * as Order from 'effect/Order';
+import * as SortedSet from 'effect/SortedSet';
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { GestureDetector } from 'react-native-gesture-handler';
-import { useAnimatedTetris } from '../hooks/animated/useAnimatedTetris';
-import { useBoardGestures } from '../hooks/useBoardGestures';
-import type { BlockShape } from '../models/Block.model';
+import { useTetrisGrid } from '../hooks/useTetrisGrid';
+import { GameState } from '../models/Board.model';
 import { TetrisCellSvg } from './SVG/CellSvg';
 import { BoardControls } from './components/BoardControls';
-import { BoardHeader } from './components/BoardHeader';
-
-export const shapeToVectors = (shape: BlockShape['shape']) => {
-  // const path = Skia.Path.Make();
-  const cartesian = pipe(shape, ReadOnlyArray.cartesian(shape));
-  console.log('cartesian: ', cartesian);
-  const vectors = pipe(
-    shape,
-    ReadOnlyArray.map((rows, y) => {
-      return ReadOnlyArray.map(rows, (_, x) => ({ x: x, y: y }));
-    }),
-  );
-
-  return vectors;
-};
-// test(BlockShapes.I.shape);
-
-const { WIDTH: SCREEN_WIDTH } = getDeviceDimensions();
-
-const SQUARES_HORIZONTAL = 10;
-const SQUARES_VERTICAL = 15;
-
-const PADDING = 3;
-const SQUARE_CONTAINER_SIZE = SCREEN_WIDTH / SQUARES_HORIZONTAL;
-const SQUARE_SIZE = SQUARE_CONTAINER_SIZE - PADDING;
-
-const CANVAS_WIDTH = SCREEN_WIDTH;
-const CANVAS_HEIGHT = SQUARES_VERTICAL * SQUARE_CONTAINER_SIZE;
 
 export const CanvasBoard = () => {
-  const tetris = useAnimatedTetris();
-  const gestures = useBoardGestures(tetris, () => {});
+  const { grid, gridModel, actions } = useTetrisGrid();
+
+  const gridCells = useMemo(
+    () =>
+      SortedSet.map(grid, Order.empty(), (cell) => (
+        <TetrisCellSvg key={cell.id} point={cell} gridModel={gridModel} />
+      )),
+    [grid, gridModel],
+  );
 
   return (
     <View style={styles.container}>
-      <BoardHeader gameState={tetris.status} nextShape={tetris.player.nextShapeBoard} />
-      <GestureDetector gesture={gestures.gesture}>
-        <Canvas style={{ width: CANVAS_WIDTH, height: CANVAS_HEIGHT }} mode='continuous'>
-          {tetris.animatedBoard.value.map((rows, rowIndex) =>
-            rows.map((_, colIndex) => (
-              <TetrisCellSvg
-                key={`cell-${rowIndex}-${colIndex}`}
-                board={tetris.animatedBoard}
-                coords={{ column: colIndex, row: rowIndex }}
-                width={SQUARE_SIZE}
-                height={SQUARE_SIZE}
-                x={colIndex * SQUARE_CONTAINER_SIZE + PADDING / 2}
-                y={rowIndex * SQUARE_CONTAINER_SIZE + PADDING / 2}
-              />
-            )),
-          )}
-          {/* <Points
-          points={points}
-          mode='polygon'
-          color='green'
-          style='fill'
-          strokeWidth={2}
-        /> */}
-
-          {/* <Points
-          points={shape}
-          mode='lines'
-          color='lightblue'
-          style='fill'
-          strokeWidth={2}
-          strokeJoin='round'
-          strokeCap='square'
-        /> */}
-          {/* <Path path={path} color='white' strokeWidth={2} style='fill' /> */}
-          {/* <Points
-          points={points}
-          mode='points'
-          color='lightblue'
-          style='stroke'
-          strokeWidth={4}
-        /> */}
-          {/* <DroppingShape
-          containerSize={SQUARE_CONTAINER_SIZE}
-          size={SQUARE_SIZE}
-          padding={PADDING}
-          position={tetris.player.position}
-          shape={tetris.player.currentShape}
-        /> */}
-        </Canvas>
-      </GestureDetector>
+      {/* <BoardHeader gameState={tetris.status} nextShape={newBoard} /> */}
+      {/* <GestureDetector gesture={gestures.gesture}> */}
+      <Canvas
+        style={{
+          width: gridModel.layout.canvas.width,
+          height: gridModel.layout.canvas.height,
+        }}
+        mode='continuous'
+      >
+        {gridCells}
+      </Canvas>
+      {/* </GestureDetector> */}
       <BoardControls
-        gameState={tetris.gameState}
-        moveLeft={tetris.playerMovements.moveLeft}
-        moveDown={tetris.playerMovements.moveDown}
-        moveRight={tetris.playerMovements.moveRight}
-        rotate={() => tetris.player.playerRotate(tetris.animatedBoard.value)}
-        startGame={tetris.startGame}
+        gameState={GameState.STOP}
+        moveLeft={() => {}}
+        moveDown={() => {}}
+        moveRight={() => {}}
+        rotate={() => {}}
+        startGame={actions.startGame}
       />
     </View>
   );
@@ -109,8 +48,6 @@ export const CanvasBoard = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   listContainer: {
     marginTop: 10,

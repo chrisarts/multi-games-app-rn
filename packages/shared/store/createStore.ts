@@ -31,6 +31,8 @@ export function createStore<StoreShape>(initialState: StoreShape) {
   }
 }
 
+export type CustomStore<T> = ReturnType<typeof createStore<T>>;
+
 export interface ValueStoreOptions<StoreName extends string> {
   name: StoreName;
 }

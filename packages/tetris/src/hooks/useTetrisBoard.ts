@@ -48,7 +48,7 @@ export const useTetrisBoard = (
       player.currentShape.shape.forEach((row, rowIndex) => {
         row.forEach((col, colIndex) => {
           if (col !== 0) {
-            newBoard[rowIndex + player.position.row][colIndex + player.position.column] =
+            newBoard[rowIndex + player.position.x][colIndex + player.position.y] =
               [player.currentBlock, player.collided ? CellState.MERGED : CellState.EMPTY];
           }
         });
@@ -63,8 +63,8 @@ export const useTetrisBoard = (
     };
     setBoard((x) => updateBoard(x));
   }, [
-    player.position?.column,
-    player.position?.row,
+    player.position?.y,
+    player.position?.x,
     player.currentBlock,
     player.collided,
     player.position,

@@ -1,6 +1,5 @@
 import { Gesture } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue } from 'react-native-reanimated';
-import { MoveDirectionEnum } from '../models/Action.model';
 import { MoveDirection } from '../models/Block.model';
 import { hasCollisions, playerMoves } from '../utils';
 import type { useAnimatedTetris } from './animated/useAnimatedTetris';
@@ -121,7 +120,7 @@ export const useBoardGestures = (
       }
       const abs = Math.abs(e.absoluteX);
       const col = Math.floor(abs / 30) - 1;
-      const newCol = col - player.position.value.column;
+      const newCol = col - player.position.value.y;
 
       if (Math.abs(e.translationX) < 10) {
         lastTouchX.value = e.translationX;

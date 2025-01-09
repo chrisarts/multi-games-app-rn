@@ -2,7 +2,11 @@
   "name": "@games/tetris",
   "main": "./src/index.tsx",
   "dependencies": {
-    "@games/shared": "workspace:*"
+    "@games/shared": "workspace:*",
+    "d3-path": "3.1.0"
+  },
+  "devDependencies": {
+    "@types/d3-path": "3.1.0"
   },
   "peerDependencies": {
     "@expo/vector-icons": "*",

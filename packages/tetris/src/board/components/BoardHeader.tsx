@@ -7,7 +7,7 @@ import { TetrisCell } from './TetrisCell';
 
 interface BoardHeaderProps {
   gameState: ReturnType<typeof useGameStatus>;
-  nextShape: SharedValue<BoardMatrix>;
+  nextShape: BoardMatrix;
 }
 export const BoardHeader = ({ gameState, nextShape }: BoardHeaderProps) => {
   const { score, level, rows } = gameState;
@@ -32,7 +32,7 @@ export const BoardHeader = ({ gameState, nextShape }: BoardHeaderProps) => {
           <FlatList
             scrollEnabled={false}
             horizontal
-            data={nextShape.value}
+            data={nextShape}
             renderItem={({ item: row, index: rowIndex }) => (
               <FlatList
                 scrollEnabled={false}
@@ -42,7 +42,7 @@ export const BoardHeader = ({ gameState, nextShape }: BoardHeaderProps) => {
                   <TetrisCell
                     board={nextShape}
                     cell={item}
-                    coords={{ row: rowIndex, column: index }}
+                    coords={{ x: rowIndex, y: index }}
                     size='small'
                   />
                 )}
