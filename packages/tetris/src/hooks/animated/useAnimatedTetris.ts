@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { MoveDirection } from '../../models/Block.model';
-import { GameState, TickSpeed } from '../../models/Board.model';
+import { MoveDirection } from '../../old-models/Block.model';
+import { _GameState, __TickSpeed } from '../../old-models/Board.model';
 import { hasCollisions, playerMoves } from '../../utils';
 import { useInterval } from '../useInterval';
 import { useAnimatedBoard } from './useAnimatedBoard';
@@ -24,7 +24,7 @@ export const useAnimatedTetris = () => {
     if (status.rows > status.level * 5) {
       status.setLevel((prev) => prev + 1);
       // Also increase speed
-      setTickSpeed(TickSpeed.Normal / status.level + 200);
+      setTickSpeed(__TickSpeed.Normal / status.level + 200);
     }
   }, [status, setTickSpeed]);
 
@@ -46,7 +46,7 @@ export const useAnimatedTetris = () => {
       player.updatePosition(dropMove, false);
     } else {
       if (player.position.value.x < 1) {
-        setGameState(GameState.STOP);
+        setGameState(_GameState.STOP);
         setTickSpeed(null);
       }
       player.updatePosition(playerMoves.zero(), true);
@@ -55,7 +55,7 @@ export const useAnimatedTetris = () => {
 
   useInterval(() => {
     'worklet';
-    if (gameState !== GameState.PLAYING) return;
+    if (gameState !== _GameState.PLAYING) return;
     drop();
   }, tickSpeed);
 

@@ -24,12 +24,12 @@ export interface BoardConfig {
   WIDTH: number;
 }
 
-export enum GameState {
+export enum _GameState {
   PLAYING = 0,
   STOP = 1,
 }
 
-export enum TickSpeed {
+export enum __TickSpeed {
   Normal = 800,
   Sliding = 200,
 }

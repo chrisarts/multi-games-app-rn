@@ -1,10 +1,10 @@
+import type { GridPosition } from '../models/GridPosition.model';
 import {
   type BoardConfig,
   type BoardMatrix,
   type BoardState,
   CellState,
-} from '../models/Board.model';
-import type { GridPosition } from '../models/GridPosition.model';
+} from './Board.model';
 
 export const BOARD_CONFIG: BoardConfig = {
   HEIGHT: 15,

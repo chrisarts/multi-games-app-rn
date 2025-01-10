@@ -4,11 +4,11 @@ import {
   type BoardMatrix,
   type BoardState,
   CellState,
-  GameState,
-  TickSpeed,
-} from '../models/Board.model';
-import { createTetrisBoard } from '../utils';
-import { BOARD_CONFIG } from '../utils/board.utils';
+  _GameState,
+  __TickSpeed,
+} from '../old-models/Board.model';
+import { BOARD_CONFIG } from '../old-models/board.utils';
+import { createTetrisBoard } from '../old-models/board.utils';
 
 export const useTetrisBoard = (
   player: BoardState,
@@ -16,8 +16,8 @@ export const useTetrisBoard = (
 ) => {
   const [boardConfig] = useState(BOARD_CONFIG);
   const [board, setBoard] = useState(createTetrisBoard(boardConfig));
-  const [gameState, setGameState] = useState(GameState.STOP);
-  const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
+  const [gameState, setGameState] = useState(_GameState.STOP);
+  const [tickSpeed, setTickSpeed] = useState<__TickSpeed | null>(null);
   const [rowsCleared, setRowsCleared] = useState(0);
 
   useEffect(() => {
@@ -48,8 +48,10 @@ export const useTetrisBoard = (
       player.currentShape.shape.forEach((row, rowIndex) => {
         row.forEach((col, colIndex) => {
           if (col !== 0) {
-            newBoard[rowIndex + player.position.x][colIndex + player.position.y] =
-              [player.currentBlock, player.collided ? CellState.MERGED : CellState.EMPTY];
+            newBoard[rowIndex + player.position.x][colIndex + player.position.y] = [
+              player.currentBlock,
+              player.collided ? CellState.MERGED : CellState.EMPTY,
+            ];
           }
         });
       });
@@ -75,13 +77,13 @@ export const useTetrisBoard = (
 
   const startGame = () => {
     setBoard(createTetrisBoard(boardConfig));
-    setGameState(GameState.PLAYING);
-    setTickSpeed(TickSpeed.Normal);
+    setGameState(_GameState.PLAYING);
+    setTickSpeed(__TickSpeed.Normal);
     resetPlayer(boardConfig);
   };
 
   const stopGame = () => {
-    setGameState(GameState.STOP);
+    setGameState(_GameState.STOP);
   };
 
   return {

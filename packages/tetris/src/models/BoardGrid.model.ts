@@ -1,5 +1,5 @@
 import * as Option from 'effect/Option';
-import { BOARD_CONFIG } from '../utils/board.utils';
+import { BOARD_CONFIG } from '../old-models/board.utils';
 import * as GridUtils from '../utils/grid.utils';
 import { BaseGridModel } from './Grid.model';
 import type { GridPosition } from './GridPosition.model';

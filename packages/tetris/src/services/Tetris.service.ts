@@ -2,12 +2,16 @@ import * as Context from 'effect/Context';
 import * as Deferred from 'effect/Deferred';
 import * as Duration from 'effect/Duration';
 import * as Effect from 'effect/Effect';
+import * as Equal from 'effect/Equal';
 import * as Layer from 'effect/Layer';
 import * as PubSub from 'effect/PubSub';
 import * as Stream from 'effect/Stream';
-import { PlayerAction } from '../models/Action.model';
-import { GameState } from '../models/Board.model';
-import { GameModel } from '../models/Game.model';
+import {
+  GameRunState,
+  MoveDirection,
+  PlayerAction,
+  TickSpeed,
+} from '../models/Action.model';
 import { GameStateCtx, GameStateCtxLive } from './GameState.service';
 
 const make = Effect.gen(function* () {
@@ -22,7 +26,7 @@ const make = Effect.gen(function* () {
             move: ({ direction }) => onMove(direction),
             rotate: () => onRotate(),
             runState: ({ status }) => onSetState(status),
-            setSpeed: ({ speed }) => onSetSpeed(speed),
+            setSpeed: ({ speed }) => onSetSpeed(TickSpeed[speed]),
           })(action);
         }),
         Stream.runDrain,
@@ -42,15 +46,15 @@ const make = Effect.gen(function* () {
     yield* Effect.log('RUN_GAME_2', gameState.getState().status);
 
     yield* Effect.zipRight(
-      onSetState(GameState.PLAYING),
-      publishAction(GameModel.playerActions.move('down')),
+      onSetState(GameRunState('Play')),
+      publishAction(PlayerAction.move({ direction: MoveDirection('down') })),
     ).pipe(
       Effect.delay(Duration.millis(gameState.getState().speed)),
       Effect.repeat({
         while: () =>
-          Effect.succeed(gameState.getState().status === GameState.PLAYING).pipe(
-            Effect.tap((x) => Effect.logDebug('CONTINUE?: ', x)),
-          ),
+          Effect.succeed(
+            Equal.equals(gameState.getState().status, GameRunState('Play')),
+          ).pipe(Effect.tap((x) => Effect.logDebug('CONTINUE?: ', x))),
       }),
       Effect.fork,
     );

@@ -1,16 +1,18 @@
 import * as Context from 'effect/Context';
 import * as Effect from 'effect/Effect';
+import * as Equal from 'effect/Equal';
 import * as Layer from 'effect/Layer';
 import * as Ref from 'effect/Ref';
-import type { MoveDirection } from '../models/Action.model';
-import { GameState, type TickSpeed } from '../models/Board.model';
+import { GameRunState, type MoveDirection } from '../models/Action.model';
 import { GameModel } from '../models/Game.model';
 
 export const make = Effect.gen(function* () {
   const gameRef = yield* Ref.make(new GameModel());
 
   const isRunning = gameRef.pipe(
-    Effect.map((state) => state.state.getState().status === GameState.PLAYING),
+    Effect.map((state) =>
+      Equal.equals(state.state.getState().status, GameRunState('Play')),
+    ),
   );
 
   return {
@@ -30,14 +32,14 @@ export const make = Effect.gen(function* () {
     return Effect.tap(gameRef, (game) => Effect.sync(() => game.rotateBlock()));
   }
 
-  function onSetState(status: GameState) {
+  function onSetState(status: GameRunState) {
     return gameRef.pipe(
-      Effect.tap((game) => Effect.sync(() => game.setState(status))),
+      Effect.tap((game) => Effect.sync(() => game.setRunStatus(status))),
       Effect.as<void>(void 0),
     );
   }
 
-  function onSetSpeed(speed: TickSpeed) {
+  function onSetSpeed(speed: number) {
     return Effect.tap(gameRef, (game) =>
       Effect.sync(() =>
         game.state.setState((prev) => {

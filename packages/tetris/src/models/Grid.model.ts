@@ -1,11 +1,13 @@
 import * as HashMap from 'effect/HashMap';
 import type * as HashSet from 'effect/HashSet';
-import * as Match from 'effect/Match';
 import * as Option from 'effect/Option';
+import { CellState } from '../old-models/Board.model';
 import * as GridUtils from '../utils/grid.utils';
-import { playerMoves, sumPositions } from '../utils/player.utils';
-import { CollisionResult, type MoveDirection } from './Action.model';
-import { CellState } from './Board.model';
+import {
+  CollisionResult,
+  type MoveDirection,
+  getMoveDirectionUnit,
+} from './Action.model';
 import type { GridBlock } from './GridBlock.model';
 import type { GridCell } from './GridCell.model';
 import { GridPosition } from './GridPosition.model';
@@ -18,18 +20,8 @@ export class BaseGridModel {
   currentBlock: GridBlock;
   nextBlock: GridBlock;
 
-  get getMovePosition() {
-    return Match.type<MoveDirection>().pipe(
-      Match.when('up', () => playerMoves.up(1)),
-      Match.when('down', () => playerMoves.down(1)),
-      Match.when('left', () => playerMoves.left(-1)),
-      Match.when('right', () => playerMoves.right(1)),
-      Match.when('rotate', () => playerMoves.rotate()),
-      // Match.when(MoveDirection.ROTATE, () => playerMoves.zero()),
-      Match.orElse(() => playerMoves.zero()),
-      (f) => (move: MoveDirection) =>
-        sumPositions(f(move), this.currentBlock.currentPosition),
-    );
+  getMovePosition(move: MoveDirection) {
+    return getMoveDirectionUnit(move).sum(this.currentBlock.currentPosition);
   }
 
   constructor(layout: GridUtils.GridLayout) {

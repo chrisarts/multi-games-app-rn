@@ -3,11 +3,15 @@ import * as Effect from 'effect/Effect';
 import * as HashMap from 'effect/HashMap';
 import type * as HashSet from 'effect/HashSet';
 import * as Layer from 'effect/Layer';
-import { CollisionResult, type MoveDirection } from '../models/Action.model';
-import { GameState, TickSpeed } from '../models/Board.model';
+import {
+  CollisionResult,
+  GameRunState,
+  type MoveDirection,
+  TickSpeed,
+} from '../models/Action.model';
 import { BoardGrid } from '../models/BoardGrid.model';
 import { GridPosition } from '../models/GridPosition.model';
-import { BOARD_CONFIG } from '../utils/board.utils';
+import { BOARD_CONFIG } from '../old-models/board.utils';
 import { createStoreContext } from '../utils/common.utils';
 import type { GridLayout } from '../utils/grid.utils';
 
@@ -56,7 +60,7 @@ const makeCtx = Effect.gen(function* () {
       },
     })(collision);
     if (CollisionResult.$is('MERGED_SIBLING')(collision) && collision.gameOver) {
-      return changeRunState(GameState.STOP);
+      return changeRunState(GameRunState('Stop'));
     }
 
     store.setState((prev) => ({ ...prev }));
@@ -100,7 +104,7 @@ const makeCtx = Effect.gen(function* () {
     store.setState((x) => x);
   }
 
-  function changeRunState(nextState: GameState) {
+  function changeRunState(nextState: GameRunState) {
     if (nextState === store.getState().game.status) {
       return;
     }
@@ -113,7 +117,7 @@ const makeCtx = Effect.gen(function* () {
     }));
   }
 
-  function changeGameSpeed(speed: TickSpeed) {
+  function changeGameSpeed(speed: number) {
     if (speed === store.getState().game.speed) {
       return;
     }
@@ -138,8 +142,8 @@ interface TetrisGameStore {
     layout: GridLayout;
   };
   game: {
-    status: GameState;
-    speed: TickSpeed;
+    status: GameRunState;
+    speed: number;
   };
   player: {
     score: number;
@@ -151,7 +155,7 @@ interface TetrisGameStore {
 const createGameStoreShape = (gameBoard: BoardGrid): TetrisGameStore => ({
   game: {
     speed: TickSpeed.Normal,
-    status: GameState.STOP,
+    status: GameRunState('Stop'),
   },
   player: {
     clearedRows: 0,

@@ -1,6 +1,6 @@
 import * as Effect from 'effect/Effect';
 import { useState, useSyncExternalStore } from 'react';
-import type { MoveDirection } from '../models/Action.model';
+import { GameRunState, MoveDirection, PlayerAction } from '../models/Action.model';
 import { GameModel } from '../models/Game.model';
 import { getTetrisGameHandler } from '../programs/game.program';
 import { TetrisRuntime } from '../programs/tetris.runtime';
@@ -42,17 +42,17 @@ export const useTetrisGrid = () => {
 
   const stopGame = () =>
     gameHandler.service
-      .publishAction(GameModel.playerActions.stop)
+      .publishAction(PlayerAction.runState({ status: GameRunState('Stop') }))
       .pipe(Effect.runPromise);
 
   const move = (moveTo: MoveDirection) =>
     gameHandler.service
-      .publishAction(GameModel.playerActions.move(moveTo))
+      .publishAction(PlayerAction.move({ direction: moveTo }))
       .pipe(Effect.runPromise);
 
   const rotate = () =>
     gameHandler.service
-      .publishAction(GameModel.playerActions.move('rotate'))
+      .publishAction(PlayerAction.move({ direction: MoveDirection('rotate') }))
       .pipe(Effect.runPromise);
 
   return {

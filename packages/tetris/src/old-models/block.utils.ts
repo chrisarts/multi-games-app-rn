@@ -1,5 +1,5 @@
-import { type Block, type BlockShape, BlockShapes } from '../models/Block.model';
-import type { BoardCell } from '../models/Board.model';
+import { type Block, type BlockShape, BlockShapes } from './Block.model';
+import type { BoardCell } from './Board.model';
 
 /**
  * @memberof `worklet`

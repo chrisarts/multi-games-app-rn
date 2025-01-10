@@ -1,5 +1,5 @@
 import { type GridBlockEnum, GridBlockShapes } from '../utils/constants.utils';
-import { playerMoves, sumPositions } from '../utils/player.utils';
+import { MoveDirection, getMoveDirectionUnit } from './Action.model';
 import { GridPosition } from './GridPosition.model';
 
 export class GridBlock {
@@ -72,14 +72,15 @@ const getRotatedShape = (originalShape: number[][]) => {
   return shape.map((row) => row.toReversed());
 };
 
-const shapeToPoints = (shape: number[][], plusPosition = playerMoves.zero()) => {
+const shapeToPoints = (
+  shape: number[][],
+  plusPosition = getMoveDirectionUnit(MoveDirection('zero')),
+) => {
   return shape
     .map((rows, x) =>
       rows.map((column, y) => {
         if (column === 0) return null;
-        return GridPosition.create(
-          sumPositions(GridPosition.create({ x, y }), plusPosition),
-        );
+        return GridPosition.create({ x, y }).sum(plusPosition);
       }),
     )
     .flatMap((x) => x.filter((y) => y !== null));

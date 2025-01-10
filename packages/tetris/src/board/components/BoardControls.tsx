@@ -1,9 +1,9 @@
 import Animated, { SlideOutLeft, SlideInRight } from 'react-native-reanimated';
-import { GameState } from '../../models/Board.model';
+import { GameRunState } from '../../models/Action.model';
 import { BoardButton } from './BoardButton';
 
 interface BoardControlsProps {
-  gameState: GameState;
+  gameState: GameRunState;
   startGame: () => void;
   moveLeft: () => void;
   moveRight: () => void;
@@ -25,7 +25,7 @@ export const BoardControls = ({
         alignItems: 'center',
       }}
     >
-      {gameState === GameState.PLAYING && (
+      {gameState === GameRunState('Play') && (
         <Animated.View
           style={{
             justifyContent: 'space-around',
@@ -41,7 +41,7 @@ export const BoardControls = ({
         </Animated.View>
       )}
 
-      {gameState === GameState.STOP && (
+      {gameState === GameRunState('Stop') && (
         <Animated.View
           style={{ justifyContent: 'center', alignItems: 'center' }}
           entering={SlideInRight}

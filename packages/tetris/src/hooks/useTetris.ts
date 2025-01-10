@@ -1,6 +1,6 @@
-import { MoveDirection } from '../models/Block.model';
-import { GameState } from '../models/Board.model';
-import { hasCollisions, playerMoves } from '../utils';
+import { MoveDirection } from '../old-models/Block.model';
+import { _GameState } from '../old-models/Board.model';
+import { hasCollisions, playerMoves } from '../old-models/board.utils';
 import { useGameStatus } from './useGameStatus';
 import { useInterval } from './useInterval';
 import { usePlayer } from './usePlayer';
@@ -26,7 +26,7 @@ export const useTetris = () => {
       updatePlayerPosition(dropMove, false);
     } else {
       if (player.position.x < 1) {
-        setGameState(GameState.STOP);
+        setGameState(_GameState.STOP);
         setTickSpeed(null);
       }
       updatePlayerPosition(playerMoves.zero(), true);
@@ -34,7 +34,7 @@ export const useTetris = () => {
   };
 
   useInterval(() => {
-    if (gameState !== GameState.PLAYING) return;
+    if (gameState !== _GameState.PLAYING) return;
     drop();
   }, tickSpeed);
 

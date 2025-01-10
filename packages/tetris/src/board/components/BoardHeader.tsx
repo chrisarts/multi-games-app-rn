@@ -1,8 +1,8 @@
 import { getDeviceDimensions } from '@games/shared';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import type { useGameStatus } from '../../hooks/useGameStatus';
-import type { BoardMatrix } from '../../models/Board.model';
 import { GridPosition } from '../../models/GridPosition.model';
+import type { BoardMatrix } from '../../old-models/Board.model';
 import { TetrisCell } from './TetrisCell';
 
 interface BoardHeaderProps {

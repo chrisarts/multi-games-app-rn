@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react';
-import { type BlockShape, MoveDirection, getRandomBlock } from '../models/Block.model';
+import { type BlockShape, MoveDirection, getRandomBlock } from '../old-models/Block.model';
 import type {
   BoardConfig,
   BoardMatrix,
   BoardPosition,
   BoardState,
-} from '../models/Board.model';
-import type { PlayerMoveAction } from '../models/Player.model';
+} from '../old-models/Board.model';
+import type { PlayerMoveAction } from '../old-models/Player.model';
 import { getBlockShape, hasCollisions, playerMoves } from '../utils';
 
 export const usePlayer = () => {

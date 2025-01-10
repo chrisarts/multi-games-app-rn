@@ -1,7 +1,7 @@
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
-import { type BlockShape, MoveDirection, getRandomBlock } from '../../models/Block.model';
-import { type BoardMatrix, type BoardPosition, CellState } from '../../models/Board.model';
-import type { PlayerMoveAction } from '../../models/Player.model';
+import { type BlockShape, MoveDirection, getRandomBlock } from '../../old-models/Block.model';
+import { type BoardMatrix, type BoardPosition, CellState } from '../../old-models/Board.model';
+import type { PlayerMoveAction } from '../../old-models/Player.model';
 import { createTetrisBoard, getBlockShape, hasCollisions, playerMoves } from '../../utils';
 
 const firstBlock = getRandomBlock();

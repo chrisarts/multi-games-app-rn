@@ -1,8 +1,8 @@
 import type { SharedValue } from 'react-native-reanimated';
-import type { MoveDirection } from './Action.model';
+import type { MoveDirection } from '../models/Action.model';
+import type { GridPosition } from '../models/GridPosition.model';
 import type { Block, BlockShape } from './Block.model';
 import type { BoardMatrix } from './Board.model';
-import type { GridPosition } from './GridPosition.model';
 
 export interface PlayerState {
   position: GridPosition;

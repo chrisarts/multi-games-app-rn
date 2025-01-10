@@ -2,10 +2,12 @@ import * as Deferred from 'effect/Deferred';
 import * as Duration from 'effect/Duration';
 import * as Effect from 'effect/Effect';
 import * as Queue from 'effect/Queue';
-import type { MoveDirection } from '../models/Action.model';
-import { GameState } from '../models/Board.model';
+import { GameRunState, MoveDirection } from '../models/Action.model';
 import { GameStateCtx } from '../services/GameState.service';
-import { TetrisStoreContext, TetrisStoreContextLive } from '../services/GameStore.service';
+import {
+  TetrisStoreContext,
+  TetrisStoreContextLive,
+} from '../services/GameStore.service';
 import { TetrisServiceCtx } from '../services/Tetris.service';
 
 export const tetrisContext = Effect.gen(function* () {
@@ -23,12 +25,12 @@ export const tetrisContext = Effect.gen(function* () {
       Effect.fork,
     );
 
-    yield* Queue.offer(gameQueue, 'down').pipe(
+    yield* Queue.offer(gameQueue, MoveDirection('down')).pipe(
       Effect.delay(Duration.millis(store.selectState((x) => x.game.speed))),
       Effect.repeat({
         while: () =>
           Effect.sync(() =>
-            store.selectState((x) => x.game.status === GameState.PLAYING),
+            store.selectState((x) => x.game.status === GameRunState('Play')),
           ),
       }),
     );

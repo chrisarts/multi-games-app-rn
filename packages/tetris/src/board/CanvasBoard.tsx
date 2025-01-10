@@ -28,9 +28,9 @@ export const CanvasBoard = () => {
       {/* </GestureDetector> */}
       <BoardControls
         gameState={gameState}
-        moveLeft={() => actions.move('left')}
-        moveDown={() => actions.move('down')}
-        moveRight={() => actions.move('right')}
+        moveLeft={() => actions.move(MoveDirection('left'))}
+        moveDown={() => actions.move(MoveDirection('down'))}
+        moveRight={() => actions.move(MoveDirection('right'))}
         rotate={() => actions.rotate()}
         startGame={actions.startGame}
       />

@@ -1,6 +1,6 @@
 import { Gesture } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue } from 'react-native-reanimated';
-import { MoveDirection } from '../models/Block.model';
+import { MoveDirection } from '../old-models/Block.model';
 import { hasCollisions, playerMoves } from '../utils';
 import type { useAnimatedTetris } from './animated/useAnimatedTetris';
 

@@ -6,9 +6,8 @@ import Animated, {
   useDerivedValue,
   withTiming,
 } from 'react-native-reanimated';
-import type { BoardCell, BoardMatrix } from '../../models/Board.model';
 import type { GridPosition } from '../../models/GridPosition.model';
-import { getBlockShape } from '../../utils/block.utils';
+import type { BoardCell, BoardMatrix } from '../../old-models/Board.model';
 
 interface TetrisCellProps {
   cell: BoardCell;
@@ -32,22 +31,16 @@ export const TetrisCell = ({ cell, board, coords, size = 'normal' }: TetrisCellP
       width: square,
       height: square,
       borderRadius,
-      backgroundColor: withTiming(
-        value.value[0] === null ? cellDefaultColor : getBlockShape(value.value[0]).color,
-        {
-          duration: 10,
-          easing: Easing.cubic,
-          reduceMotion: ReduceMotion.System,
-        },
-      ),
-      borderColor: withTiming(
-        value.value[0] === null ? cellDefaultColor : getBlockShape(value.value[0]).color,
-        {
-          duration: 10,
-          easing: Easing.in(Easing.linear),
-          reduceMotion: ReduceMotion.System,
-        },
-      ),
+      backgroundColor: withTiming(cellDefaultColor, {
+        duration: 10,
+        easing: Easing.cubic,
+        reduceMotion: ReduceMotion.System,
+      }),
+      borderColor: withTiming(cellDefaultColor, {
+        duration: 10,
+        easing: Easing.in(Easing.linear),
+        reduceMotion: ReduceMotion.System,
+      }),
     };
   });
   return <Animated.View style={[styles.cell, animatedStyles]} />;

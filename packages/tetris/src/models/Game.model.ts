@@ -1,16 +1,20 @@
 import { type CustomStore, createStore } from '@games/shared';
-import { BOARD_CONFIG } from '../utils/board.utils';
-import { CollisionResult, type MoveDirection, PlayerAction } from './Action.model';
-import { GameState, TickSpeed } from './Board.model';
+import { BOARD_CONFIG } from '../old-models/board.utils';
+import {
+  CollisionResult,
+  GameRunState,
+  type MoveDirection,
+  TickSpeed,
+} from './Action.model';
 import { BoardGrid } from './BoardGrid.model';
 
 interface GameStore {
-  status: GameState;
+  status: GameRunState;
   board: BoardGrid;
   score: number;
   clearedRows: number;
   level: number;
-  speed: TickSpeed;
+  speed: number;
 }
 export class GameModel {
   state: CustomStore<GameStore>;
@@ -24,7 +28,7 @@ export class GameModel {
       height: BOARD_CONFIG.HEIGHT,
     });
     this.state = createStore<GameStore>({
-      status: GameState.STOP,
+      status: GameRunState('Stop'),
       clearedRows: 0,
       level: 0,
       score: 0,
@@ -51,7 +55,7 @@ export class GameModel {
       },
     })(collision);
     if (CollisionResult.$is('MERGED_SIBLING')(collision) && collision.gameOver) {
-      return this.setState(GameState.STOP);
+      return this.setRunStatus(GameRunState('Stop'));
     }
 
     this.state.setState((prev) => {
@@ -75,20 +79,20 @@ export class GameModel {
     // });
   }
 
-  setState(status: GameState) {
+  setRunStatus(status: GameRunState) {
     this.state.setState((prev) => {
       prev.status = status;
       return prev;
     });
   }
 
-  static playerActions = {
-    move: (direction: MoveDirection) =>
-      PlayerAction.move({ direction }),
-    play: PlayerAction.runState({ status: GameState.PLAYING }),
-    stop: PlayerAction.runState({ status: GameState.STOP }),
-    setSpeed: (speed: TickSpeed) => PlayerAction.setSpeed({ speed }),
-  };
+  // static playerActions = {
+  //   move: (direction: MoveDirection) =>
+  //     PlayerAction.move({ direction }),
+  //   play: PlayerAction.runState({ status: _GameState.PLAYING }),
+  //   stop: PlayerAction.runState({ status: _GameState.STOP }),
+  //   setSpeed: (speed: __TickSpeed) => PlayerAction.setSpeed({ speed }),
+  // };
 }
 
 // function printTemplate(template: any, ...args: any[]) {

@@ -2,15 +2,17 @@ import * as Context from 'effect/Context';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
 import * as Ref from 'effect/Ref';
-import { GameState, TickSpeed } from '../models/Board.model';
+import { GameRunState, TickSpeed } from '../models/Action.model';
 
 export const make = Effect.gen(function* () {
-  const thickRef = yield* Ref.make<TickSpeed>(TickSpeed.Normal);
-  const runStateRef = yield* Ref.make<GameState>(GameState.STOP);
+  const thickRef = yield* Ref.make(TickSpeed.Normal);
+  const runStateRef = yield* Ref.make(GameRunState('Stop'));
 
-  const startGame = Ref.set(runStateRef, GameState.PLAYING);
-  const stopGame = Ref.set(runStateRef, GameState.STOP);
-  const isRunning = Ref.get(runStateRef).pipe(Effect.map((x) => x === GameState.PLAYING));
+  const startGame = Ref.set(runStateRef, GameRunState('Play'));
+  const stopGame = Ref.set(runStateRef, GameRunState('Stop'));
+  const isRunning = Ref.get(runStateRef).pipe(
+    Effect.map((x) => x === GameRunState('Play')),
+  );
 
   return {
     thickRef,

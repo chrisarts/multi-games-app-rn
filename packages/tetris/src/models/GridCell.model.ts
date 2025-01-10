@@ -1,5 +1,5 @@
 import * as Order from 'effect/Order';
-import { CellState } from './Board.model';
+import { CellState } from '../old-models/Board.model';
 import type { GridBlock } from './GridBlock.model';
 import type { GridPosition } from './GridPosition.model';
 

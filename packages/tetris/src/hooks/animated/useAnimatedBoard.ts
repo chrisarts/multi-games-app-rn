@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { runOnJS, useDerivedValue, useSharedValue } from 'react-native-reanimated';
-import { getRandomBlock } from '../../models/Block.model';
-import { type BoardMatrix, CellState, GameState, TickSpeed } from '../../models/Board.model';
-import type { AnimatedPlayerState } from '../../models/Player.model';
+import { getRandomBlock } from '../../old-models/Block.model';
+import { type BoardMatrix, CellState, _GameState, __TickSpeed } from '../../old-models/Board.model';
+import type { AnimatedPlayerState } from '../../old-models/Player.model';
+import { BOARD_CONFIG, createTetrisBoard } from '../../old-models/board.utils';
 import { getBlockShape } from '../../utils';
-import { BOARD_CONFIG, createTetrisBoard } from '../../utils/board.utils';
 import { useGameStatus } from '../useGameStatus';
 
 const firstBoard = createTetrisBoard(BOARD_CONFIG);
@@ -18,13 +18,13 @@ export const useAnimatedBoard = ({
   nextShape,
 }: AnimatedPlayerState) => {
   const boardValue = useSharedValue(firstBoard);
-  const [tickSpeed, setTickSpeed] = useState<null | TickSpeed>(null);
-  const [gameState, setGameState] = useState(GameState.STOP);
+  const [tickSpeed, setTickSpeed] = useState<null | __TickSpeed>(null);
+  const [gameState, setGameState] = useState(_GameState.STOP);
   const [rowsCleared, setRowsCleared] = useState(0);
   const status = useGameStatus(rowsCleared);
 
   const animatedBoard = useDerivedValue(() => {
-    if (gameState === GameState.STOP) return boardValue.value;
+    if (gameState === _GameState.STOP) return boardValue.value;
     const newBoard: BoardMatrix = boardValue.value.map((row) =>
       row.map((cell) => (cell[1] === CellState.EMPTY ? [null, CellState.EMPTY] : cell)),
     );
@@ -80,8 +80,8 @@ export const useAnimatedBoard = ({
     status.setLevel(1);
     status.setRows(0);
     status.setScore(0);
-    setTickSpeed(TickSpeed.Normal);
-    setGameState(GameState.PLAYING);
+    setTickSpeed(__TickSpeed.Normal);
+    setGameState(_GameState.PLAYING);
   };
 
   return {
