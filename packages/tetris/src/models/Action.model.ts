@@ -1,5 +1,15 @@
 import * as Data from 'effect/Data';
-import type { BoardPosition } from './Board.model';
+import type { MoveDirection } from './Block.model';
+import type { BoardPosition, GameState, TickSpeed } from './Board.model';
+
+export type PlayerAction = Data.TaggedEnum<{
+  move: { direction: MoveDirection };
+  rotate: { direction: MoveDirection.LEFT | MoveDirection.RIGHT };
+  runState: { status: GameState };
+  setSpeed: { speed: TickSpeed };
+}>;
+
+export const PlayerAction = Data.taggedEnum<PlayerAction>();
 
 export type __MoveDirectionEnum = Data.TaggedEnum<{
   LEFT: BoardPosition;

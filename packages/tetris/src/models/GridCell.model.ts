@@ -1,7 +1,8 @@
+import { Equivalence } from 'effect';
 import * as Equal from 'effect/Equal';
 import * as Hash from 'effect/Hash';
 import * as Order from 'effect/Order';
-import { CellState } from './Board.model';
+import { type BoardPosition, CellState } from './Board.model';
 import type { GridBlock } from './GridBlock.model';
 
 interface GridCellProps {
@@ -37,17 +38,20 @@ export class GridCell {
   }
 
   setColorFor(shape: GridBlock) {
+    // if (this.state === CellState.MERGED) return;
+
     this.color = shape.color;
     this.store = this.getStore();
   }
 
   clear() {
     this.color = this.defaultColor;
+    this.state = CellState.EMPTY;
     this.store = this.getStore();
   }
 
-  setState(state: CellState) {
-    this.state = state;
+  mergeCell() {
+    this.state = CellState.MERGED;
     this.store = this.getStore();
   }
 
@@ -87,9 +91,16 @@ export class GridPoint implements Equal.Equal {
     readonly y: number,
   ) {}
 
-  static create(xRow: number, yColumn: number) {
-    return new GridPoint(xRow, yColumn);
+  static create(position: BoardPosition) {
+    return new GridPoint(position.x, position.y);
   }
+
+  static order = Order.make<BoardPosition>((a, b) => {
+    if (a.x < b.x) return -1;
+    if (a.x === b.x && a.y < b.y) return -1;
+
+    return 1;
+  });
 
   get id() {
     return `[${this.x}, ${this.y}]`;

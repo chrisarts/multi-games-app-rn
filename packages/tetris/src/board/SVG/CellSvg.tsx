@@ -1,18 +1,25 @@
 import { RoundedRect } from '@shopify/react-native-skia';
-import { useEffect, useSyncExternalStore } from 'react';
+import { Effect, Ref } from 'effect';
+import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import { Easing, useSharedValue, withTiming } from 'react-native-reanimated';
-import type { GridModel } from '../../models/Grid.model';
 import type { GridPoint } from '../../models/GridCell.model';
+import type { GameStateCtx } from '../../programs/services/GameState.service';
 
 export const cellDefaultColor = 'rgba(131, 126, 126, 0.3)';
 
 export const TetrisCellSvg = ({
   point,
-  gridModel,
-}: { point: GridPoint; gridModel: GridModel }) => {
+  gameRef,
+}: { point: GridPoint; gameRef: GameStateCtx['gameRef'] }) => {
+  const gameStore = useMemo(
+    () => Effect.runSync(gameRef.pipe(Effect.map((x) => x.state))),
+    [gameRef],
+  );
+
   const props = useSyncExternalStore(
-    gridModel.store.subscribe,
-    () => gridModel.findBlockByPoint(point).store,
+    gameStore.subscribe,
+    () => gameStore.getState().board.unsafePointToCell(point).store,
+    () => gameStore.getState().board.unsafePointToCell(point).store,
   );
 
   const animatedColor = useSharedValue(props.svg.color);

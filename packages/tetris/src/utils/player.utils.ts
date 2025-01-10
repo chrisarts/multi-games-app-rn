@@ -8,7 +8,7 @@ export const playerMoves = {
   right: (x: number): BoardPosition => ({ y: x, x: 0 }),
 };
 
-export const sumPositions = (a: BoardPosition, b: BoardPosition) => ({
-  row: (a.x += b.x),
-  column: (a.y += b.y),
+export const sumPositions = (a: BoardPosition, b: BoardPosition): BoardPosition => ({
+  x: a.x + b.x,
+  y: a.y + b.y,
 });

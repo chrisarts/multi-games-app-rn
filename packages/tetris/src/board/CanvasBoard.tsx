@@ -1,22 +1,26 @@
 import { Canvas } from '@shopify/react-native-skia';
-import * as Order from 'effect/Order';
-import * as SortedSet from 'effect/SortedSet';
+import * as HashSet from 'effect/HashSet';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTetrisGrid } from '../hooks/useTetrisGrid';
-import { GameState } from '../models/Board.model';
+import { MoveDirection } from '../models/Block.model';
 import { TetrisCellSvg } from './SVG/CellSvg';
 import { BoardControls } from './components/BoardControls';
 
 export const CanvasBoard = () => {
-  const { grid, gridModel, actions } = useTetrisGrid();
+  const { gridPoints, gridModel, actions, gameState, gameStore, gameHandler } =
+    useTetrisGrid();
 
   const gridCells = useMemo(
     () =>
-      SortedSet.map(grid, Order.empty(), (cell) => (
-        <TetrisCellSvg key={cell.id} point={cell} gridModel={gridModel} />
+      HashSet.map(gridPoints, (gridPoint) => (
+        <TetrisCellSvg
+          key={gridPoint.id}
+          point={gridPoint}
+          gameRef={gameHandler.game.gameRef}
+        />
       )),
-    [grid, gridModel],
+    [gridPoints, gameHandler],
   );
 
   return (
@@ -34,10 +38,10 @@ export const CanvasBoard = () => {
       </Canvas>
       {/* </GestureDetector> */}
       <BoardControls
-        gameState={GameState.STOP}
-        moveLeft={() => {}}
-        moveDown={() => {}}
-        moveRight={() => {}}
+        gameState={gameState}
+        moveLeft={() => actions.move(MoveDirection.LEFT)}
+        moveDown={() => actions.move(MoveDirection.DOWN)}
+        moveRight={() => actions.move(MoveDirection.RIGHT)}
         rotate={() => {}}
         startGame={actions.startGame}
       />

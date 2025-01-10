@@ -5,7 +5,6 @@ export enum MoveDirection {
   RIGHT = 1,
   DOWN = 2,
   UP = 3,
-  ROTATE = 4,
 }
 
 export enum Block {

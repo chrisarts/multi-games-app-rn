@@ -1,18 +1,34 @@
-import { Layer } from 'effect';
 import * as Effect from 'effect/Effect';
-import * as ManagedRuntime from 'effect/ManagedRuntime';
-import { BoardStateCtx, BoardStateCtxLive } from './services/BoardState.service';
-import { TetrisServiceCtx, TetrisServiceCtxLive } from './services/Tetris.service';
+import * as Ref from 'effect/Ref';
+import { GameStateCtx } from './services/GameState.service';
+import { TetrisServiceCtx } from './services/Tetris.service';
 
-const MainLayer = TetrisServiceCtxLive.pipe(Layer.provideMerge(BoardStateCtxLive));
-export const TetrisRuntime = ManagedRuntime.make(MainLayer);
+// export const runTetris = TetrisServiceCtx.pipe(
+//   Effect.andThen((tetris) => tetris.runGame),
+//   Effect.scoped,
+//   Effect.forkDaemon,
+// );
 
-export const runTetris = Effect.gen(function* () {
-  const { runTetris } = yield* TetrisServiceCtx;
+// export const publishTetrisAction = TetrisServiceCtx.pipe(
+//   Effect.andThen((game) => game.publishAction),
+// );
 
-  yield* runTetris;
-}).pipe(Effect.scoped);
+// export const getGameStoreSync = GameStateCtx.pipe(
+//   Effect.andThen((x) => Ref.get(x.gameRef)),
+//   Effect.andThen((game) => Effect.sync(() => game.state)),
+// );
 
-export const runTetrisDrop = Effect.gen(function* () {
-  const { drop, boardRef } = yield* BoardStateCtx;
+export const getTetrisGameHandler = Effect.gen(function* () {
+  const { runGame, publishAction } = yield* TetrisServiceCtx;
+  const { gameRef, isRunning } = yield* GameStateCtx;
+  return {
+    service: {
+      runGame,
+      publishAction,
+    },
+    game: {
+      isRunning,
+      gameRef,
+    },
+  };
 });

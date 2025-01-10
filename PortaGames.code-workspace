@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "✨ root",
+			"path": "."
+		},
+		{
+			"name": "🚀 expo-app",
+			"path": "apps/expo-app"
+		},
+		{
+			"name": "📦 @games/tetris",
+			"path": "packages/tetris"
+		},
+		{
+			"name": "📦 @games/shared",
+			"path": "packages/shared"
+		}
+	],
+	"settings": {}
+}
