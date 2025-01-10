@@ -1,34 +1,61 @@
+import * as Deferred from 'effect/Deferred';
+import * as Duration from 'effect/Duration';
 import * as Effect from 'effect/Effect';
-import * as Ref from 'effect/Ref';
-import { GameStateCtx } from './services/GameState.service';
-import { TetrisServiceCtx } from './services/Tetris.service';
+import * as Queue from 'effect/Queue';
+import type { MoveDirection } from '../models/Action.model';
+import { GameState } from '../models/Board.model';
+import { GameStateCtx } from '../services/GameState.service';
+import { TetrisStoreContext, TetrisStoreContextLive } from '../services/GameStore.service';
+import { TetrisServiceCtx } from '../services/Tetris.service';
 
-// export const runTetris = TetrisServiceCtx.pipe(
-//   Effect.andThen((tetris) => tetris.runGame),
-//   Effect.scoped,
-//   Effect.forkDaemon,
-// );
+export const tetrisContext = Effect.gen(function* () {
+  const { controls, store } = yield* TetrisStoreContext;
 
-// export const publishTetrisAction = TetrisServiceCtx.pipe(
-//   Effect.andThen((game) => game.publishAction),
-// );
+  const runTetrisTicks = Effect.gen(function* () {
+    controls.refreshBoard();
+    const latch = yield* Deferred.make<boolean>();
+    const gameQueue = yield* Queue.unbounded<MoveDirection>();
 
-// export const getGameStoreSync = GameStateCtx.pipe(
-//   Effect.andThen((x) => Ref.get(x.gameRef)),
-//   Effect.andThen((game) => Effect.sync(() => game.state)),
-// );
+    yield* Queue.take(gameQueue).pipe(
+      Effect.map((move) => Effect.sync(() => controls.runMoveTo(move))),
+      Effect.flatten,
+      Effect.forever,
+      Effect.fork,
+    );
+
+    yield* Queue.offer(gameQueue, 'down').pipe(
+      Effect.delay(Duration.millis(store.selectState((x) => x.game.speed))),
+      Effect.repeat({
+        while: () =>
+          Effect.sync(() =>
+            store.selectState((x) => x.game.status === GameState.PLAYING),
+          ),
+      }),
+    );
+
+    yield* Effect.addFinalizer(() =>
+      Deferred.complete(latch, Effect.succeed(true)).pipe(
+        Effect.andThen((completed) => Effect.log('completed_ ', completed)),
+      ),
+    );
+
+    yield* Deferred.await(latch);
+  });
+
+  return {
+    controls,
+    store,
+    runTetrisTicks,
+  };
+}).pipe(Effect.provide(TetrisStoreContextLive), Effect.runSync);
 
 export const getTetrisGameHandler = Effect.gen(function* () {
-  const { runGame, publishAction } = yield* TetrisServiceCtx;
-  const { gameRef, isRunning } = yield* GameStateCtx;
+  const service = yield* TetrisServiceCtx;
+  const game = yield* GameStateCtx;
+  const gameModel = yield* game.gameRef;
   return {
-    service: {
-      runGame,
-      publishAction,
-    },
-    game: {
-      isRunning,
-      gameRef,
-    },
+    gameModel,
+    game,
+    service,
   };
 });

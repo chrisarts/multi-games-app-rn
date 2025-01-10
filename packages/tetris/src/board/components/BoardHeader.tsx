@@ -1,8 +1,8 @@
 import { getDeviceDimensions } from '@games/shared';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import type { SharedValue } from 'react-native-reanimated';
 import type { useGameStatus } from '../../hooks/useGameStatus';
 import type { BoardMatrix } from '../../models/Board.model';
+import { GridPosition } from '../../models/GridPosition.model';
 import { TetrisCell } from './TetrisCell';
 
 interface BoardHeaderProps {
@@ -42,7 +42,7 @@ export const BoardHeader = ({ gameState, nextShape }: BoardHeaderProps) => {
                   <TetrisCell
                     board={nextShape}
                     cell={item}
-                    coords={{ x: rowIndex, y: index }}
+                    coords={GridPosition.create({ x: rowIndex, y: index })}
                     size='small'
                   />
                 )}

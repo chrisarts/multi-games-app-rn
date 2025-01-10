@@ -1,9 +1,7 @@
-import { Equivalence } from 'effect';
-import * as Equal from 'effect/Equal';
-import * as Hash from 'effect/Hash';
 import * as Order from 'effect/Order';
-import { type BoardPosition, CellState } from './Board.model';
+import { CellState } from './Board.model';
 import type { GridBlock } from './GridBlock.model';
+import type { GridPosition } from './GridPosition.model';
 
 interface GridCellProps {
   state: CellState;
@@ -25,13 +23,14 @@ export interface GridCellLayout {
 }
 
 export class GridCell {
+  readonly _tag = 'GridCell';
   private readonly defaultColor = 'rgba(131, 126, 126, 0.3)';
   private color = this.defaultColor;
   private state = CellState.EMPTY;
   store: GridCellProps;
 
   constructor(
-    readonly point: GridPoint,
+    readonly point: GridPosition,
     readonly layout: GridCellLayout,
   ) {
     this.store = this.getStore();
@@ -55,7 +54,7 @@ export class GridCell {
     this.store = this.getStore();
   }
 
-  static order = Order.make<GridPoint>((a, b) => {
+  static order = Order.make<GridPosition>((a, b) => {
     if (a.id === b.id) {
       console.log('EQUALS: ', a);
       return 0;
@@ -80,36 +79,5 @@ export class GridCell {
         r: 5,
       },
     };
-  }
-}
-
-export class GridPoint implements Equal.Equal {
-  private constructor(
-    /** x axis / row */
-    readonly x: number,
-    /** y axis / column */
-    readonly y: number,
-  ) {}
-
-  static create(position: BoardPosition) {
-    return new GridPoint(position.x, position.y);
-  }
-
-  static order = Order.make<BoardPosition>((a, b) => {
-    if (a.x < b.x) return -1;
-    if (a.x === b.x && a.y < b.y) return -1;
-
-    return 1;
-  });
-
-  get id() {
-    return `[${this.x}, ${this.y}]`;
-  }
-
-  [Equal.symbol](that: unknown): boolean {
-    return that instanceof GridPoint && this.id === that.id;
-  }
-  [Hash.symbol](): number {
-    return Hash.string(this.id);
   }
 }

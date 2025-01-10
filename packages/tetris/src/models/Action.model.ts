@@ -1,31 +1,21 @@
 import * as Data from 'effect/Data';
-import type { MoveDirection } from './Block.model';
-import type { BoardPosition, GameState, TickSpeed } from './Board.model';
+import type { GameState, TickSpeed } from './Board.model';
+import type { GridCell } from './GridCell.model';
+import type { GridPosition } from './GridPosition.model';
 
+export type MoveDirection = 'left' | 'right' | 'up' | 'down' | 'rotate';
 export type PlayerAction = Data.TaggedEnum<{
-  move: { direction: MoveDirection };
-  rotate: { direction: MoveDirection.LEFT | MoveDirection.RIGHT };
+  move: { direction: MoveDirection; };
   runState: { status: GameState };
   setSpeed: { speed: TickSpeed };
 }>;
 
 export const PlayerAction = Data.taggedEnum<PlayerAction>();
 
-export type __MoveDirectionEnum = Data.TaggedEnum<{
-  LEFT: BoardPosition;
-  RIGHT: BoardPosition;
-  DOWN: BoardPosition;
-  UP: BoardPosition;
-  ROTATE: BoardPosition;
-  ZERO: BoardPosition;
+export type CollisionResult = Data.TaggedEnum<{
+  LIMIT_REACHED: { gameOver: boolean; merge: boolean };
+  MERGED_SIBLING: { sibling: GridCell; gameOver: boolean };
+  CLEAR: { toPoint: GridPosition };
 }>;
 
-const { DOWN, LEFT, RIGHT, ROTATE, UP, ZERO } = Data.taggedEnum<__MoveDirectionEnum>();
-
-export const playerMoves = {
-  zero: (): BoardPosition => ZERO({ y: 0, x: 0 }),
-  up: (x: number): BoardPosition => UP({ y: 0, x: x }),
-  down: (x: number): BoardPosition => DOWN({ y: 0, x: x }),
-  left: (x: number): BoardPosition => LEFT({ y: x, x: 0 }),
-  right: (x: number): BoardPosition => RIGHT({ y: x, x: 0 }),
-};
+export const CollisionResult = Data.taggedEnum<CollisionResult>();

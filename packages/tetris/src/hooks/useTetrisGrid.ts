@@ -1,22 +1,28 @@
-import { Fiber, Ref } from 'effect';
 import * as Effect from 'effect/Effect';
-import { useEffect, useSyncExternalStore } from 'react';
-import type { MoveDirection } from '../models/Block.model';
-import { GameState } from '../models/Board.model';
+import { useState, useSyncExternalStore } from 'react';
+import type { MoveDirection } from '../models/Action.model';
 import { GameModel } from '../models/Game.model';
 import { getTetrisGameHandler } from '../programs/game.program';
 import { TetrisRuntime } from '../programs/tetris.runtime';
+import {
+  TetrisStoreContext,
+  TetrisStoreContextLive,
+} from '../services/GameStore.service';
+import { useRenderCounter } from './useRenderCounter';
 
-const gameHandler = TetrisRuntime.runSync(getTetrisGameHandler);
-const gameStore = Effect.runSync(
-  gameHandler.game.gameRef.pipe(Effect.map((x) => x.state)),
+const storeContext = Effect.runSync(
+  TetrisStoreContext.pipe(Effect.provide(TetrisStoreContextLive)),
 );
-
 export const useTetrisGrid = () => {
-  const gridModel = useSyncExternalStore(
+  useRenderCounter();
+  const [gameHandler] = useState(() => TetrisRuntime.runSync(getTetrisGameHandler));
+
+  const gameStore = gameHandler.gameModel.state;
+
+  const canvasSize = useSyncExternalStore(
     gameStore.subscribe,
-    () => gameStore.getState().board,
-    () => gameStore.getState().board,
+    () => gameStore.getState().board.layout.canvas,
+    () => gameStore.getState().board.layout.canvas,
   );
   const gameState = useSyncExternalStore(
     gameStore.subscribe,
@@ -25,24 +31,9 @@ export const useTetrisGrid = () => {
   );
   const gridPoints = useSyncExternalStore(
     gameStore.subscribe,
-    () => gridModel.gridPoints,
-    () => gridModel.gridPoints,
+    () => gameStore.getState().board.gridPoints,
+    () => gameStore.getState().board.gridPoints,
   );
-
-  // useEffect(() => {
-  //   console.log('HANDLER: ', Effect.runSync(gameHandler.game.isRunning));
-  //   console.log('STATE: ', gameState);
-  //   if (gameState === GameState.PLAYING) {
-  //     console.log('PLAYING: ', gameState);
-  //     const fiber = Effect.runFork(gameHandler.service.runGame.pipe(Effect.scoped));
-  //     return () => {
-  //       const logFiber = fiber.status.pipe(
-  //         Effect.tap((x) => Effect.log('FIBER_STATE', x)),
-  //       );
-  //       Effect.runPromise(Effect.zipRight(logFiber, Fiber.interrupt(fiber)));
-  //     };
-  //   }
-  // }, [gameState]);
 
   const startGame = () =>
     Effect.runFork(
@@ -59,16 +50,36 @@ export const useTetrisGrid = () => {
       .publishAction(GameModel.playerActions.move(moveTo))
       .pipe(Effect.runPromise);
 
+  const rotate = () =>
+    gameHandler.service
+      .publishAction(GameModel.playerActions.move('rotate'))
+      .pipe(Effect.runPromise);
+
   return {
     gridPoints,
-    gridModel,
+    canvasSize,
     gameState,
-    gameStore,
     gameHandler,
     actions: {
       startGame,
       stopGame,
       move,
+      rotate,
     },
   };
 };
+
+// useEffect(() => {
+//   console.log('HANDLER: ', Effect.runSync(gameHandler.game.isRunning));
+//   console.log('STATE: ', gameState);
+//   if (gameState === GameState.PLAYING) {
+//     console.log('PLAYING: ', gameState);
+//     const fiber = Effect.runFork(gameHandler.service.runGame.pipe(Effect.scoped));
+//     return () => {
+//       const logFiber = fiber.status.pipe(
+//         Effect.tap((x) => Effect.log('FIBER_STATE', x)),
+//       );
+//       Effect.runPromise(Effect.zipRight(logFiber, Fiber.interrupt(fiber)));
+//     };
+//   }
+// }, [gameState]);

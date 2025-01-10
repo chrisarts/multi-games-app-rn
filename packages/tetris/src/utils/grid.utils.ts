@@ -2,13 +2,13 @@ import { getDeviceDimensions } from '@games/shared';
 import * as RA from 'effect/Array';
 import * as HashMap from 'effect/HashMap';
 import * as HashSet from 'effect/HashSet';
-import type { BoardPosition } from '../models/Board.model';
 import { GridBlock } from '../models/GridBlock.model';
-import { GridCell, type GridCellLayout, GridPoint } from '../models/GridCell.model';
+import { GridCell, type GridCellLayout } from '../models/GridCell.model';
+import { GridPosition } from '../models/GridPosition.model';
 import { GridBlockNames } from './constants.utils';
 
 export interface GridLayout {
-  initialPosition: BoardPosition;
+  initialPosition: GridPosition;
   cell: GridCellLayout;
   canvas: {
     width: number;
@@ -20,23 +20,19 @@ export interface GridLayout {
   };
 }
 
-export const getRandomShape = (initialPosition: BoardPosition): GridBlock =>
+export const getRandomShape = (initialPosition: { x: number; y: number }): GridBlock =>
   new GridBlock(
     GridBlockNames[Math.floor(Math.random() * GridBlockNames.length)],
-    initialPosition,
+    GridPosition.create(initialPosition),
   );
 
-export const createGrid = (config: {
-  columns: number;
-  rows: number;
-  layout: GridLayout;
-}) =>
+export const createGrid = ({ config, cell }: GridLayout) =>
   HashSet.fromIterable(
     RA.flatten(
       RA.makeBy(config.columns, (col) =>
         RA.makeBy(
           config.rows,
-          (row) => new GridCell(GridPoint.create({ x: row, y: col }), config.layout.cell),
+          (row) => new GridCell(GridPosition.create({ x: row, y: col }), cell),
         ),
       ),
     ),
@@ -56,10 +52,10 @@ export const getGridLayout = (colsNumber: number, rowsNumber: number): GridLayou
   const canvasHeight = rowsNumber * squareContainerSize;
 
   return {
-    initialPosition: {
+    initialPosition: GridPosition.create({
       x: 0,
       y: Math.floor(colsNumber / 3),
-    },
+    }),
     canvas: {
       width: canvasWidth,
       height: canvasHeight,

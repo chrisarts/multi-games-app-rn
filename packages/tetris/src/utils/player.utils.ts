@@ -1,14 +1,16 @@
-import type { BoardPosition } from '../models/Board.model';
+import { GridPosition } from '../models/GridPosition.model';
 
 export const playerMoves = {
-  zero: (): BoardPosition => ({ y: 0, x: 0 }),
-  up: (x: number): BoardPosition => ({ y: 0, x: x }),
-  down: (x: number): BoardPosition => ({ y: 0, x: x }),
-  left: (x: number): BoardPosition => ({ y: x, x: 0 }),
-  right: (x: number): BoardPosition => ({ y: x, x: 0 }),
+  zero: (): GridPosition => GridPosition.create({ y: 0, x: 0 }),
+  up: (x: number): GridPosition => GridPosition.create({ y: 0, x: x }),
+  down: (x: number): GridPosition => GridPosition.create({ y: 0, x: x }),
+  left: (y: number): GridPosition => GridPosition.create({ x: 0, y }),
+  right: (y: number): GridPosition => GridPosition.create({ x: 0, y }),
+  rotate: (): GridPosition => GridPosition.create({ x: 0, y: 0 }),
 };
 
-export const sumPositions = (a: BoardPosition, b: BoardPosition): BoardPosition => ({
-  x: a.x + b.x,
-  y: a.y + b.y,
-});
+export const sumPositions = (a: GridPosition, b: GridPosition): GridPosition =>
+  GridPosition.create({
+    x: a.x + b.x,
+    y: a.y + b.y,
+  });

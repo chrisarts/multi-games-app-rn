@@ -1,10 +1,10 @@
 import {
   type BoardConfig,
   type BoardMatrix,
-  type BoardPosition,
   type BoardState,
   CellState,
 } from '../models/Board.model';
+import type { GridPosition } from '../models/GridPosition.model';
 
 export const BOARD_CONFIG: BoardConfig = {
   HEIGHT: 15,
@@ -20,7 +20,7 @@ export const createTetrisBoard = ({ WIDTH, HEIGHT }: BoardConfig): BoardMatrix =
 export const hasCollisions = (
   board: BoardMatrix,
   player: BoardState,
-  move: BoardPosition,
+  move: GridPosition,
 ) => {
   const shape = player.currentShape.shape;
   for (let row = 0; row < shape.length; row += 1) {

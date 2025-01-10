@@ -2,18 +2,18 @@ import { StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   ReduceMotion,
-  type SharedValue,
   useAnimatedStyle,
   useDerivedValue,
   withTiming,
 } from 'react-native-reanimated';
-import type { BoardCell, BoardMatrix, BoardPosition } from '../../models/Board.model';
+import type { BoardCell, BoardMatrix } from '../../models/Board.model';
+import type { GridPosition } from '../../models/GridPosition.model';
 import { getBlockShape } from '../../utils/block.utils';
 
 interface TetrisCellProps {
   cell: BoardCell;
   board: BoardMatrix;
-  coords: BoardPosition;
+  coords: GridPosition;
   size?: 'small' | 'normal';
 }
 

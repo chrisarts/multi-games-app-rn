@@ -1,16 +1,18 @@
 import type { SharedValue } from 'react-native-reanimated';
-import type { Block, BlockShape, MoveDirection } from './Block.model';
-import type { BoardMatrix, BoardPosition } from './Board.model';
+import type { MoveDirection } from './Action.model';
+import type { Block, BlockShape } from './Block.model';
+import type { BoardMatrix } from './Board.model';
+import type { GridPosition } from './GridPosition.model';
 
 export interface PlayerState {
-  position: BoardPosition;
+  position: GridPosition;
   currentBlock: Block;
   currentShape: BlockShape;
   collided: boolean;
 }
 
 export interface AnimatedPlayerState {
-  position: SharedValue<BoardPosition>;
+  position: SharedValue<GridPosition>;
   currentBlock: SharedValue<Block>;
   currentShape: SharedValue<BlockShape>;
   nextBlock: SharedValue<Block>;

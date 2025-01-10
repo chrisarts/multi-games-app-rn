@@ -2,13 +2,6 @@ import type { Block, BlockShape } from './Block.model';
 
 export const ROW_POINTS = [40, 100, 300, 1200];
 
-export interface BoardPosition {
-  /** row */
-  x: number;
-  /** column */
-  y: number;
-}
-
 export type BoardCell = [Block | null, CellState];
 
 /** Board 2D Matrix BoardCell[][] */
@@ -20,7 +13,7 @@ export enum CellState {
 }
 
 export interface BoardState {
-  position: BoardPosition;
+  position: any;
   currentBlock: Block;
   currentShape: BlockShape;
   collided: boolean;

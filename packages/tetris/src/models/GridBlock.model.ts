@@ -1,43 +1,86 @@
-import { sumPositions } from '../utils';
 import { type GridBlockEnum, GridBlockShapes } from '../utils/constants.utils';
-import type { BoardPosition } from './Board.model';
-import { GridPoint } from './GridCell.model';
+import { playerMoves, sumPositions } from '../utils/player.utils';
+import { GridPosition } from './GridPosition.model';
 
 export class GridBlock {
   readonly color: string;
-  shape: number[][];
-  position: GridPoint;
+  private state: {
+    shape: number[][];
+    position: GridPosition;
+    collided: boolean;
+    nextShape: number[][];
+  };
+
+  get currentPosition() {
+    return this.state.position;
+  }
+
+  get currentShape() {
+    return this.state.shape;
+  }
 
   constructor(
     readonly blockName: GridBlockEnum['name'],
-    initialPosition: BoardPosition,
+    initialPosition: GridPosition,
   ) {
     const { color, value } = GridBlockShapes[blockName];
     this.color = color;
-    this.shape = value;
-    this.position = GridPoint.create(initialPosition);
+    this.state = {
+      shape: value,
+      position: GridPosition.create(initialPosition),
+      collided: false,
+      nextShape: getRotatedShape(value),
+    };
   }
 
-  updatePosition(position: BoardPosition) {
-    this.position = GridPoint.create(position);
+  updatePosition(position: GridPosition, collided: boolean) {
+    this.setState({
+      ...this.state,
+      position,
+      collided,
+    });
   }
 
-  rotate() {
-    // Make the rows to become cols (transpose)
-    const shape = this.shape.map((_, i) => this.shape.map((column) => column[i]));
-    // Reverse each row to get a rotated matrix
-    this.shape = shape.map((row) => row.reverse());
+  toPoints(withPos?: GridPosition) {
+    const position = withPos ?? this.state.position;
+    return shapeToPoints(this.state.shape, position);
   }
 
-  toPoints(withPos?: GridPoint) {
-    const position = withPos ?? this.position;
-    return this.shape
-      .map((rows, x) =>
-        rows.map((column, y) => {
-          if (column === 0) return null;
-          return GridPoint.create({ x: x + position.x, y: y + position.y });
-        }),
-      )
-      .flatMap((x) => x.filter((y) => y !== null));
+  toNextShape() {
+    this.setState({
+      nextShape: getRotatedShape(this.state.nextShape),
+      shape: this.state.shape,
+    });
+  }
+
+  getState() {
+    return this.state;
+  }
+
+  private setState(nextState: Partial<GridBlock['state']>) {
+    this.state = {
+      ...this.state,
+      ...nextState,
+    };
   }
 }
+
+const getRotatedShape = (originalShape: number[][]) => {
+  // Make the rows to become cols (transpose)
+  const shape = originalShape.map((_, i) => originalShape.map((column) => column[i]));
+  // Reverse each row to get a rotated matrix
+  return shape.map((row) => row.toReversed());
+};
+
+const shapeToPoints = (shape: number[][], plusPosition = playerMoves.zero()) => {
+  return shape
+    .map((rows, x) =>
+      rows.map((column, y) => {
+        if (column === 0) return null;
+        return GridPosition.create(
+          sumPositions(GridPosition.create({ x, y }), plusPosition),
+        );
+      }),
+    )
+    .flatMap((x) => x.filter((y) => y !== null));
+};
