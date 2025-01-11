@@ -1,7 +1,7 @@
+
 import { type GridBlockEnum, getGridBlockShape } from '../utils/constants.utils';
 import { MoveDirection, getMoveDirectionUnit } from './Action.model';
 import { GridPosition } from './GridPosition.model';
-
 // const blockShapesCache = new Map<GridBlockEnum['name'], BlockShape[]>();
 
 export class GridBlock {

@@ -1236,6 +1236,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@effect/typeclass@npm:~0.31.1":
+  version: 0.31.1
+  resolution: "@effect/typeclass@npm:0.31.1"
+  peerDependencies:
+    effect: ^3.12.1
+  checksum: 10c0/77464decba0d47a7c43dbe388bea6f351b74773a53020e8d13fb796f55ad6d23958fef8cb437f1ea4b878f53f72e96abe3e93fa099accd28fe1c2778bdaaff0e
+  languageName: node
+  linkType: hard
+
 "@egjs/hammerjs@npm:^2.0.17":
   version: 2.0.17
   resolution: "@egjs/hammerjs@npm:2.0.17"
@@ -1643,6 +1652,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@games/tetris@workspace:packages/tetris"
   dependencies:
+    "@effect/typeclass": "npm:~0.31.1"
     "@games/shared": "workspace:*"
     "@types/d3-path": "npm:3.1.0"
     d3-path: "npm:3.1.0"

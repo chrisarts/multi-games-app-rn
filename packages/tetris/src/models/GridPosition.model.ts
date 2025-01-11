@@ -1,7 +1,21 @@
+import * as SemiGroup from '@effect/typeclass/Semigroup';
 import { Equivalence } from 'effect';
+import * as Data from 'effect/Data';
 import * as Equal from 'effect/Equal';
 import * as Hash from 'effect/Hash';
 import * as Order from 'effect/Order';
+
+interface Position {
+  _tag: 'Position';
+  row: number;
+  column: number;
+}
+const Position = Data.tagged<Position>('Position');
+
+const semigroup = SemiGroup.make<Position>((self, that) =>
+  Position({ row: self.row + that.row, column: self.column + that.column }),
+);
+const order = {};
 
 const rowOrder = Order.reverse(
   Order.mapInput(Order.number, (position: GridPosition) => position.row),
