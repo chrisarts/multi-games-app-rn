@@ -10,15 +10,9 @@
     "ignoreUnknown": true,
     "include": ["*/src/**/*.ts", "*/src/**/*.tsx", "*/test/**/*"],
     "ignore": [
-      "packages/*/build/**/*",
       "*/test/fixtures/**/*",
       "*/test/project-fixture/**/*",
       "*/test/server-fixture/**/*"
-    ]
-  },
-  "organizeImports": {
-    "ignore": [
-      "*/twin.run/**/*"
     ]
   },
   "linter": {
@@ -85,12 +79,7 @@
     "lineWidth": 90,
     "attributePosition": "multiline",
     "bracketSpacing": true,
-    "ignore": [
-      "**/.eslintrc.json",
-      "**/*.json",
-      "./.nx/cache",
-      "./.nx/workspace-data"
-    ]
+    "ignore": ["**/*.json"]
   },
   "javascript": {
     "formatter": {

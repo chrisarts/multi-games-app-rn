@@ -1,133 +1,86 @@
+import { Option } from 'effect';
 import * as Context from 'effect/Context';
 import * as Effect from 'effect/Effect';
-import * as HashMap from 'effect/HashMap';
-import type * as HashSet from 'effect/HashSet';
 import * as Layer from 'effect/Layer';
 import {
-  CollisionResult,
   GameRunState,
   type MoveDirection,
-  TickSpeed,
+  type PlayerActionExecution,
 } from '../models/Action.model';
 import { BoardGrid } from '../models/BoardGrid.model';
-import { GridPosition } from '../models/GridPosition.model';
-import { BOARD_CONFIG } from '../old-models/board.utils';
+import type { GridPosition } from '../models/GridPosition.model';
 import { createStoreContext } from '../utils/common.utils';
-import type { GridLayout } from '../utils/grid.utils';
 
 const makeCtx = Effect.gen(function* () {
-  const gameBoard = yield* Effect.sync(
-    () =>
-      new BoardGrid({
-        height: BOARD_CONFIG.HEIGHT,
-        width: BOARD_CONFIG.WIDTH,
-      }),
-  );
-  const store = yield* createStoreContext(createGameStoreShape(gameBoard));
+  const gameBoard = yield* Effect.sync(() => new BoardGrid());
+  const store = yield* createStoreContext(gameBoard.state);
 
   return {
+    gameBoard,
     controls: {
       runMoveTo,
       runRotate,
-      changeRunState,
-      changeGameSpeed,
-      getCellAt: (point: GridPosition) => gameBoard.pointToCell(point),
+      setRunState,
+      getCellAt: (point: GridPosition) => gameBoard.findCellByPoint(point),
       refreshBoard,
     },
     store: {
       subscribe: store.subscribe,
-      selectState: store.selector,
+      selectState: <Value>(cb: (state: BoardGrid['state']) => Value): Value =>
+        store.selector(() => cb(gameBoard.state)),
     } as const,
   };
 
-  function runMoveTo(direction: MoveDirection) {
-    if (gameBoard.collided) return;
+  function setRunState(runState: GameRunState) {
+    gameBoard.state.player.runState = runState;
+    store.setState(() => gameBoard.state);
+  }
 
-    const collision = gameBoard.checkMoveCollision(direction);
-    CollisionResult.$match({
-      CLEAR: ({ toPoint }) => {
-        gameBoard.updateBoard(toPoint, false);
-      },
-      LIMIT_REACHED: ({ gameOver, merge }) => {
-        console.log('LIMIT: ', { gameOver, merge });
-        if (merge) {
-          gameBoard.updateBoard(gameBoard.currentBlock.currentPosition, true);
-        }
-      },
-      MERGED_SIBLING: ({ sibling, gameOver }) => {
-        if (!gameOver)
-          gameBoard.updateBoard(gameBoard.currentBlock.currentPosition, true);
-      },
-    })(collision);
-    if (CollisionResult.$is('MERGED_SIBLING')(collision) && collision.gameOver) {
-      return changeRunState(GameRunState('Stop'));
+  function runMoveTo(direction: MoveDirection) {
+    console.log('MOVE: ', direction);
+    const moveAction = gameBoard.getMoveAction(direction);
+    const run = gameBoard.getActionExecution(moveAction);
+    runAction(run);
+    // store.setState(() => gameBoard.moveBlock(direction));
+  }
+
+  function runAction(action: PlayerActionExecution) {
+    const data = {
+      ...action,
+      moveTo: action.moveTo.pipe(Option.getOrNull),
+    };
+    if (action.gameOver) {
+      console.warn('GAME_OVER: ', data);
+      gameBoard.state.player.runState = GameRunState('Stop');
+      store.setState((x) => x);
+    }
+    if (!data.moveTo) {
+      console.log('BLOCK_MOVE', data);
+      store.setState(() => gameBoard.state);
+      return;
     }
 
-    store.setState((prev) => ({ ...prev }));
+    if (action.mergeBlock) console.log('MMMEEEEEERGEEEE');
+    gameBoard.updateBoard(data.moveTo, action.mergeBlock);
+    store.setState(() => gameBoard.state);
   }
 
   function runRotate() {
-    const currentPosition = {
-      x: gameBoard.currentBlock.currentPosition.x,
-      y: gameBoard.currentBlock.currentPosition.y,
-    };
-    const rotatedShape = gameBoard.currentBlock.getState().nextShape;
-
-    const posX = currentPosition.x;
-    let offset = 1;
-
-    while (
-      gameBoard.pointHasCollision(GridPosition.create(currentPosition)) === undefined
-    ) {
-      currentPosition.x += offset;
-      offset = -(offset + (offset > 0 ? 1 : -1));
-      console.log('POS: ', posX, offset);
-
-      if (offset > rotatedShape[0].length) {
-        currentPosition.x = posX;
-        break;
-      }
-    }
-    gameBoard.currentBlock.toPoints().forEach((x) => {
-      const cell = gameBoard.pointToCell(x);
-      if (cell._tag === 'Some') {
-        cell.value.clear();
-      }
-    });
-    gameBoard.currentBlock.toNextShape();
-    gameBoard.currentBlock.updatePosition(GridPosition.create(currentPosition), false);
-    store.setState((prev) => ({ ...prev }));
+    const rotatedShape = gameBoard.state.player.currentBlock.rotate();
+    gameBoard.draw();
+    gameBoard.state.player.currentBlock
+      .getGridPointsAt(gameBoard.state.player.dropPosition)
+      .forEach((x) => {
+        const cell = gameBoard.findCellByPoint(x);
+        if (cell._tag === 'Some') {
+          cell.value.clear();
+        }
+      });
   }
 
   function refreshBoard() {
     gameBoard.draw();
-    store.setState((x) => x);
-  }
-
-  function changeRunState(nextState: GameRunState) {
-    if (nextState === store.getState().game.status) {
-      return;
-    }
-    store.setState((prev) => ({
-      ...prev,
-      game: {
-        speed: prev.game.speed,
-        status: nextState,
-      },
-    }));
-  }
-
-  function changeGameSpeed(speed: number) {
-    if (speed === store.getState().game.speed) {
-      return;
-    }
-    store.setState((prev) => ({
-      ...prev,
-      game: {
-        speed,
-        status: prev.game.status,
-      },
-    }));
+    store.setState(() => gameBoard.state);
   }
 });
 
@@ -135,35 +88,3 @@ export interface TetrisStoreContext extends Effect.Effect.Success<typeof makeCtx
 export const TetrisStoreContext =
   Context.GenericTag<TetrisStoreContext>('TetrisStoreContext');
 export const TetrisStoreContextLive = Layer.effect(TetrisStoreContext, makeCtx);
-
-interface TetrisGameStore {
-  board: {
-    points: HashSet.HashSet<GridPosition>;
-    layout: GridLayout;
-  };
-  game: {
-    status: GameRunState;
-    speed: number;
-  };
-  player: {
-    score: number;
-    clearedRows: number;
-    level: number;
-  };
-}
-
-const createGameStoreShape = (gameBoard: BoardGrid): TetrisGameStore => ({
-  game: {
-    speed: TickSpeed.Normal,
-    status: GameRunState('Stop'),
-  },
-  player: {
-    clearedRows: 0,
-    level: 0,
-    score: 0,
-  },
-  board: {
-    points: HashMap.keySet(gameBoard.grid),
-    layout: gameBoard.layout,
-  },
-});

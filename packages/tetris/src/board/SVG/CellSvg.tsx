@@ -13,14 +13,19 @@ export const TetrisCellSvg = ({ point }: { point: GridPosition }) => {
     () => tetrisContext.controls.getCellAt(point).pipe(Option.getOrThrow).store,
   );
 
+  const isCurrentPosition = useSyncExternalStore(tetrisContext.store.subscribe, () => {
+    const pos = tetrisContext.store.selectState((x) => x.player.dropPosition);
+    return pos.id === point.id;
+  });
+
   const animatedColor = useSharedValue(props.svg.color);
 
   useEffect(() => {
-    animatedColor.value = withTiming(props.svg.color, {
+    animatedColor.value = withTiming(isCurrentPosition ? 'red' : props.svg.color, {
       duration: 100,
       easing: Easing.ease,
     });
-  }, [props.svg.color, animatedColor]);
+  }, [props.svg.color, animatedColor, isCurrentPosition]);
 
   return <RoundedRect {...props.svg} color={animatedColor} />;
 };

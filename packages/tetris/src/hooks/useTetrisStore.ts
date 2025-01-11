@@ -13,15 +13,15 @@ export const useTetrisStore = () => {
     tetrisContext.store.selectState((state) => state.board.layout.canvas),
   );
   const gameState = useSyncExternalStore(tetrisContext.store.subscribe, () =>
-    tetrisContext.store.selectState((state) => state.game.status),
+    tetrisContext.store.selectState((state) => state.player.runState),
   );
   const gridPoints = useSyncExternalStore(tetrisContext.store.subscribe, () =>
-    tetrisContext.store.selectState((state) => state.board.points),
+    tetrisContext.store.selectState((state) => state.board.gridPositions),
   );
 
-  const startGame = () => tetrisContext.controls.changeRunState(GameRunState('Play'));
+  const startGame = () => tetrisContext.controls.setRunState(GameRunState('Play'));
 
-  const stopGame = () => tetrisContext.controls.changeRunState(GameRunState('Stop'));
+  const stopGame = () => tetrisContext.controls.setRunState(GameRunState('Stop'));
 
   const move = (moveTo: MoveDirection) => tetrisContext.controls.runMoveTo(moveTo);
 

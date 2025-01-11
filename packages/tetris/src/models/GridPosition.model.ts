@@ -1,38 +1,96 @@
+import { Equivalence } from 'effect';
 import * as Equal from 'effect/Equal';
 import * as Hash from 'effect/Hash';
 import * as Order from 'effect/Order';
+
+const rowOrder = Order.reverse(
+  Order.mapInput(Order.number, (position: GridPosition) => position.row),
+);
+const columnOrder = Order.reverse(
+  Order.mapInput(Order.number, (position: GridPosition) => position.column),
+);
+const rowEqual = Equivalence.mapInput(
+  Equivalence.number,
+  (position: GridPosition) => position.row,
+);
+const colEqual = Equivalence.mapInput(
+  Equivalence.number,
+  (position: GridPosition) => position.column,
+);
+const positionOrder = Order.make<GridPosition>((a, b) => {
+  if (a.row < b.row) return -1;
+  if (a.row === b.row && a.column < b.column) return -1;
+
+  return 1;
+});
 
 export class GridPosition implements Equal.Equal {
   readonly _tag = 'GridPoint';
 
   get id() {
-    return `[${this.x}, ${this.y}]`;
-  }
-
-  static ord = ord;
-
-  static create(position: {
-    /** x axis / row */
-    readonly x: number;
-    /** y axis / column */
-    readonly y: number;
-  }) {
-    return new GridPosition(position.x, position.y);
-  }
-
-  sum(that: GridPosition): GridPosition {
-    return GridPosition.create({
-      x: this.x + that.x,
-      y: this.y + that.y,
-    });
+    return `[${this.row}, ${this.column}]`;
   }
 
   private constructor(
     /** x axis / row */
-    readonly x: number,
+    readonly row: number,
     /** y axis / column */
-    readonly y: number,
+    readonly column: number,
   ) {}
+
+  static create(position: {
+    /** x axis / row */
+    readonly row: number;
+    /** y axis / column */
+    readonly column: number;
+  }) {
+    return new GridPosition(position.row, position.column);
+  }
+
+  lessThan = {
+    row: Order.lessThan(rowOrder)(this),
+    column: Order.lessThan(columnOrder)(this),
+    that: Order.lessThan(positionOrder)(this),
+  };
+  greatThan = {
+    row: Order.greaterThan(rowOrder)(this),
+    column: Order.greaterThan(columnOrder)(this),
+    that: Order.greaterThan(positionOrder)(this),
+  };
+  equalTo = {
+    row: (that: GridPosition) => rowEqual(this, that),
+    column: (that: GridPosition) => colEqual(this, that),
+    that: (that: GridPosition) =>
+      Equivalence.combine(this.equalTo.row, this.equalTo.column)(this, that),
+  };
+  lessThanOrEquals = {
+    row: Order.lessThanOrEqualTo(rowOrder)(this),
+    column: Order.lessThanOrEqualTo(columnOrder)(this),
+    that: Order.lessThanOrEqualTo(positionOrder)(this),
+  };
+  greatThanOrEquals = {
+    row: Order.greaterThanOrEqualTo(rowOrder)(this),
+    column: Order.greaterThanOrEqualTo(columnOrder)(this),
+    that: Order.greaterThanOrEqualTo(positionOrder)(this),
+  };
+  // rowGreaterThan = Order.greaterThan(rowOrder)(this);
+  // rowLessThan = Order.lessThan(rowOrder)(this);
+  // rowEquals = (that: GridPosition) => rowEqual(this, that);
+
+  // colGreaterThan = Order.lessThan(columnOrder)(this);
+  // colLessThan = Order.lessThan(columnOrder)(this);
+  // colEquals = (that: GridPosition) => colEqual(this, that);
+
+  equivalence(that: GridPosition) {
+    return positionOrder(this, that);
+  }
+
+  sum(that: GridPosition): GridPosition {
+    return GridPosition.create({
+      row: this.row + that.row,
+      column: this.column + that.column,
+    });
+  }
 
   [Equal.symbol](that: unknown): boolean {
     return that instanceof GridPosition && this.id === that.id;
@@ -40,13 +98,4 @@ export class GridPosition implements Equal.Equal {
   [Hash.symbol](): number {
     return Hash.string(this.id);
   }
-}
-
-function ord() {
-  return Order.make<GridPosition>((a, b) => {
-    if (a.x < b.x) return -1;
-    if (a.x === b.x && a.y < b.y) return -1;
-
-    return 1;
-  });
 }

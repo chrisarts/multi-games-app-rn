@@ -1,9 +1,5 @@
-import { useEffect, useSyncExternalStore } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
-import { Easing, useSharedValue, withTiming } from 'react-native-reanimated';
 import { CanvasBoard } from './board/CanvasBoard';
-import type { GridPosition } from './models/GridCell.model';
-
 
 export const TetrisGame = () => {
   return (

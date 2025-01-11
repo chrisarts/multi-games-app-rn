@@ -42,7 +42,7 @@ export const BoardHeader = ({ gameState, nextShape }: BoardHeaderProps) => {
                   <TetrisCell
                     board={nextShape}
                     cell={item}
-                    coords={GridPosition.create({ x: rowIndex, y: index })}
+                    coords={GridPosition.create({ row: rowIndex, column: index })}
                     size='small'
                   />
                 )}

@@ -15,7 +15,10 @@ export const make = Effect.gen(function* () {
     ),
   );
 
+  const getState = Effect.map(gameRef, (game) => game.state.getState());
+
   return {
+    getState,
     gameRef,
     isRunning,
     onMove,

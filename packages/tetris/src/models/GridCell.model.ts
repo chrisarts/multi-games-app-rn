@@ -1,10 +1,13 @@
+import * as Brand from 'effect/Brand';
 import * as Order from 'effect/Order';
-import { CellState } from '../old-models/Board.model';
 import type { GridBlock } from './GridBlock.model';
 import type { GridPosition } from './GridPosition.model';
 
+export type GridCellState = ('Merged' | 'Empty') & Brand.Brand<'GridCellState'>;
+export const GridCellState = Brand.nominal<GridCellState>();
+
 interface GridCellProps {
-  state: CellState;
+  state: GridCellState;
   svg: {
     x: number;
     y: number;
@@ -26,8 +29,12 @@ export class GridCell {
   readonly _tag = 'GridCell';
   private readonly defaultColor = 'rgba(131, 126, 126, 0.3)';
   private color = this.defaultColor;
-  private state = CellState.EMPTY;
+  private state = GridCellState('Empty');
   store: GridCellProps;
+
+  get isMerged() {
+    return this.state === GridCellState('Merged');
+  }
 
   constructor(
     readonly point: GridPosition,
@@ -38,19 +45,18 @@ export class GridCell {
 
   setColorFor(shape: GridBlock) {
     // if (this.state === CellState.MERGED) return;
-
     this.color = shape.color;
     this.store = this.getStore();
   }
 
   clear() {
     this.color = this.defaultColor;
-    this.state = CellState.EMPTY;
+    this.state = GridCellState('Empty');
     this.store = this.getStore();
   }
 
   mergeCell() {
-    this.state = CellState.MERGED;
+    this.state = GridCellState('Merged');
     this.store = this.getStore();
   }
 
@@ -60,8 +66,8 @@ export class GridCell {
       return 0;
     }
 
-    if (a.x < b.x) return -1;
-    if (a.x === b.x && a.y < b.y) return -1;
+    if (a.row < b.row) return -1;
+    if (a.row === b.row && a.column < b.column) return -1;
 
     return 1;
   });
@@ -70,8 +76,8 @@ export class GridCell {
     return {
       state: this.state,
       svg: {
-        x: this.point.y * this.layout.containerSize + this.layout.spacing / 2,
-        y: this.point.x * this.layout.containerSize + this.layout.spacing / 2,
+        x: this.point.column * this.layout.containerSize + this.layout.spacing / 2,
+        y: this.point.row * this.layout.containerSize + this.layout.spacing / 2,
         height: this.layout.size,
         width: this.layout.size,
         color: this.color,

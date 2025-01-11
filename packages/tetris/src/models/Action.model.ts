@@ -1,6 +1,7 @@
 import * as Brand from 'effect/Brand';
 import * as Data from 'effect/Data';
 import * as Match from 'effect/Match';
+import type * as Option from 'effect/Option';
 import type { GridCell } from './GridCell.model';
 import { GridPosition } from './GridPosition.model';
 
@@ -23,14 +24,33 @@ export type GameRunState = ('Play' | 'GameOver' | 'Stop') & Brand.Brand<'GameRun
 export const GameRunState = Brand.nominal<GameRunState>();
 
 export const getMoveDirectionUnit = Match.type<MoveDirection>().pipe(
-  Match.when('zero', () => GridPosition.create({ x: 0, y: 0 })),
-  Match.when('up', () => GridPosition.create({ x: -1, y: 0 })),
-  Match.when('down', () => GridPosition.create({ x: 1, y: 0 })),
-  Match.when('left', () => GridPosition.create({ x: 0, y: -1 })),
-  Match.when('right', () => GridPosition.create({ x: 0, y: 1 })),
-  Match.when('rotate', () => GridPosition.create({ x: 0, y: 0 })),
+  Match.when('zero', () => GridPosition.create({ row: 0, column: 0 })),
+  Match.when('up', () => GridPosition.create({ row: -1, column: 0 })),
+  Match.when('down', () => GridPosition.create({ row: 1, column: 0 })),
+  Match.when('left', () => GridPosition.create({ row: 0, column: -1 })),
+  Match.when('right', () => GridPosition.create({ row: 0, column: 1 })),
+  Match.when('rotate', () => GridPosition.create({ row: 0, column: 0 })),
   Match.exhaustive,
 );
+
+export interface GridPositionBounds {
+  right: number;
+  left: number;
+  up: number;
+  down: number;
+}
+
+export interface PlayerMoveResult {
+  direction: MoveDirection;
+  move: {
+    from: GridPosition;
+    to: GridPosition;
+  };
+  blockPosition: {
+    from: GridPosition[];
+    to: GridPosition[];
+  };
+}
 
 export type PlayerAction = Data.TaggedEnum<{
   move: { direction: MoveDirection };
@@ -40,9 +60,16 @@ export type PlayerAction = Data.TaggedEnum<{
 
 export const PlayerAction = Data.taggedEnum<PlayerAction>();
 
+export interface PlayerActionExecution {
+  moveTo: Option.Option<GridPosition>;
+  mergeBlock: boolean;
+  gameOver: boolean;
+  clearRows: number[];
+}
+
 export type CollisionResult = Data.TaggedEnum<{
   LIMIT_REACHED: { gameOver: boolean; merge: boolean };
-  MERGED_SIBLING: { sibling: GridCell; gameOver: boolean };
+  MERGED_SIBLING: { sibling: GridCell; gameOver: boolean; merge: boolean };
   CLEAR: { toPoint: GridPosition };
 }>;
 

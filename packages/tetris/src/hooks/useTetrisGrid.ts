@@ -1,7 +1,6 @@
 import * as Effect from 'effect/Effect';
 import { useState, useSyncExternalStore } from 'react';
 import { GameRunState, MoveDirection, PlayerAction } from '../models/Action.model';
-import { GameModel } from '../models/Game.model';
 import { getTetrisGameHandler } from '../programs/game.program';
 import { TetrisRuntime } from '../programs/tetris.runtime';
 import {
@@ -21,8 +20,8 @@ export const useTetrisGrid = () => {
 
   const canvasSize = useSyncExternalStore(
     gameStore.subscribe,
-    () => gameStore.getState().board.layout.canvas,
-    () => gameStore.getState().board.layout.canvas,
+    () => gameStore.getState().board.state.board.layout.canvas,
+    () => gameStore.getState().board.state.board.layout.canvas,
   );
   const gameState = useSyncExternalStore(
     gameStore.subscribe,
@@ -31,8 +30,8 @@ export const useTetrisGrid = () => {
   );
   const gridPoints = useSyncExternalStore(
     gameStore.subscribe,
-    () => gameStore.getState().board.gridPoints,
-    () => gameStore.getState().board.gridPoints,
+    () => gameStore.getState().board.state.board.cellsMap,
+    () => gameStore.getState().board.state.board.cellsMap,
   );
 
   const startGame = () =>
@@ -83,3 +82,20 @@ export const useTetrisGrid = () => {
 //     };
 //   }
 // }, [gameState]);
+
+const root = {
+  id: 1,
+  render: () => `<h1 id=${'asdads'}><div><spinner /></h1>`,
+  children: {
+    id: 2,
+    isLoading: false,
+    children: [
+      {
+        id: 3,
+      },
+      {
+        id: 4,
+      },
+    ],
+  },
+};

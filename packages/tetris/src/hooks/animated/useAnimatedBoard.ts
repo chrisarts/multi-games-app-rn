@@ -32,7 +32,7 @@ export const useAnimatedBoard = ({
     currentShape.value.shape.forEach((row, rowIndex) => {
       row.forEach((col, colIndex) => {
         if (col !== 0) {
-          newBoard[rowIndex + position.value.x][colIndex + position.value.y] = [
+          newBoard[rowIndex + position.value.row][colIndex + position.value.column] = [
             currentBlock.value,
             collided.value ? CellState.MERGED : CellState.EMPTY,
           ];
@@ -60,7 +60,7 @@ export const useAnimatedBoard = ({
     };
 
     if (collided.value) {
-      position.value = { y: 3, x: 0 };
+      position.value = { column: 3, row: 0 };
       currentBlock.value = nextBlock.value;
       currentShape.value = nextShape.value;
       collided.value = false;

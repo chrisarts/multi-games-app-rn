@@ -20,7 +20,7 @@ export const cellDefaultColor = 'rgba(131, 126, 126, 0.3)';
 
 export const TetrisCell = ({ cell, board, coords, size = 'normal' }: TetrisCellProps) => {
   const value = useDerivedValue(() => {
-    return board[coords.x][coords.y];
+    return board[coords.row][coords.column];
   });
   const animatedStyles = useAnimatedStyle(() => {
     const square = size === 'normal' ? 30 : 8;

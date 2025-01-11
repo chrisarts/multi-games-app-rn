@@ -12,71 +12,80 @@ export type GridBlockEnum = Data.TaggedEnum<{
 }>;
 const GridBlockEnum = Data.taggedEnum<GridBlockEnum>();
 
-export const GridBlockShapes = {
-  // 🟥
-  O: GridBlockEnum.O({
-    name: 'O',
-    value: [
-      [1, 1],
-      [1, 1],
-    ],
-    color: 'rgba(223, 217, 36,1)',
-  }),
-  I: GridBlockEnum.I({
-    name: 'I',
-    value: [
-      [0, 1, 0, 0],
-      [0, 1, 0, 0],
-      [0, 1, 0, 0],
-      [0, 1, 0, 0],
-    ],
-    color: 'rgba(80, 227, 230, 1)',
-  }),
-  J: GridBlockEnum.J({
-    name: 'J',
-    value: [
-      [0, 1, 0],
-      [0, 1, 0],
-      [1, 1, 0],
-    ],
-    color: 'rgba(36, 95, 223,1)',
-  }),
-  L: GridBlockEnum.L({
-    name: 'L',
-    value: [
-      [0, 1, 0],
-      [0, 1, 0],
-      [0, 1, 1],
-    ],
-    color: 'rgba(223, 173, 36,1)',
-  }),
-  S: GridBlockEnum.S({
-    name: 'S',
-    value: [
-      [0, 1, 1],
-      [1, 1, 0],
-      [0, 0, 0],
-    ],
-    color: 'rgba(48, 211, 56,1)',
-  }),
-  T: GridBlockEnum.T({
-    name: 'T',
-    value: [
-      [1, 1, 1],
-      [0, 1, 0],
-      [0, 0, 0],
-    ],
-    color: 'rgba(132, 61, 198,1)',
-  }),
-  Z: GridBlockEnum.Z({
-    name: 'Z',
-    value: [
-      [1, 1, 0],
-      [0, 1, 1],
-      [0, 0, 0],
-    ],
-    color: 'rgba(227, 78, 78,1)',
-  }),
-};
+export const getGridBlockShape = (name: GridBlockEnum['_tag']) =>
+  ({
+    // 🟥
+    O: GridBlockEnum.O({
+      name: 'O',
+      value: [
+        [1, 1],
+        [1, 1],
+      ],
+      color: 'rgba(223, 217, 36,1)',
+    }),
+    I: GridBlockEnum.I({
+      name: 'I',
+      value: [
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+      ],
+      color: 'rgba(80, 227, 230, 1)',
+    }),
+    J: GridBlockEnum.J({
+      name: 'J',
+      value: [
+        [0, 1, 0],
+        [0, 1, 0],
+        [1, 1, 0],
+      ],
+      color: 'rgba(36, 95, 223,1)',
+    }),
+    L: GridBlockEnum.L({
+      name: 'L',
+      value: [
+        [0, 1, 0],
+        [0, 1, 0],
+        [0, 1, 1],
+      ],
+      color: 'rgba(223, 173, 36,1)',
+    }),
+    S: GridBlockEnum.S({
+      name: 'S',
+      value: [
+        [0, 1, 1],
+        [1, 1, 0],
+        [0, 0, 0],
+      ],
+      color: 'rgba(48, 211, 56,1)',
+    }),
+    T: GridBlockEnum.T({
+      name: 'T',
+      value: [
+        [1, 1, 1],
+        [0, 1, 0],
+        [0, 0, 0],
+      ],
+      color: 'rgba(132, 61, 198,1)',
+    }),
+    Z: GridBlockEnum.Z({
+      name: 'Z',
+      value: [
+        [1, 1, 0],
+        [0, 1, 1],
+        [0, 0, 0],
+      ],
+      color: 'rgba(227, 78, 78,1)',
+    }),
+  })[name];
 
-export const GridBlockNames = keysOf(GridBlockShapes);
+export const GridBlockNames: GridBlockEnum['_tag'][] = [
+  'I',
+  'J',
+  'L',
+  'O',
+  'S',
+  'T',
+  'Z',
+];

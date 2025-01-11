@@ -1,37 +1,63 @@
-import * as Option from 'effect/Option';
-import { BOARD_CONFIG } from '../old-models/board.utils';
 import * as GridUtils from '../utils/grid.utils';
+import type * as Actions from './Action.model';
 import { BaseGridModel } from './Grid.model';
-import type { GridPosition } from './GridPosition.model';
+
+export interface BoardConfig {
+  /** height */
+  readonly rows: number;
+  /** width */
+  readonly columns: number;
+}
+export const DefaultBoardConfig: BoardConfig = {
+  rows: 15,
+  columns: 10,
+};
 
 export class BoardGrid extends BaseGridModel {
   collided: boolean;
 
-  constructor(
-    readonly config: { width: number; height: number } = {
-      width: BOARD_CONFIG.WIDTH,
-      height: BOARD_CONFIG.HEIGHT,
-    },
-  ) {
-    const layout = GridUtils.getGridLayout(config.width, config.height);
+  constructor(readonly config: BoardConfig = DefaultBoardConfig) {
+    const layout = GridUtils.getGridLayout(config);
     super(layout);
     this.collided = false;
   }
 
-  updateBoard(position: GridPosition, merge: boolean) {
-    for (const point of this.currentBlock.toPoints()) {
-      this.pointToCell(point).pipe(Option.map((cell) => cell.clear()));
-    }
-    this.currentBlock.updatePosition(position, false);
-    for (const point of this.currentBlock.toPoints()) {
-      this.pointToCell(point).pipe(
-        Option.map((cell) => {
-          cell.setColorFor(this.currentBlock);
-          if (merge) cell.mergeCell();
-        }),
-      );
+  moveBlock(move: Actions.MoveDirection) {
+    const movePoint = this.getMovePosition(move);
+
+    if (movePoint.column > this.board.layout.config.columns) {
+      this.updateBoard(this.player.dropPosition, true);
+      return this.state;
     }
 
-    if (merge) this.toNextBlock();
+    return this.state;
   }
+
+  // private updateStateForCollideState(
+  //   collision: Actions.CollisionResult,
+  //   movePoint: GridPosition,
+  // ) {
+  //   Match.value(collision).pipe(
+  //     Match.when({ _tag: 'CLEAR' }, ({ toPoint }) => {
+  //       this.updateBoard(toPoint, false);
+  //     }),
+  //     Match.when(
+  //       {
+  //         gameOver: true,
+  //       },
+  //       () => {
+  //         this.mutatePlayer({
+  //           runState: Actions.GameRunState('Stop'),
+  //         });
+  //       },
+  //     ),
+  //     Match.when({ _tag: 'LIMIT_REACHED' }, ({ merge }) => {
+  //       if (merge) this.updateBoard(this.player.dropPosition, merge);
+  //     }),
+  //     Match.when({ _tag: 'MERGED_SIBLING' }, ({ merge }) => {
+  //       this.updateBoard(this.player.dropPosition, merge);
+  //     }),
+  //     Match.exhaustive,
+  //   );
+  // }
 }

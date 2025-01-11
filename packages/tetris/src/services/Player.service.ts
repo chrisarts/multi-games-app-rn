@@ -1,28 +1,27 @@
 import * as Context from 'effect/Context';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
-import * as Ref from 'effect/Ref';
-import { GameRunState, TickSpeed } from '../models/Action.model';
+import type * as Actions from '../models/Action.model';
+import { TetrisStoreContext, TetrisStoreContextLive } from './GameStore.service';
 
 export const make = Effect.gen(function* () {
-  const thickRef = yield* Ref.make(TickSpeed.Normal);
-  const runStateRef = yield* Ref.make(GameRunState('Stop'));
-
-  const startGame = Ref.set(runStateRef, GameRunState('Play'));
-  const stopGame = Ref.set(runStateRef, GameRunState('Stop'));
-  const isRunning = Ref.get(runStateRef).pipe(
-    Effect.map((x) => x === GameRunState('Play')),
-  );
+  const { gameBoard } = yield* TetrisStoreContext;
 
   return {
-    thickRef,
-    runState: Ref.get(runStateRef),
-    startGame,
-    stopGame,
-    isRunning,
+    moveTo,
   };
+
+  // TODO: Set state from this fn
+  function moveTo(move: Actions.MoveDirection) {
+    const moveAction = gameBoard.getMoveAction(move);
+    const run = gameBoard.getActionExecution(moveAction);
+
+    console.log('RUN: ', run);
+  }
 }).pipe(Effect.tap(() => Effect.log('Provided player service ctx')));
 
 export interface PlayerContext extends Effect.Effect.Success<typeof make> {}
 export const PlayerContext = Context.GenericTag<PlayerContext>('PlayerContext');
-export const PlayerContextLive = Layer.effect(PlayerContext, make);
+export const PlayerContextLive = Layer.effect(PlayerContext, make).pipe(
+  Layer.provide(TetrisStoreContextLive),
+);
