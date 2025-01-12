@@ -1,17 +1,18 @@
 import * as Brand from 'effect/Brand';
-import type * as GridBlock from '../models/GridBlock.model';
 import type * as Position from './Position.domain';
+import type * as Tetromino from './Tetromino.domain';
+
+export interface GameState {
+  gameStatus: GameRunState;
+  dropPosition: Position.Position;
+  nextTetromino: Tetromino.Tetromino;
+  currentTetromino: Tetromino.Tetromino;
+}
 
 export type GameRunState = ('InProgress' | 'GameOver' | 'Stop') &
   Brand.Brand<'GameRunState'>;
 
 export const GameRunState = Brand.nominal<GameRunState>();
-
-export interface GameState {
-  gameStatus: GameRunState;
-  dropPosition: Position.Position;
-  droppingBlock: GridBlock.GridBlock;
-}
 
 export const isRunning = (game: GameState) =>
   game.gameStatus === GameRunState('InProgress');

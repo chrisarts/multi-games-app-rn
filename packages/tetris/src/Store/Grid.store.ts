@@ -10,7 +10,7 @@ import type * as Position from '../Domain/Position.domain';
 const store = createStore<GridDomain.GridState>(
   GridDomain.makeGridState({
     screen: Dimensions.get('screen'),
-    size: { rows: 10, columns: 15 },
+    size: { rows: 15, columns: 10 },
   }),
 );
 

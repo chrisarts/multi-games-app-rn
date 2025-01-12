@@ -4,11 +4,10 @@ import * as Equivalence from 'effect/Equivalence';
 import * as Ord from 'effect/Order';
 
 export interface Position {
-  readonly _tag: 'Position';
   row: number;
   column: number;
 }
-export const Position = Data.tagged<Position>('Position');
+export const Position = Data.struct<Position>;
 export const of = Position;
 export const zero = () => Position({ row: 0, column: 0 });
 

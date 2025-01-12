@@ -1,4 +1,3 @@
-import * as Data from 'effect/Data';
 import * as TetrominoData from '../Data/Tetrominos.data';
 import * as Bound from './GridBound.domain';
 import * as Position from './Position.domain';
@@ -10,6 +9,8 @@ export interface Tetromino {
   drawPositions: Position.Position[];
   zeroBounds: Bound.GridBound;
 }
+
+export const of = (tetromino: Tetromino): Tetromino => tetromino;
 
 export const fromConfig = (config: TetrominoData.TetrominoConfig): Tetromino => {
   const drawPositions = getMatrixPositions(config.value);
@@ -31,6 +32,12 @@ export const getRandomTetromino = (): Tetromino =>
       Math.floor(Math.random() * TetrominoData.TetrominoNames.length)
     ],
   );
+
+export const moveTeTromino = (tetromino: Tetromino, to: Position.Position): Tetromino =>
+  of({
+    ...tetromino,
+    drawPositions: getMatrixPositions(tetromino.matrix, to),
+  });
 
 const getMatrixPositions = (
   matrix: TetrominoData.TetrominoConfig['value'],
