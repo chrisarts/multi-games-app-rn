@@ -1,11 +1,12 @@
 import { SafeAreaView, StyleSheet, View } from 'react-native';
-import { CanvasBoard } from './board/CanvasBoard';
+import { GridView } from './Presentation/Grid.view';
+// import { CanvasBoard } from '../board/CanvasBoard';
 
 export const TetrisGame = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <CanvasBoard />
+        <GridView />
       </View>
     </SafeAreaView>
   );

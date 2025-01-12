@@ -1643,6 +1643,8 @@ __metadata:
 "@games/shared@workspace:*, @games/shared@workspace:packages/shared":
   version: 0.0.0-use.local
   resolution: "@games/shared@workspace:packages/shared"
+  dependencies:
+    fp-ts: "npm:^2.16.9"
   peerDependencies:
     react-native: "*"
   languageName: unknown
@@ -4431,6 +4433,13 @@ __metadata:
     combined-stream: "npm:^1.0.8"
     mime-types: "npm:^2.1.12"
   checksum: 10c0/1ccc3ae064a080a799923f754d49fcebdd90515a8924f0f54de557540b50e7f1fe48ba5f2bd0435a5664aa2d49729107e6aaf2155a9abf52339474c5638b4485
+  languageName: node
+  linkType: hard
+
+"fp-ts@npm:^2.16.9":
+  version: 2.16.9
+  resolution: "fp-ts@npm:2.16.9"
+  checksum: 10c0/704fcc2e792bd17cb653e7b62b5d9d905c04327776df8bf2a1f67e1c6823b06c7c36036345279ac04f0b6b7214ad01f91f109f548e144c9f866a491392fbfbcc
   languageName: node
   linkType: hard
 

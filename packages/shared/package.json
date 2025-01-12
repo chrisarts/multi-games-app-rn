@@ -2,6 +2,9 @@
   "name": "@games/shared",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "dependencies": {
+    "fp-ts": "^2.16.9"
+  },
   "peerDependencies": {
     "react-native": "*"
   }
