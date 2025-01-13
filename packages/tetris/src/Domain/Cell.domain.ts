@@ -1,5 +1,7 @@
 import * as Equal from 'effect/Equal';
 import * as Hash from 'effect/Hash';
+import { makeMutable } from 'react-native-reanimated';
+import type { Mutable } from 'react-native-reanimated/lib/typescript/reanimated2/commonTypes';
 import type { GridLayout } from './Layout.domain';
 import * as Position from './Position.domain';
 
@@ -10,12 +12,22 @@ export interface CellState {
   color: string;
 }
 
+export const defaultCellColor = 'rgba(131, 126, 126, 0.3)';
 export class Cell implements Equal.Equal {
   state: CellState = {
     merged: false,
-    color: 'rgba(131, 126, 126, 0.3)',
+    color: defaultCellColor,
   };
-  constructor(readonly position: Position.Position) {}
+  animated: {
+    color: Mutable<string>;
+    merge: Mutable<boolean>;
+  };
+  constructor(readonly position: Position.Position) {
+    this.animated = {
+      color: makeMutable('rgba(131, 126, 126, 0.3)'),
+      merge: makeMutable(false),
+    };
+  }
 
   [Equal.symbol](that: unknown): boolean {
     return that instanceof Cell && Position.Eq.equals(this.position, that.position);

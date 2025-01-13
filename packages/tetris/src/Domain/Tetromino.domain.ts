@@ -7,7 +7,7 @@ export interface Tetromino {
   color: string;
   matrix: TetrominoData.TetrominoMatrix;
   drawPositions: Position.Position[];
-  zeroBounds: Bound.GridBound;
+  bounds: Bound.GridBound;
 }
 
 export const of = (tetromino: Tetromino): Tetromino => tetromino;
@@ -17,12 +17,22 @@ export const fromConfig = (config: TetrominoData.TetrominoConfig): Tetromino => 
 
   return {
     drawPositions,
-    zeroBounds: Bound.getFromPositions(drawPositions),
+    bounds: Bound.getFromPositions(drawPositions),
     name: config.name,
     color: config.color,
     matrix: config.value,
   };
 };
+
+export const mapWithPosition = (tetromino: Tetromino, position: Position.Position) => {
+  const positions = tetromino.drawPositions.map((x) => Position.sum(x, position));
+  const bounds = Bound.getFromPositions(positions);
+  return {
+    positions,
+    bounds,
+  };
+};
+
 export const fromName = (name: TetrominoData.TetrominoConfig['name']): Tetromino =>
   fromConfig(TetrominoData.TetrominosData[name]);
 

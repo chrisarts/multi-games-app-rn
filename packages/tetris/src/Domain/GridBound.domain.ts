@@ -30,6 +30,15 @@ export const columnBoundValid = (bounds: GridBound, position: Position.Position)
 export const rowBoundValid = (bounds: GridBound, position: Position.Position) =>
   position.row >= bounds.min.row && position.row <= bounds.max.row;
 
+export const bothRowBoundsValid = (self: GridBound, that: GridBound) =>
+  rowBoundValid(self, that.max) && rowBoundValid(self, that.min);
+
+export const bothColBoundsValid = (self: GridBound, that: GridBound) =>
+  columnBoundValid(self, that.max) && columnBoundValid(self, that.min);
+
+export const validateBounds = (self: GridBound, that: GridBound) =>
+  bothRowBoundsValid(self, that) && bothColBoundsValid(self, that);
+
 export const positionInsideBound = (bounds: GridBound, position: Position.Position) =>
   columnBoundValid(bounds, position) && rowBoundValid(bounds, position);
 
@@ -55,7 +64,7 @@ export const getFromPositions = (positions: Position.Position[]): GridBound => {
     },
   );
   return of({
-    min: Position.of({ column: bounds.column.min, row: bounds.column.min }),
-    max: Position.of({ column: bounds.column.max, row: bounds.column.max }),
+    min: Position.of({ row: bounds.row.min, column: bounds.column.min }),
+    max: Position.of({ row: bounds.row.max, column: bounds.column.max }),
   });
 };

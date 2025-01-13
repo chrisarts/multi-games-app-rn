@@ -27,12 +27,12 @@ const make = Effect.gen(function* () {
 
   return {
     gridStore,
+    selector: gridStore.selector,
     addListener: gridStore.listenStateChanges,
-    actions: {
-      getCellAt,
-      mutateCellAt,
-      mapCellState,
-    },
+    getCellAt,
+    mutateCellAt,
+    mapCellState,
+    unsafeSetState: gridStore.unsafeSetState,
   };
 });
 

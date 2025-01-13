@@ -1,16 +1,17 @@
-import * as Duration from 'effect/Duration';
 import * as Effect from 'effect/Effect';
 import * as HashMap from 'effect/HashMap';
+import * as Option from 'effect/Option';
 import * as Queue from 'effect/Queue';
-import * as Stream from 'effect/Stream';
+import { defaultCellColor } from '../Domain/Cell.domain';
 import * as Game from '../Domain/Game.domain';
 import * as GameAction from '../Domain/GameAction.domain';
-import * as Position from '../Domain/Position.domain';
+import type * as Position from '../Domain/Position.domain';
+import * as Tetromino from '../Domain/Tetromino.domain';
 import { GameRepoContext } from '../Services/GameRepo.service';
 import { GridRepoContext } from '../Services/GridStore.service';
 import { PlayerContext } from '../Services/Player.service';
 import { TetrisLayer, TetrisRuntime } from '../Services/Runtime.layers';
-import { listenForkedStreamChanges } from '../utils/effect.utils';
+import { debugObjectLog } from '../utils/log.utils';
 
 export const playerContextLive = Effect.gen(function* () {
   const { playerActions, publishAction } = yield* PlayerContext;
@@ -22,45 +23,22 @@ export const playerContextLive = Effect.gen(function* () {
 }).pipe(Effect.provide(TetrisLayer));
 
 export const publishPlayerAction = (action: GameAction.GameAction) =>
-  Effect.gen(function* () {
-    const { playerActions } = yield* PlayerContext;
-
-    return yield* Queue.offer(playerActions, action);
-  }).pipe(TetrisRuntime.runPromise);
+  TetrisRuntime.runPromise(
+    Effect.andThen(PlayerContext, (ctx) => Queue.offer(ctx.playerActions, action)),
+  );
 
 export const runForkedTetris = Effect.gen(function* () {
   const gameRepo = yield* GameRepoContext;
-  const gridRepo = yield* GridRepoContext;
   const { playerActions } = yield* PlayerContext;
 
-  yield* gameRepo.addListener.pipe(Stream.unwrap, (stream) =>
-    listenForkedStreamChanges(stream, (state) => {
-      return Effect.void;
-      // Effect.log('LISTEN_CHANGES: ', state.gameStatus);
-    }),
-  );
-
-  yield* gridRepo.addListener.pipe(Stream.unwrap, (stream) =>
-    listenForkedStreamChanges(
-      stream,
-      (state) => Effect.void,
-      // Effect.log('Grid state change: ', HashMap.size(state.cellsMap)),
-    ),
-  );
-
   const updatesDequeue = yield* Queue.take(playerActions).pipe(
-    // Effect.tap((action) => Effect.log('Received action', action)),
-    Effect.andThen((action) => {
-      if (GameAction.GameAction.$is('move')(action)) {
-        console.log('RECEIVED_ACTION: ', action.to);
-      }
-      return GameAction.GameAction.$match(action, {
+    Effect.andThen((action) =>
+      GameAction.GameAction.$match(action, {
         move: (x) => onMoveAction(x.to),
-        rotate: (x) =>
-          onMoveAction(x.to).pipe(Effect.tap(() => Effect.log('MOVE_TO', x))),
+        rotate: (x) => onMoveAction(x.to),
         statusChange: (x) => onStatusAction(x.state),
-      });
-    }),
+      }),
+    ),
     Effect.forever,
     Effect.forkDaemon,
   );
@@ -92,22 +70,47 @@ export const runForkedTetris = Effect.gen(function* () {
 
   function onMoveAction(moveTo: Position.Position) {
     return Effect.gen(function* () {
-      console.log('MOVE_TO: ', moveTo);
-      const currentPos = yield* gameRepo.selector((x) => x.dropPosition);
-      const tetromino = yield* gameRepo.selector((x) => x.currentTetromino);
-      const nextPosition = Position.sum(currentPos, moveTo);
+      const {
+        nextDraw,
+        nextPosition,
+        merge,
+        gameOver,
+        tetromino,
+        insideGrid,
+        currentPos,
+      } = yield* gameRepo.getMoveUnitState(moveTo);
 
-      for (const drawPos of tetromino.drawPositions) {
-        const nextDrawPos = Position.sum(drawPos, nextPosition);
-        yield* gridRepo.actions.mapCellState(nextDrawPos, (cell) => {
-          cell.state = {
-            color: tetromino.color,
-            merged: false,
-          };
-          return cell;
-        });
+      if (gameOver) {
+        debugObjectLog('GAME_OVER', nextDraw.bounds);
+        return;
       }
-      yield* gameRepo.actions.updateDropPosition(nextPosition);
+
+      if (merge) {
+        debugObjectLog('MERGE: ', nextDraw.bounds);
+      }
+
+      if (!insideGrid && merge) {
+        debugObjectLog('INVALID_NEXT_POSITION', {
+          draw: nextDraw.bounds,
+          currentPos: currentPos,
+          nextPosition,
+        });
+        
+      }
+
+      const { positions } = Tetromino.mapWithPosition(tetromino, currentPos);
+
+      console.log('MERGE: ', merge);
+
+      if (merge) {
+      }
+      yield* gameRepo.unsafeUpdateBoard({
+        tetromino,
+        updatedPosition: merge ? currentPos : nextPosition,
+        fromPositions: positions,
+        toPositions: nextDraw.positions,
+        merge,
+      });
     });
   }
 

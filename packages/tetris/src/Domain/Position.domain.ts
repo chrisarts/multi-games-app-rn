@@ -11,8 +11,8 @@ export const Position = Data.struct<Position>;
 export const of = Position;
 export const zero = () => Position({ row: 0, column: 0 });
 
-export const reduce = (position: Position, collection: Position[]) =>
-  collection.reduce(sum, position);
+// export const reduce = (position: Position, collection: Position[]) =>
+//   collection.reduce(sum, position);
 
 export const sum = (self: Position, that: Position): Position =>
   of({ row: self.row + that.row, column: self.column + that.column });

@@ -8,6 +8,6 @@ export const TetrisLayer = Layer.mergeAll(
   PlayerContextLive,
   GameRepoContextLive,
   GridRepoContextLive,
-).pipe(Layer.provide(GridRepoContextLive));
+);
 
 export const TetrisRuntime = ManagedRuntime.make(TetrisLayer);

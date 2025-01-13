@@ -31,8 +31,8 @@ export const makeGridState = ({ screen, size }: GridLayout.GridConfig): GridStat
 export const getGridBounds = (layout: GridLayout.GridConfig) =>
   GridBound.of({
     max: Position.of({
-      row: layout.size.rows,
-      column: layout.size.columns,
+      row: layout.size.rows - 1,
+      column: layout.size.columns - 1,
     }),
     min: Position.zero(),
   });

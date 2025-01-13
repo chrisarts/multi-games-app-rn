@@ -1,11 +1,14 @@
+import { HashMap, Ref } from 'effect';
 import * as Context from 'effect/Context';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
+import { defaultCellColor } from '../Domain/Cell.domain';
 import * as Game from '../Domain/Game.domain';
+import * as GridBound from '../Domain/GridBound.domain';
 import * as Position from '../Domain/Position.domain';
 import * as Tetromino from '../Domain/Tetromino.domain';
 import * as GameStore from '../Store/Game.store';
-import { GridRepoContext } from './GridStore.service';
+import { GridRepoContext, GridRepoContextLive } from './GridStore.service';
 import { createEffectStore } from './Store.service';
 
 const make = Effect.gen(function* () {
@@ -54,6 +57,8 @@ const make = Effect.gen(function* () {
     addListener: gameStore.listenStateChanges,
     store: gameStore.store,
     listenChanges: gameStore.listenStateChanges,
+    getMoveUnitState,
+    unsafeUpdateBoard,
     actions: {
       updateDropPosition,
       resetGame,
@@ -63,8 +68,90 @@ const make = Effect.gen(function* () {
       setGameOver,
     },
   };
+
+  // If any provided position is invalid this will throw
+  function unsafeUpdateBoard(data: {
+    tetromino: Tetromino.Tetromino;
+    toPositions: Position.Position[];
+    fromPositions: Position.Position[];
+    updatedPosition: Position.Position;
+    merge: boolean;
+  }) {
+    return Effect.gen(function* () {
+      console.log('UPDATE: ', {
+        moveTo: data.updatedPosition,
+        merge: data.merge,
+      });
+      const store = yield* gameStore.store;
+      const layout = yield* gridRepo.selector((x) => x.layout);
+
+      yield* gridRepo.unsafeSetState((x) => {
+        HashMap.forEach(x.cellsMap, (cell) => {
+          if (cell.state.merged) return;
+          cell.state = {
+            color: defaultCellColor,
+            merged: false,
+          };
+        });
+
+        for (const position of Tetromino.mapWithPosition(
+          data.tetromino,
+          data.updatedPosition,
+        ).positions) {
+          const cell = HashMap.unsafeGet(x.cellsMap, position);
+          cell.state = {
+            color: data.tetromino.color,
+            merged: data.merge,
+          };
+        }
+      });
+      store.setState((x) => {
+        if (data.merge) {
+          x.dropPosition = layout.initialPosition;
+          x.currentTetromino = x.nextTetromino;
+          x.nextTetromino = Tetromino.getRandomTetromino();
+        } else {
+          x.dropPosition = data.updatedPosition;
+        }
+        return x;
+      });
+      if (data.merge) {
+        yield* swapTetrominos;
+      }
+    }).pipe(Effect.tap(() => Effect.log('Board updated')));
+  }
+
+  function getMoveUnitState(moveUnit: Position.Position) {
+    return Effect.gen(function* () {
+      const gridBounds = yield* gridRepo.selector((x) => x.bounds);
+      const state = yield* gameStore.selector((x) => x);
+      const currentPos = state.dropPosition;
+      const tetromino = state.currentTetromino;
+      const nextPosition = Position.sum(currentPos, moveUnit);
+      const nextDraw = Tetromino.mapWithPosition(tetromino, nextPosition);
+
+      const rowBoundValid = GridBound.bothRowBoundsValid(gridBounds, nextDraw.bounds);
+      const minRowValid = GridBound.rowBoundValid(gridBounds, nextDraw.bounds.min);
+      const gameOver = !rowBoundValid && !minRowValid;
+      const merge = !GridBound.rowBoundValid(gridBounds, nextDraw.bounds.max);
+      const insideGrid = GridBound.validateBounds(gridBounds, nextDraw.bounds);
+
+      return {
+        gameOver,
+        merge,
+        nextPosition,
+        insideGrid,
+        nextDraw,
+        tetromino,
+        currentPos,
+        gridBounds,
+      };
+    });
+  }
 });
 
 export interface GameRepoContext extends Effect.Effect.Success<typeof make> {}
 export const GameRepoContext = Context.GenericTag<GameRepoContext>('GameRepoContext');
-export const GameRepoContextLive = Layer.effect(GameRepoContext, make);
+export const GameRepoContextLive = Layer.effect(GameRepoContext, make).pipe(
+  Layer.provide(GridRepoContextLive),
+);
