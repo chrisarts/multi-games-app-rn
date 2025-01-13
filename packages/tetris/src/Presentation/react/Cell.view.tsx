@@ -1,9 +1,9 @@
 import * as HashMap from 'effect/HashMap';
 import * as Option from 'effect/Option';
-import { Text, View } from 'react-native';
-import type * as Layout from '../Domain/Layout.domain';
-import type * as Position from '../Domain/Position.domain';
-import { useGridStore } from './hooks/useStore';
+import Animated from 'react-native-reanimated';
+import type * as Layout from '../../Domain/Layout.domain';
+import type * as Position from '../../Domain/Position.domain';
+import { useGridStore } from '../hooks/useStore';
 
 interface CellViewProps {
   position: Position.Position;
@@ -26,7 +26,7 @@ export const CellView = ({ position, cellLayout }: CellViewProps) => {
   if (!cellState) return null;
 
   return (
-    <View
+    <Animated.View
       style={{
         backgroundColor: cellState.color,
         width: cellLayout.size,
@@ -35,7 +35,9 @@ export const CellView = ({ position, cellLayout }: CellViewProps) => {
         borderRadius: 5,
       }}
     >
-      <Text style={{ color: 'white' }}>{`${position.row},${position.column}`}</Text>
-    </View>
+      <Animated.Text
+        style={{ color: 'white' }}
+      >{`${position.row},${position.column}`}</Animated.Text>
+    </Animated.View>
   );
 };

@@ -1,7 +1,7 @@
 import * as Equal from 'effect/Equal';
 import * as Hash from 'effect/Hash';
-import { makeMutable } from 'react-native-reanimated';
-import type { Mutable } from 'react-native-reanimated/lib/typescript/reanimated2/commonTypes';
+// import { makeMutable } from 'react-native-reanimated';
+// import type { Mutable } from 'react-native-reanimated/lib/typescript/commonTypes';
 import type { GridLayout } from './Layout.domain';
 import * as Position from './Position.domain';
 
@@ -12,22 +12,17 @@ export interface CellState {
   color: string;
 }
 
-export const defaultCellColor = 'rgba(131, 126, 126, 0.3)';
+export const defaultCellColor: string = 'rgba(131, 126, 126, 0.3)';
 export class Cell implements Equal.Equal {
   state: CellState = {
     merged: false,
     color: defaultCellColor,
   };
-  animated: {
-    color: Mutable<string>;
-    merge: Mutable<boolean>;
-  };
-  constructor(readonly position: Position.Position) {
-    this.animated = {
-      color: makeMutable('rgba(131, 126, 126, 0.3)'),
-      merge: makeMutable(false),
-    };
-  }
+  // animated: {
+  //   color: Mutable<string>;
+  //   merge: Mutable<boolean>;
+  // };
+  constructor(readonly position: Position.Position) {}
 
   [Equal.symbol](that: unknown): boolean {
     return that instanceof Cell && Position.Eq.equals(this.position, that.position);
@@ -49,9 +44,9 @@ export const setColor = (cell: Cell, color: string) =>
     color,
   });
 
-export const getCellSvg = (cell: Cell, layout: GridLayout['cell']) => ({
-  x: cell.position.column * layout.containerSize + layout.spacing / 2,
-  y: cell.position.row * layout.containerSize + layout.spacing / 2,
+export const getCellSvg = (position: Position.Position, layout: GridLayout['cell']) => ({
+  x: position.column * layout.containerSize + layout.spacing / 2,
+  y: position.row * layout.containerSize + layout.spacing / 2,
   height: layout.size,
   width: layout.size,
   style: 'fill',

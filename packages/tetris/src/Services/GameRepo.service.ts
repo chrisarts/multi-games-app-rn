@@ -1,4 +1,6 @@
-import { HashMap, Ref } from 'effect';
+import { interpolateColors } from '@shopify/react-native-skia';
+import { HashMap, Option, Ref } from 'effect';
+import { withTime } from 'effect/Console';
 import * as Context from 'effect/Context';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
@@ -86,20 +88,29 @@ const make = Effect.gen(function* () {
       const layout = yield* gridRepo.selector((x) => x.layout);
 
       yield* gridRepo.unsafeSetState((x) => {
-        HashMap.forEach(x.cellsMap, (cell) => {
-          if (cell.state.merged) return;
-          cell.state = {
+        const drawPositions = data.tetromino.drawPositions.map((position) =>
+          Position.sum(store.getState().dropPosition, position),
+        );
+        for (const position of drawPositions) {
+          const cell = HashMap.get(x.cellsMap, position);
+          if (Option.isNone(cell)) continue;
+          if (cell.value.state.merged) continue;
+
+          cell.value.state = {
             color: defaultCellColor,
             merged: false,
           };
-        });
+        }
 
         for (const position of Tetromino.mapWithPosition(
           data.tetromino,
           data.updatedPosition,
         ).positions) {
-          const cell = HashMap.unsafeGet(x.cellsMap, position);
-          cell.state = {
+          const cell = HashMap.get(x.cellsMap, position);
+          if (Option.isNone(cell)) continue;
+          if (cell.value.state.merged) continue;
+
+          cell.value.state = {
             color: data.tetromino.color,
             merged: data.merge,
           };

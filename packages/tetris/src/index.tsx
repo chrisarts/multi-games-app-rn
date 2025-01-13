@@ -1,5 +1,6 @@
 import { SafeAreaView, StyleSheet, View } from 'react-native';
-import { GridView } from './Presentation/Grid.view';
+import { GridView } from './Presentation/GridSvg.view';
+// import { GridView } from './Presentation/Grid.view';
 // import { CanvasBoard } from '../board/CanvasBoard';
 
 export const TetrisGame = () => {
