@@ -1,14 +1,10 @@
 import * as Effect from 'effect/Effect';
-import * as HashMap from 'effect/HashMap';
-import * as Option from 'effect/Option';
 import * as Queue from 'effect/Queue';
-import { defaultCellColor } from '../Domain/Cell.domain';
-import * as Game from '../Domain/Game.domain';
 import * as GameAction from '../Domain/GameAction.domain';
+import type * as Game from '../Domain/GameState.domain';
 import type * as Position from '../Domain/Position.domain';
 import * as Tetromino from '../Domain/Tetromino.domain';
 import { GameRepoContext } from '../Services/GameRepo.service';
-import { GridRepoContext } from '../Services/GridStore.service';
 import { PlayerContext } from '../Services/Player.service';
 import { TetrisLayer, TetrisRuntime } from '../Services/Runtime.layers';
 import { debugObjectLog } from '../utils/log.utils';
@@ -117,11 +113,11 @@ export const runForkedTetris = Effect.gen(function* () {
   function onStatusAction(state: Game.GameRunState) {
     console.log('PUBLISHED_ACTION: ', state);
     switch (state) {
-      case Game.GameRunState('InProgress'):
+      case 'InProgress':
         return gameRepo.actions.startGame;
-      case Game.GameRunState('GameOver'):
+      case 'GameOver':
         return gameRepo.actions.stopGame;
-      case Game.GameRunState('Stop'):
+      case 'Stop':
         return gameRepo.actions.stopGame;
     }
   }

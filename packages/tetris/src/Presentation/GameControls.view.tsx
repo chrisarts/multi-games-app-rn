@@ -2,11 +2,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Pressable } from 'react-native';
 import Animated, { SlideOutLeft, SlideInRight } from 'react-native-reanimated';
 import { runActionOnUI } from '../Application/RunPlayerAction.program';
-import * as Game from '../Domain/Game.domain';
+import * as Game from '../Domain/GameState.domain';
 import { useGameStore } from './hooks/useStore';
 
 export const GridControls = () => {
-  const gameState = useGameStore((state) => state.gameStatus);
+  const gameState = useGameStore((state) => state.game.status);
 
   return (
     <Animated.View
@@ -15,7 +15,7 @@ export const GridControls = () => {
         alignItems: 'center',
       }}
     >
-      {gameState === Game.GameRunState('InProgress') && (
+      {gameState === 'InProgress' && (
         <Animated.View
           style={{
             justifyContent: 'space-around',
@@ -34,7 +34,7 @@ export const GridControls = () => {
         </Animated.View>
       )}
 
-      {gameState === Game.GameRunState('Stop') && (
+      {gameState === 'Stop' && (
         <Animated.View
           style={{ justifyContent: 'center', alignItems: 'center' }}
           entering={SlideInRight}

@@ -1,5 +1,5 @@
 import * as Data from 'effect/Data';
-import type * as Game from './Game.domain';
+import type * as GameState from './GameState.domain';
 import * as Position from './Position.domain';
 
 export type MoveAction = Data.TaggedEnum<{
@@ -13,7 +13,7 @@ export const MoveAction = Data.taggedEnum<MoveAction>();
 export type GameAction = Data.TaggedEnum<{
   move: { to: MoveAction };
   rotate: { to: MoveAction };
-  statusChange: { state: Game.GameRunState };
+  statusChange: { state: GameState.GameRunState };
 }>;
 
 export const GameAction = Data.taggedEnum<GameAction>();

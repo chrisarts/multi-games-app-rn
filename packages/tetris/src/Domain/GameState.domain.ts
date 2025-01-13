@@ -1,18 +1,34 @@
 import * as HashMap from 'effect/HashMap';
-import * as HashSet from 'effect/HashSet';
-import * as Position from '../Domain/Position.domain';
 import * as CellDomain from './Cell.domain';
 import * as GridBound from './GridBound.domain';
 import * as GridLayout from './Layout.domain';
+import * as Position from './Position.domain';
+import type * as Tetromino from './Tetromino.domain';
 
-export interface GridState {
-  positions: HashSet.HashSet<Position.Position>;
-  cellsMap: HashMap.HashMap<Position.Position, CellDomain.Cell>;
-  layout: GridLayout.GridLayout;
-  bounds: GridBound.GridBound;
+export interface GameState {
+  tetromino: {
+    current: Tetromino.Tetromino;
+    next: Tetromino.Tetromino;
+    position: Position.Position;
+  };
+  game: {
+    status: GameRunState;
+    speed: number;
+  };
+  grid: {
+    positions: Position.Position[];
+    cellsMap: HashMap.HashMap<Position.Position, CellDomain.Cell>;
+    layout: GridLayout.GridLayout;
+    bounds: GridBound.GridBound;
+  };
 }
 
-export const makeGridState = ({ screen, size }: GridLayout.GridConfig): GridState => {
+export type GameRunState = 'InProgress' | 'GameOver' | 'Stop';
+
+export const makeGridState = ({
+  screen,
+  size,
+}: GridLayout.GridConfig): GameState['grid'] => {
   const layout = getGridLayout({ screen, size });
   const positions: Position.Position[] = [];
   const cells = GridLayout.makeBy((position): [Position.Position, CellDomain.Cell] => {
@@ -21,7 +37,7 @@ export const makeGridState = ({ screen, size }: GridLayout.GridConfig): GridStat
   })(size);
 
   return {
-    positions: HashSet.fromIterable(positions),
+    positions: positions,
     cellsMap: HashMap.fromIterable(cells),
     layout,
     bounds: getGridBounds(layout),

@@ -1,58 +1,66 @@
-import { interpolateColors } from '@shopify/react-native-skia';
-import { HashMap, Option, Ref } from 'effect';
-import { withTime } from 'effect/Console';
 import * as Context from 'effect/Context';
 import * as Effect from 'effect/Effect';
+import * as HashMap from 'effect/HashMap';
 import * as Layer from 'effect/Layer';
+import * as Option from 'effect/Option';
 import { defaultCellColor } from '../Domain/Cell.domain';
-import * as Game from '../Domain/Game.domain';
+import type * as Cell from '../Domain/Cell.domain';
 import * as GridBound from '../Domain/GridBound.domain';
 import * as Position from '../Domain/Position.domain';
 import * as Tetromino from '../Domain/Tetromino.domain';
 import * as GameStore from '../Store/Game.store';
-import { GridRepoContext, GridRepoContextLive } from './GridStore.service';
 import { createEffectStore } from './Store.service';
 
 const make = Effect.gen(function* () {
   const gameStore = yield* createEffectStore(GameStore.GameStore);
-  const gridRepo = yield* GridRepoContext;
 
-  const swapTetrominos = gridRepo.gridStore
-    .selector((state) => state.layout)
-    .pipe(
-      Effect.andThen((layout) =>
-        gameStore.unsafeSetState((state) => {
-          state.currentTetromino = state.nextTetromino;
-          state.nextTetromino = Tetromino.getRandomTetromino();
-          state.dropPosition = layout.initialPosition;
-        }),
-      ),
-    );
+  const swapTetrominos = gameStore.unsafeSetState((state) => {
+    state.tetromino.current = state.tetromino.next;
+    state.tetromino.next = Tetromino.getRandomTetromino();
+    state.tetromino.position = state.grid.layout.initialPosition;
+  });
 
   const updateDropPosition = (to: Position.Position) =>
     gameStore.unsafeSetState((state) => {
-      state.dropPosition = to;
+      state.tetromino.position = to;
     });
 
   const startGame = gameStore.unsafeSetState(
-    (state) => (state.gameStatus = Game.GameRunState('InProgress')),
+    (state) => (state.game.status = 'InProgress'),
   );
-  const stopGame = gameStore.unsafeSetState(
-    (state) => (state.gameStatus = Game.GameRunState('Stop')),
-  );
+  const stopGame = gameStore.unsafeSetState((state) => (state.game.status = 'Stop'));
   const setGameOver = gameStore.unsafeSetState(
-    (state) => (state.gameStatus = Game.GameRunState('GameOver')),
+    (state) => (state.game.status = 'GameOver'),
   );
   const resetGame = gameStore.unsafeSetState(
     (x) =>
       (x = {
-        currentTetromino: Tetromino.getRandomTetromino(),
-        dropPosition: Position.zero(),
-        nextTetromino: Tetromino.getRandomTetromino(),
-        gameStatus: Game.GameRunState('Stop'),
-        speed: 800,
+        game: {
+          status: 'Stop',
+          speed: 800,
+        },
+        grid: x.grid,
+        tetromino: {
+          current: Tetromino.getRandomTetromino(),
+          next: Tetromino.getRandomTetromino(),
+          position: x.grid.layout.initialPosition,
+        },
       }),
   );
+
+  const getCellAt = (position: Position.Position) =>
+    gameStore.selector((x) => HashMap.get(x.grid.cellsMap, position));
+
+  const mutateCellAt = (position: Position.Position, f: (cell: Cell.Cell) => void) =>
+    gameStore.unsafeSetState((state) => {
+      HashMap.get(state.grid.cellsMap, position).pipe(Option.map(f));
+    });
+
+  const mapCellState = (position: Position.Position, f: (cell: Cell.Cell) => Cell.Cell) =>
+    gameStore.unsafeSetState((state) => {
+      HashMap.modify(state.grid.cellsMap, position, f);
+      return state;
+    });
 
   return {
     selector: gameStore.selector,
@@ -85,14 +93,14 @@ const make = Effect.gen(function* () {
         merge: data.merge,
       });
       const store = yield* gameStore.store;
-      const layout = yield* gridRepo.selector((x) => x.layout);
+      const layout = store.getState().grid.layout;
 
-      yield* gridRepo.unsafeSetState((x) => {
+      yield* gameStore.unsafeSetState((x) => {
         const drawPositions = data.tetromino.drawPositions.map((position) =>
-          Position.sum(store.getState().dropPosition, position),
+          Position.sum(store.getState().tetromino.position, position),
         );
         for (const position of drawPositions) {
-          const cell = HashMap.get(x.cellsMap, position);
+          const cell = HashMap.get(x.grid.cellsMap, position);
           if (Option.isNone(cell)) continue;
           if (cell.value.state.merged) continue;
 
@@ -106,7 +114,7 @@ const make = Effect.gen(function* () {
           data.tetromino,
           data.updatedPosition,
         ).positions) {
-          const cell = HashMap.get(x.cellsMap, position);
+          const cell = HashMap.get(x.grid.cellsMap, position);
           if (Option.isNone(cell)) continue;
           if (cell.value.state.merged) continue;
 
@@ -118,11 +126,11 @@ const make = Effect.gen(function* () {
       });
       store.setState((x) => {
         if (data.merge) {
-          x.dropPosition = layout.initialPosition;
-          x.currentTetromino = x.nextTetromino;
-          x.nextTetromino = Tetromino.getRandomTetromino();
+          x.tetromino.position = layout.initialPosition;
+          x.tetromino.current = x.tetromino.next;
+          x.tetromino.next = Tetromino.getRandomTetromino();
         } else {
-          x.dropPosition = data.updatedPosition;
+          x.tetromino.position = data.updatedPosition;
         }
         return x;
       });
@@ -134,10 +142,10 @@ const make = Effect.gen(function* () {
 
   function getMoveUnitState(moveUnit: Position.Position) {
     return Effect.gen(function* () {
-      const gridBounds = yield* gridRepo.selector((x) => x.bounds);
+      const gridBounds = yield* gameStore.selector((x) => x.grid.bounds);
       const state = yield* gameStore.selector((x) => x);
-      const currentPos = state.dropPosition;
-      const tetromino = state.currentTetromino;
+      const currentPos = state.tetromino.position;
+      const tetromino = state.tetromino.current;
       const nextPosition = Position.sum(currentPos, moveUnit);
       const nextDraw = Tetromino.mapWithPosition(tetromino, nextPosition);
 
@@ -163,6 +171,4 @@ const make = Effect.gen(function* () {
 
 export interface GameRepoContext extends Effect.Effect.Success<typeof make> {}
 export const GameRepoContext = Context.GenericTag<GameRepoContext>('GameRepoContext');
-export const GameRepoContextLive = Layer.effect(GameRepoContext, make).pipe(
-  Layer.provide(GridRepoContextLive),
-);
+export const GameRepoContextLive = Layer.effect(GameRepoContext, make);

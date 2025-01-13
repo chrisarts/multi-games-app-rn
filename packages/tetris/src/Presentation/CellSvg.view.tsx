@@ -1,13 +1,9 @@
 import { RoundedRect } from '@shopify/react-native-skia';
-import { HashMap } from 'effect';
-import * as Option from 'effect/Option';
-import { useDerivedValue } from 'react-native-reanimated';
+import * as HashMap from 'effect/HashMap';
 import * as Cell from '../Domain/Cell.domain';
 import type * as Layout from '../Domain/Layout.domain';
 import type * as Position from '../Domain/Position.domain';
-import { GridStore } from '../Store/Grid.store';
-import { useRenderCounter } from './hooks/useRenderCounter';
-import { useGridStore } from './hooks/useStore';
+import { useGameStore } from './hooks/useStore';
 export const cellDefaultColor = 'rgba(131, 126, 126, 0.3)';
 
 interface CellViewProps {
@@ -17,8 +13,8 @@ interface CellViewProps {
 
 export const TetrisCellSvg = ({ position, cellLayout }: CellViewProps) => {
   // useRenderCounter(`Cell: ${position.row} ${position.column}`)
-  const cellState = useGridStore(
-    (selector) => HashMap.unsafeGet(selector.cellsMap, position).state,
+  const cellState = useGameStore(
+    (selector) => HashMap.unsafeGet(selector.grid.cellsMap, position).state,
   );
 
   const svg = Cell.getCellSvg(position, cellLayout);
