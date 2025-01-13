@@ -1,10 +1,9 @@
 import * as Array from 'effect/Array';
-import * as Effect from 'effect/Effect';
 import { useMemo } from 'react';
 import { FlatList, View } from 'react-native';
 import { runForkedTetris } from '../Application/RunGame';
 import * as Position from '../Domain/Position.domain';
-import { TetrisLayer, TetrisRuntime } from '../Services/Runtime.layers';
+import { TetrisRuntime } from '../Services/Runtime.layers';
 import { CellView } from './Cell.view';
 import { GridControls } from './GridControls';
 import { useRenderCounter } from './hooks/useRenderCounter';

@@ -3,7 +3,6 @@ import * as Option from 'effect/Option';
 import { Text, View } from 'react-native';
 import type * as Layout from '../Domain/Layout.domain';
 import type * as Position from '../Domain/Position.domain';
-import { GridStore } from '../Store/Grid.store';
 import { useGridStore } from './hooks/useStore';
 
 interface CellViewProps {
