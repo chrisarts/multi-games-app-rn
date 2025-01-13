@@ -1,57 +1,42 @@
-// import type { CustomStore } from '@games/shared';
-// import * as Context from 'effect/Context';
-// import * as Effect from 'effect/Effect';
-// import * as Layer from 'effect/Layer';
-// import * as Stream from 'effect/Stream';
-// import type * as Game from '../Domain/Game.domain';
-// import type * as Grid from '../Domain/Grid.domain';
-// import { GameStore } from '../Store/Game.store';
-// import { GridStore } from '../Store/Grid.store';
-// import { listenForkedStreamChanges } from '../utils/effect.utils';
+import type { CustomStore } from '@games/shared';
+import * as Effect from 'effect/Effect';
+import * as Ref from 'effect/Ref';
+import * as Stream from 'effect/Stream';
 
-// export const make = Effect.gen(function* () {
-//   const getGame = Effect.suspend(() => Effect.sync(() => GameStore.store));
-//   const getGrid = Effect.suspend(() => Effect.sync(() => GridStore.store));
+export const createEffectStore = <State>(fromStore: CustomStore<State>) =>
+  Effect.gen(function* () {
+    const storeRef = yield* Ref.make<CustomStore<State>>(fromStore);
 
-//   const gameStore = Effect.suspend(() =>
-//     getGame.pipe(Effect.map((store) => createStoreStream(store, 'GameStore'))),
-//   );
-//   const gridStore = Effect.suspend(() =>
-//     getGrid.pipe(Effect.map((store) => createStoreStream(store, 'GridStore'))),
-//   );
+    const selector = <Out>(f: (state: State) => Out): Effect.Effect<Out> =>
+      Ref.get(storeRef).pipe(Effect.map((x) => f(x.getState())));
 
-//   const subscribeToGame = (f: <E>(state: Game.GameState) => Effect.Effect<void, E>) =>
-//     Stream.unwrap(gameStore).pipe((stream) => listenForkedStreamChanges(stream, f));
+    const unsafeSetState = (f: (state: State) => void): Effect.Effect<void> =>
+      Effect.map(Ref.get(storeRef), (store) =>
+        store.setState((x) => {
+          f(x);
+          return x;
+        }),
+      );
 
-//   const subscribeToGridState = (
-//     f: <E>(state: Grid.GridState) => Effect.Effect<void, E>,
-//   ) => Stream.unwrap(gridStore).pipe((stream) => listenForkedStreamChanges(stream, f));
+    const listenStateChanges = Effect.map(Ref.get(storeRef), (currentStore) =>
+      Stream.async<State>((emit) => {
+        const subscriber = currentStore.subscribe((nextState) =>
+          Effect.runSync(Effect.sync(() => emit.single(nextState))),
+        );
 
-//   return {
-//     subscribeToGame,
-//     subscribeToGridState,
-//   };
+        return Effect.sync(() => subscriber()).pipe(
+          Effect.tap((r) => Effect.log(`Store Unsubscribed - removed: ${r}`)),
+        );
+      }),
+    );
 
-//   function createStoreStream<V>(store: CustomStore<V>, name: string) {
-//     return Stream.async<V>((emit) => {
-//       const subscriber = store.subscribe((state) =>
-//         Effect.runSync(Effect.sync(() => emit.single(state))),
-//       );
-
-//       return Effect.sync(() => subscriber()).pipe(
-//         Effect.tap((r) => Effect.log(`Store Unsubscribed: ${name} - removed: ${r}`)),
-//       );
-//     });
-//   }
-
-//   // TODO: Set state from this fn
-//   // function moveTo(move: Game.MoveDirection) {
-//   //   const moveAction = gameBoard.getMoveAction(move);
-//   //   const run = gameBoard.getActionExecution(moveAction);
-
-//   //   console.log('RUN: ', run);
-//   // }
-// }).pipe(Effect.tap(() => Effect.log('Provided Store service ctx')));
+    return {
+      store: Ref.get(storeRef),
+      selector,
+      unsafeSetState,
+      listenStateChanges,
+    };
+  });
 
 // export interface StoreContext extends Effect.Effect.Success<typeof make> {}
 // export const StoreContext = Context.GenericTag<StoreContext>('StoreContext');

@@ -20,7 +20,7 @@ export const GameAction = Data.taggedEnum<GameAction>();
 
 export const makeMove = {
   up: () => MoveAction.up(Position.of({ column: 0, row: -1 })),
-  down: () => MoveAction.up(Position.of({ column: 0, row: 1 })),
-  left: () => MoveAction.up(Position.of({ column: -1, row: 0 })),
-  right: () => MoveAction.up(Position.of({ column: 0, row: 1 })),
+  down: () => MoveAction.down(Position.of({ column: 0, row: 1 })),
+  left: () => MoveAction.left(Position.of({ column: -1, row: 0 })),
+  right: () => MoveAction.right(Position.of({ column: 1, row: 0 })),
 };

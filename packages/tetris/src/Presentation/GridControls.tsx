@@ -1,46 +1,42 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import * as Effect from 'effect/Effect';
 import { Pressable } from 'react-native';
 import Animated, { SlideOutLeft, SlideInRight } from 'react-native-reanimated';
+import { publishPlayerAction } from '../Application/RunGame';
 import * as Game from '../Domain/Game.domain';
 import * as GameAction from '../Domain/GameAction.domain';
 import * as Position from '../Domain/Position.domain';
-import { PlayerContext, PlayerContextLive } from '../Services/Player.service';
-import { GameStore } from '../Store/Game.store';
 import { useGameStore } from './hooks/useStore';
-
-const playerPublisher = Effect.runSync(
-  PlayerContext.pipe(
-    Effect.map((x) => x.publishAction),
-    Effect.provide(PlayerContextLive),
-    Effect.uninterruptible,
-  ),
-);
 
 export const GridControls = () => {
   const gameState = useGameStore((state) => state.gameStatus);
 
   const moveLeft = () =>
-    playerPublisher(GameAction.GameAction.move({ to: GameAction.makeMove.left() }));
+    publishPlayerAction(
+      GameAction.GameAction.move({ to: GameAction.makeMove.left() }),
+    ).then((re) => console.log('PUBLISHED?', re));
 
   const moveRight = () =>
-    playerPublisher(GameAction.GameAction.move({ to: GameAction.makeMove.right() }));
+    publishPlayerAction(
+      GameAction.GameAction.move({ to: GameAction.makeMove.right() }),
+    ).then((re) => console.log('PUBLISHED?', re));
   const moveDown = () =>
-    playerPublisher(GameAction.GameAction.move({ to: GameAction.makeMove.down() }));
+    publishPlayerAction(
+      GameAction.GameAction.move({ to: GameAction.makeMove.down() }),
+    ).then((re) => console.log('PUBLISHED?', re));
   const rotate = () =>
-    playerPublisher(
+    publishPlayerAction(
       GameAction.GameAction.rotate({ to: GameAction.MoveAction.down(Position.zero()) }),
     );
 
-  const startGame = () => {
+  const startGame = async () => {
     console.log('STAAAAART!');
-    GameStore.setState((x) => {
-      x.gameStatus = Game.GameRunState('InProgress');
-      return x;
-    });
-    playerPublisher(
+    // GameStore.setState((x) => {
+    //   x.gameStatus = Game.GameRunState('InProgress');
+    //   return x;
+    // });
+    await publishPlayerAction(
       GameAction.GameAction.statusChange({ state: Game.GameRunState('InProgress') }),
-    );
+    ).then((re) => console.log('PUBLISHED?', re));
   };
 
   return (

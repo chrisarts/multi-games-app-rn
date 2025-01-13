@@ -6,7 +6,7 @@ import * as Option from 'effect/Option';
 import type * as Cell from '../Domain/Cell.domain';
 import type * as Position from '../Domain/Position.domain';
 import * as GridStore from '../Store/Grid.store';
-import { createEffectStore } from '../utils/effect.utils';
+import { createEffectStore } from './Store.service';
 
 const make = Effect.gen(function* () {
   const gridStore = yield* createEffectStore(GridStore.GridStore);
@@ -27,7 +27,7 @@ const make = Effect.gen(function* () {
 
   return {
     gridStore,
-    listen: gridStore.listenStateChanges,
+    addListener: gridStore.listenStateChanges,
     actions: {
       getCellAt,
       mutateCellAt,

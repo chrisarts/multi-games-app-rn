@@ -5,8 +5,8 @@ import * as Game from '../Domain/Game.domain';
 import * as Position from '../Domain/Position.domain';
 import * as Tetromino from '../Domain/Tetromino.domain';
 import * as GameStore from '../Store/Game.store';
-import { createEffectStore } from '../utils/effect.utils';
 import { GridRepoContext } from './GridStore.service';
+import { createEffectStore } from './Store.service';
 
 const make = Effect.gen(function* () {
   const gameStore = yield* createEffectStore(GameStore.GameStore);
@@ -51,6 +51,7 @@ const make = Effect.gen(function* () {
 
   return {
     selector: gameStore.selector,
+    addListener: gameStore.listenStateChanges,
     store: gameStore.store,
     listenChanges: gameStore.listenStateChanges,
     actions: {

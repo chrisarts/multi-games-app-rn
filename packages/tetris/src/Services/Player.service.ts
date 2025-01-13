@@ -8,7 +8,7 @@ export const make = Effect.gen(function* () {
   const playerActions = yield* Queue.unbounded<GameAction.GameAction>();
 
   const publishAction = (action: GameAction.GameAction) =>
-    Queue.unsafeOffer(playerActions, action);
+    Queue.offer(playerActions, action);
 
   return {
     playerActions,
@@ -26,4 +26,4 @@ export const make = Effect.gen(function* () {
 
 export interface PlayerContext extends Effect.Effect.Success<typeof make> {}
 export const PlayerContext = Context.GenericTag<PlayerContext>('PlayerContext');
-export const PlayerContextLive = Layer.scoped(PlayerContext, make);
+export const PlayerContextLive = Layer.effect(PlayerContext, make);

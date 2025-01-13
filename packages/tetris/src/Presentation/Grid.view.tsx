@@ -2,21 +2,15 @@ import * as Array from 'effect/Array';
 import * as Effect from 'effect/Effect';
 import { useMemo } from 'react';
 import { FlatList, View } from 'react-native';
+import { runForkedTetris } from '../Application/RunGame';
 import * as Position from '../Domain/Position.domain';
-import { GameContext, GameContextLive } from '../Services/Game.service';
-import { TetrisRuntime } from '../Services/Runtime.layers';
+import { TetrisLayer, TetrisRuntime } from '../Services/Runtime.layers';
 import { CellView } from './Cell.view';
 import { GridControls } from './GridControls';
 import { useRenderCounter } from './hooks/useRenderCounter';
 import { useGridStore } from './hooks/useStore';
 
-TetrisRuntime.runFork(
-  GameContext.pipe(
-    Effect.tap((ctx) => Effect.log('START')),
-    Effect.provide(GameContextLive),
-    Effect.uninterruptible,
-  ),
-);
+TetrisRuntime.runFork(runForkedTetris);
 
 export const GridView = () => {
   useRenderCounter('GridView');
