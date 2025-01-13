@@ -26,4 +26,4 @@ export const make = Effect.gen(function* () {
 
 export interface PlayerContext extends Effect.Effect.Success<typeof make> {}
 export const PlayerContext = Context.GenericTag<PlayerContext>('PlayerContext');
-export const PlayerContextLive = Layer.effect(PlayerContext, make);
+export const PlayerContextLive = Layer.scoped(PlayerContext, make);

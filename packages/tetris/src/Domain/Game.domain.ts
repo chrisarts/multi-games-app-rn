@@ -7,6 +7,7 @@ export interface GameState {
   dropPosition: Position.Position;
   nextTetromino: Tetromino.Tetromino;
   currentTetromino: Tetromino.Tetromino;
+  speed: number;
 }
 
 export type GameRunState = ('InProgress' | 'GameOver' | 'Stop') &

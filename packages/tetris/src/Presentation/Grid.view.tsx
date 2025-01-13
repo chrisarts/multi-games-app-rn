@@ -1,27 +1,32 @@
-import { Array, Effect } from 'effect';
-import * as HashSet from 'effect/HashSet';
+import * as Array from 'effect/Array';
+import * as Effect from 'effect/Effect';
 import { useMemo } from 'react';
 import { FlatList, View } from 'react-native';
+import * as Position from '../Domain/Position.domain';
 import { GameContext, GameContextLive } from '../Services/Game.service';
 import { TetrisRuntime } from '../Services/Runtime.layers';
-import { GridStore } from '../Store/Grid.store';
 import { CellView } from './Cell.view';
 import { GridControls } from './GridControls';
 import { useRenderCounter } from './hooks/useRenderCounter';
+import { useGridStore } from './hooks/useStore';
 
 TetrisRuntime.runFork(
   GameContext.pipe(
-    Effect.tap((ctx) => Effect.log('START', ctx.onAction)),
+    Effect.tap((ctx) => Effect.log('START')),
     Effect.provide(GameContextLive),
+    Effect.uninterruptible,
   ),
 );
 
 export const GridView = () => {
   useRenderCounter('GridView');
-  const boardCells = GridStore.useGrisStore((state) => state.positions);
-  const layout = GridStore.useGrisStore((state) => state.layout);
+  const boardCells = useGridStore((state) => state.positions);
+  const layout = useGridStore((state) => state.layout);
 
-  const cells = useMemo(() => Array.fromIterable(boardCells), [boardCells]);
+  const cells = useMemo(
+    () => Array.sort(Array.fromIterable(boardCells), Position.Order.sort),
+    [boardCells],
+  );
 
   return (
     <View style={{ flex: 1 }}>

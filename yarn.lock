@@ -1657,7 +1657,9 @@ __metadata:
     "@effect/typeclass": "npm:~0.31.1"
     "@games/shared": "workspace:*"
     "@types/d3-path": "npm:3.1.0"
+    "@types/scheduler": "npm:^0.23.0"
     d3-path: "npm:3.1.0"
+    scheduler: "npm:^0.23"
   peerDependencies:
     "@expo/vector-icons": "*"
     "@shopify/react-native-skia": "*"
@@ -2433,6 +2435,13 @@ __metadata:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 10c0/fe455f805c5da13b89964c3d68060cebd43e73ec15001a68b34634604a78140e6fc202f3f61679b9d809dde6d7a7c2cb3ed51e0fd1462557911db09879b55114
+  languageName: node
+  linkType: hard
+
+"@types/scheduler@npm:^0.23.0":
+  version: 0.23.0
+  resolution: "@types/scheduler@npm:0.23.0"
+  checksum: 10c0/5cf7f2ba3732b74877559eb20b19f95fcd0a20c17dcb20e75a7ca7c7369cd455aeb2d406b3ff5a38168a9750da3bad78dd20d96d11118468b78f4959b8e56090
   languageName: node
   linkType: hard
 
@@ -7858,6 +7867,15 @@ __metadata:
   dependencies:
     loose-envify: "npm:^1.1.0"
   checksum: 10c0/083a9a0c83f4923f7f5bb28d8bcf13cff42c90f4303bc187166520fcfc576c97e946d426c707d5a9c0aa0a655819605dd0c741467c626824bbf191251c126f1b
+  languageName: node
+  linkType: hard
+
+"scheduler@npm:^0.23":
+  version: 0.23.2
+  resolution: "scheduler@npm:0.23.2"
+  dependencies:
+    loose-envify: "npm:^1.1.0"
+  checksum: 10c0/26383305e249651d4c58e6705d5f8425f153211aef95f15161c151f7b8de885f24751b377e4a0b3dd42cce09aad3f87a61dab7636859c0d89b7daf1a1e2a5c78
   languageName: node
   linkType: hard
 

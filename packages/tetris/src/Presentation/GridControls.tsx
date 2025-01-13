@@ -1,21 +1,25 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as Effect from 'effect/Effect';
-import { useState } from 'react';
 import { Pressable } from 'react-native';
 import Animated, { SlideOutLeft, SlideInRight } from 'react-native-reanimated';
 import * as Game from '../Domain/Game.domain';
 import * as GameAction from '../Domain/GameAction.domain';
 import * as Position from '../Domain/Position.domain';
-import { PlayerContext } from '../Services/Player.service';
-import { TetrisRuntime } from '../Services/Runtime.layers';
+import { PlayerContext, PlayerContextLive } from '../Services/Player.service';
 import { GameStore } from '../Store/Game.store';
+import { useGameStore } from './hooks/useStore';
+
+const playerPublisher = Effect.runSync(
+  PlayerContext.pipe(
+    Effect.map((x) => x.publishAction),
+    Effect.provide(PlayerContextLive),
+    Effect.uninterruptible,
+  ),
+);
 
 export const GridControls = () => {
-  const [playerPublisher] = useState(() =>
-    TetrisRuntime.runSync(PlayerContext.pipe(Effect.andThen((x) => x.publishAction))),
-  );
+  const gameState = useGameStore((state) => state.gameStatus);
 
-  const gameState = GameStore.useGameStore((state) => state.gameStatus);
   const moveLeft = () =>
     playerPublisher(GameAction.GameAction.move({ to: GameAction.makeMove.left() }));
 
@@ -28,7 +32,16 @@ export const GridControls = () => {
       GameAction.GameAction.rotate({ to: GameAction.MoveAction.down(Position.zero()) }),
     );
 
-  const startGame = () => GameStore.setRunState(Game.GameRunState('InProgress'));
+  const startGame = () => {
+    console.log('STAAAAART!');
+    GameStore.setState((x) => {
+      x.gameStatus = Game.GameRunState('InProgress');
+      return x;
+    });
+    playerPublisher(
+      GameAction.GameAction.statusChange({ state: Game.GameRunState('InProgress') }),
+    );
+  };
 
   return (
     <Animated.View

@@ -1,6 +1,13 @@
+import * as Layer from 'effect/Layer';
 import * as ManagedRuntime from 'effect/ManagedRuntime';
-import { PlayerContext, PlayerContextLive } from './Player.service';
+import { GameRepoContextLive } from './GameRepo.service';
+import { GridRepoContextLive } from './GridStore.service';
+import { PlayerContextLive } from './Player.service';
 
-export const TetrisLayer = PlayerContextLive;
+export const TetrisLayer = Layer.mergeAll(
+  PlayerContextLive,
+  GameRepoContextLive,
+  GridRepoContextLive,
+).pipe(Layer.provide(GridRepoContextLive));
 
-export const TetrisRuntime = ManagedRuntime.make(PlayerContextLive);
+export const TetrisRuntime = ManagedRuntime.make(TetrisLayer);

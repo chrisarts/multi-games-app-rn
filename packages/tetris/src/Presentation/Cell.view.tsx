@@ -1,50 +1,42 @@
 import * as HashMap from 'effect/HashMap';
 import * as Option from 'effect/Option';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import type * as Layout from '../Domain/Layout.domain';
 import type * as Position from '../Domain/Position.domain';
 import { GridStore } from '../Store/Grid.store';
-import { useRenderCounter } from './hooks/useRenderCounter';
+import { useGridStore } from './hooks/useStore';
 
 interface CellViewProps {
   position: Position.Position;
   cellLayout: Layout.CellLayout;
 }
 
-
 export const CellView = ({ position, cellLayout }: CellViewProps) => {
-  useRenderCounter(
-    `CellView [x: ${position.column}, y: ${position.row}]`,
-    (count) => count > 2,
+  // useRenderCounter(
+  //   `CellView [x: ${position.column}, y: ${position.row}]`,
+  //   (count) => count > 2,
+  // );
+
+  const cellState = useGridStore((selector) =>
+    HashMap.get(selector.cellsMap, position).pipe(
+      Option.map((cell) => cell.state),
+      Option.getOrElse(() => null),
+    ),
   );
 
-  const tetrisCell = GridStore.useGrisStore((state) =>
-    HashMap.get(state.cellsMap, position),
-  );
+  if (!cellState) return null;
 
-  return Option.map(tetrisCell, (cell) => (
+  return (
     <View
       style={{
-        backgroundColor: cell.state.color,
+        backgroundColor: cellState.color,
         width: cellLayout.size,
         height: cellLayout.size,
         margin: cellLayout.spacing / 2,
         borderRadius: 5,
       }}
-    />
-  )).pipe(
-    Option.getOrElse(() => (
-      <View
-        style={{
-          backgroundColor: 'red',
-          borderWidth: 1,
-          borderColor: 'gray',
-          width: cellLayout.size,
-          height: cellLayout.size,
-          borderRadius: 5,
-          padding: cellLayout.spacing,
-        }}
-      />
-    )),
+    >
+      <Text style={{ color: 'white' }}>{`${position.row},${position.column}`}</Text>
+    </View>
   );
 };

@@ -31,6 +31,10 @@ export function createStore<StoreShape>(initialState: StoreShape) {
   }
 }
 
+export type StoreSelectorFn<Store> = <T>(state: Store) => T;
+export type StoreUnsafeSet<Store> = (state: Store) => void;
+export type StoreSetFn<Store> = (state: Store) => Store;
+
 export type CustomStore<T> = ReturnType<typeof createStore<T>>;
 
 export class GlobalStore<StoreShape> {

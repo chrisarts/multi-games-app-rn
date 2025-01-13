@@ -3,11 +3,13 @@
   "main": "./src/index.tsx",
   "dependencies": {
     "@games/shared": "workspace:*",
-    "d3-path": "3.1.0"
+    "d3-path": "3.1.0",
+    "scheduler": "^0.23"
   },
   "devDependencies": {
     "@effect/typeclass": "~0.31.1",
-    "@types/d3-path": "3.1.0"
+    "@types/d3-path": "3.1.0",
+    "@types/scheduler": "^0.23.0"
   },
   "peerDependencies": {
     "@expo/vector-icons": "*",
