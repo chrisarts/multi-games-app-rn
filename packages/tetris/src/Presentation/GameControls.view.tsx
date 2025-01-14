@@ -1,4 +1,5 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { getDeviceDimensions } from '@games/shared';
 import { Pressable } from 'react-native';
 import Animated, { SlideOutLeft, SlideInRight } from 'react-native-reanimated';
 import { runActionOnUI } from '../Application/RunPlayerAction.program';
@@ -13,6 +14,7 @@ export const GridControls = () => {
       style={{
         justifyContent: 'center',
         alignItems: 'center',
+        width: getDeviceDimensions().WIDTH,
       }}
     >
       {gameState === 'InProgress' && (

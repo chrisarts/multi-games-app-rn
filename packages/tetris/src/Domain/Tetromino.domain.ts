@@ -43,6 +43,9 @@ export const getRandomTetromino = (): Tetromino =>
     ],
   );
 
+export const getTetrominoInitialPos = (initialPos: Position.Position, tetromino: Tetromino) =>
+  Position.sum(initialPos, tetromino.bounds.min);
+
 export const moveTeTromino = (tetromino: Tetromino, to: Position.Position): Tetromino =>
   of({
     ...tetromino,

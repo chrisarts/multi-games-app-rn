@@ -1,7 +1,6 @@
 import * as Effect from 'effect/Effect';
 import * as Queue from 'effect/Queue';
 import * as GameAction from '../Domain/GameAction.domain';
-import * as Game from '../Domain/GameState.domain';
 import * as Position from '../Domain/Position.domain';
 import { PlayerContext } from '../Services/Player.service';
 import { TetrisRuntime } from '../Services/Runtime.layers';

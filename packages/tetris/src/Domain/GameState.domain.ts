@@ -1,7 +1,6 @@
 import * as HashMap from 'effect/HashMap';
-import * as CellDomain from './Cell.domain';
+import type * as Grid from './Grid.domain';
 import * as GridBound from './GridBound.domain';
-import * as GridLayout from './Layout.domain';
 import * as Position from './Position.domain';
 import type * as Tetromino from './Tetromino.domain';
 
@@ -15,67 +14,55 @@ export interface GameState {
     status: GameRunState;
     speed: number;
   };
-  grid: {
-    positions: Position.Position[];
-    cellsMap: HashMap.HashMap<Position.Position, CellDomain.Cell>;
-    layout: GridLayout.GridLayout;
-    bounds: GridBound.GridBound;
-  };
+  grid: Grid.GridState;
 }
 
 export type GameRunState = 'InProgress' | 'GameOver' | 'Stop';
 
-export const makeGridState = ({
-  screen,
-  size,
-}: GridLayout.GridConfig): GameState['grid'] => {
-  const layout = getGridLayout({ screen, size });
-  const positions: Position.Position[] = [];
-  const cells = GridLayout.makeBy((position): [Position.Position, CellDomain.Cell] => {
-    positions.push(position);
-    return [position, CellDomain.makeCell(position)];
-  })(size);
-
+export const collisionChecker = (bounds: {
+  tetromino: GridBound.GridBound;
+  grid: GridBound.GridBound;
+}) => {
   return {
-    positions: positions,
-    cellsMap: HashMap.fromIterable(cells),
-    layout,
-    bounds: getGridBounds(layout),
+    /** Tetromino min row position is less than grid min row position  */
+    gameOver: Position.Order.rowGreatThan(bounds.tetromino.min, bounds.grid.min),
+    /** the tetromino bounds are valid grid bounds  */
+    insideGrid: GridBound.validateBounds(bounds.grid, bounds.tetromino),
+    /** Tetromino is beyond the last row  */
+    shouldMerge: Position.Order.rowGreatThan(bounds.tetromino.max, bounds.grid.max),
   };
 };
 
-export const getGridBounds = (layout: GridLayout.GridConfig) =>
-  GridBound.of({
-    max: Position.of({
-      row: layout.size.rows - 1,
-      column: layout.size.columns - 1,
-    }),
-    min: Position.zero(),
-  });
+export const checkMergedSiblings = (state: {
+  cells: Grid.GridState['cellsMap'];
+  tetromino: Tetromino.Tetromino;
+  /** This position must be valid or this method will throw */
+  position: Position.Position;
+}) => {
+  let siblings = false;
+  const positionBounds = {
+    max: Position.sum(state.tetromino.bounds.max, state.position),
+    min: Position.sum(state.tetromino.bounds.min, state.position),
+  };
+  for (const drawPos of state.tetromino.drawPositions) {
+    const nextPos = Position.sum(drawPos, state.position);
+    const cell = HashMap.unsafeGet(state.cells, nextPos);
+    const isBellow = Position.Order.rowGreatThan(positionBounds.max, cell.position);
+    if (!siblings) siblings = cell.state.merged;
+    if (cell.state.merged && isBellow) {
+      console.log('BOUNDS: ', {
+        positionBounds,
+        sibling: cell.position,
+      });
+      return {
+        merge: true,
+        siblings,
+      };
+    }
+  }
 
-export const getGridLayout = ({
-  screen,
-  size,
-}: GridLayout.GridConfig): GridLayout.GridLayout => {
-  const { height, width } = screen;
-
-  const spacing = 3;
-  const squareContainerSize = width / size.columns;
-  const squareSize = squareContainerSize - spacing;
-
-  const canvasWidth = height;
-  const canvasHeight = size.rows * squareContainerSize;
-
-  const midX = Math.floor(size.columns / 3);
   return {
-    screen,
-    size,
-    initialPosition: Position.of({ row: 0, column: midX }),
-    canvas: { width: canvasWidth, height: canvasHeight },
-    cell: {
-      containerSize: squareContainerSize,
-      size: squareSize,
-      spacing,
-    },
+    merge: false,
+    siblings,
   };
 };

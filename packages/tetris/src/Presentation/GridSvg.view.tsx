@@ -21,7 +21,14 @@ export const GridView = () => {
   );
 
   return (
-    <Canvas style={grid.layout.canvas} mode='continuous'>
+    <Canvas
+      style={{
+        maxWidth: grid.layout.canvas.width,
+        maxHeight: grid.layout.canvas.height,
+        flex: 1,
+      }}
+      mode='continuous'
+    >
       {gridCells}
     </Canvas>
   );

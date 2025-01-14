@@ -1,3 +1,5 @@
+import { getDeviceDimensions } from '@games/shared';
+import * as Effect from 'effect/Effect';
 import { StyleSheet, View } from 'react-native';
 import { runForkedTetris } from '../Application/RunGame';
 import { TetrisRuntime } from '../Services/Runtime.layers';
@@ -5,7 +7,9 @@ import { GridControls } from './GameControls.view';
 import { GridView } from './GridSvg.view';
 import { useRenderCounter } from './hooks/useRenderCounter';
 
-TetrisRuntime.runFork(runForkedTetris);
+TetrisRuntime.runFork(
+  runForkedTetris.pipe(Effect.tap(() => Effect.log('Tetris stopped'))),
+);
 
 export const GameBoardView = () => {
   useRenderCounter('GridView');
@@ -21,6 +25,8 @@ export const GameBoardView = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'space-around',
+    width: getDeviceDimensions().WIDTH,
   },
   listContainer: {
     marginTop: 10,

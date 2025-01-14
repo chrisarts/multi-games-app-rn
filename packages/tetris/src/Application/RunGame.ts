@@ -1,13 +1,12 @@
+import * as Duration from 'effect/Duration';
 import * as Effect from 'effect/Effect';
 import * as Queue from 'effect/Queue';
 import * as GameAction from '../Domain/GameAction.domain';
 import type * as Game from '../Domain/GameState.domain';
-import type * as Position from '../Domain/Position.domain';
-import * as Tetromino from '../Domain/Tetromino.domain';
 import { GameRepoContext } from '../Services/GameRepo.service';
 import { PlayerContext } from '../Services/Player.service';
 import { TetrisLayer, TetrisRuntime } from '../Services/Runtime.layers';
-import { debugObjectLog } from '../utils/log.utils';
+import { MoveTetrominoProgram } from './MoveTetromino.program';
 
 export const playerContextLive = Effect.gen(function* () {
   const { playerActions, publishAction } = yield* PlayerContext;
@@ -30,8 +29,14 @@ export const runForkedTetris = Effect.gen(function* () {
   const updatesDequeue = yield* Queue.take(playerActions).pipe(
     Effect.andThen((action) =>
       GameAction.GameAction.$match(action, {
-        move: (x) => onMoveAction(x.to),
-        rotate: (x) => onMoveAction(x.to),
+        move: (x) =>
+          MoveTetrominoProgram(x.to).pipe(
+            Effect.tap((x) => Effect.log('FINISH MOVE', x)),
+          ),
+        rotate: (x) =>
+          MoveTetrominoProgram(x.to).pipe(
+            Effect.tap(() => Effect.log('FINISH MOVE', action)),
+          ),
         statusChange: (x) => onStatusAction(x.state),
       }),
     ),
@@ -39,76 +44,29 @@ export const runForkedTetris = Effect.gen(function* () {
     Effect.forkDaemon,
   );
 
-  // const isRunning = gameRepo
-  //   .selector((x) => x.gameStatus)
-  //   .pipe(Effect.map((x) => x !== Game.GameRunState('GameOver')));
+  const isRunning = gameRepo
+    .selector((x) => x.game.status)
+    .pipe(Effect.map((x) => x !== 'GameOver'));
 
-  // while (yield* isRunning) {
-  //   // yield* Effect.log('Running...');
-  //   const { speed, status } = yield* gameRepo.selector((x) => ({
-  //     status: x.gameStatus,
-  //     speed: x.speed,
-  //   }));
+  while (yield* isRunning) {
+    const { speed, status } = yield* gameRepo.selector((x) => ({
+      status: x.game.status,
+      speed: x.game.speed,
+    }));
 
-  //   if (status === Game.GameRunState('InProgress')) {
-  //     yield* playerActions.offer(
-  //       GameAction.GameAction.move({ to: GameAction.makeMove.down() }),
-  //     );
-  //   }
+    if (status === 'InProgress') {
+      yield* playerActions.offer(
+        GameAction.GameAction.move({ to: GameAction.makeMove.down() }),
+      );
+    }
 
-  //   yield* Effect.sleep(Duration.millis(speed));
-  // }
+    yield* Effect.sleep(Duration.millis(speed));
+  }
 
   Effect.addFinalizer(() => Effect.log('Finalized Game Service'));
   return {
     updatesDequeue,
   };
-
-  function onMoveAction(moveTo: Position.Position) {
-    return Effect.gen(function* () {
-      const {
-        nextDraw,
-        nextPosition,
-        merge,
-        gameOver,
-        tetromino,
-        insideGrid,
-        currentPos,
-      } = yield* gameRepo.getMoveUnitState(moveTo);
-
-      if (gameOver) {
-        debugObjectLog('GAME_OVER', nextDraw.bounds);
-        return;
-      }
-
-      if (merge) {
-        debugObjectLog('MERGE: ', nextDraw.bounds);
-      }
-
-      if (!insideGrid && merge) {
-        debugObjectLog('INVALID_NEXT_POSITION', {
-          draw: nextDraw.bounds,
-          currentPos: currentPos,
-          nextPosition,
-        });
-        
-      }
-
-      const { positions } = Tetromino.mapWithPosition(tetromino, currentPos);
-
-      console.log('MERGE: ', merge);
-
-      if (merge) {
-      }
-      yield* gameRepo.unsafeUpdateBoard({
-        tetromino,
-        updatedPosition: merge ? currentPos : nextPosition,
-        fromPositions: positions,
-        toPositions: nextDraw.positions,
-        merge,
-      });
-    });
-  }
 
   function onStatusAction(state: Game.GameRunState) {
     console.log('PUBLISHED_ACTION: ', state);

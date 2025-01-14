@@ -1,8 +1,10 @@
-import { RoundedRect } from '@shopify/react-native-skia';
+import { Group, Paragraph, RoundedRect, Skia } from '@shopify/react-native-skia';
 import * as HashMap from 'effect/HashMap';
+import { useMemo } from 'react';
 import * as Cell from '../Domain/Cell.domain';
 import type * as Layout from '../Domain/Layout.domain';
 import type * as Position from '../Domain/Position.domain';
+import { useRenderCounter } from './hooks/useRenderCounter';
 import { useGameStore } from './hooks/useStore';
 export const cellDefaultColor = 'rgba(131, 126, 126, 0.3)';
 
@@ -12,22 +14,38 @@ interface CellViewProps {
 }
 
 export const TetrisCellSvg = ({ position, cellLayout }: CellViewProps) => {
-  // useRenderCounter(`Cell: ${position.row} ${position.column}`)
+  useRenderCounter(`Cell: ${position.row} ${position.column}`)
   const cellState = useGameStore(
     (selector) => HashMap.unsafeGet(selector.grid.cellsMap, position).state,
   );
 
+  const paragraph = useMemo(() => {
+    const para = Skia.ParagraphBuilder.Make()
+      .addText(`${position.row}:${position.column}`)
+      .build();
+    para.layout(cellLayout.size);
+    return para;
+  }, [position, cellLayout]);
+
   const svg = Cell.getCellSvg(position, cellLayout);
   return (
-    <RoundedRect
-      height={svg.height}
-      width={svg.width}
-      r={svg.r}
-      x={svg.x}
-      y={svg.y}
-      style='fill'
-      color={cellState.color}
-    />
+    <Group>
+      <RoundedRect
+        height={svg.height}
+        width={svg.width}
+        r={svg.r}
+        x={svg.x}
+        y={svg.y}
+        style='fill'
+        color={cellState.color}
+      />
+      <Paragraph
+        paragraph={paragraph}
+        width={cellLayout.size * 0.9}
+        x={svg.x + cellLayout.spacing}
+        y={svg.y + cellLayout.spacing}
+      />
+    </Group>
   );
 };
 

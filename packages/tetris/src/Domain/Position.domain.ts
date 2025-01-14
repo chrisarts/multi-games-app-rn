@@ -38,6 +38,8 @@ export const Order = {
   rowLessThan: Ord.lessThan(ordRow),
   columnLessThan: Ord.lessThan(ordColumn),
   rowGreatThan: Ord.greaterThan(ordRow),
+  rowGreatThanOrEquals: Ord.greaterThanOrEqualTo(ordRow),
+  colGreatThanOrEquals: Ord.greaterThanOrEqualTo(ordRow),
   columnGreatThan: Ord.greaterThan(ordColumn),
 };
 

@@ -70,6 +70,9 @@ const make = Effect.gen(function* () {
     getMoveUnitState,
     unsafeUpdateBoard,
     actions: {
+      getCellAt,
+      mutateCellAt,
+      mapCellState,
       updateDropPosition,
       resetGame,
       swapTetrominos,
@@ -88,10 +91,10 @@ const make = Effect.gen(function* () {
     merge: boolean;
   }) {
     return Effect.gen(function* () {
-      console.log('UPDATE: ', {
-        moveTo: data.updatedPosition,
-        merge: data.merge,
-      });
+      // console.log('UPDATE: ', {
+      //   moveTo: data.updatedPosition,
+      //   merge: data.merge,
+      // });
       const store = yield* gameStore.store;
       const layout = store.getState().grid.layout;
 
@@ -137,7 +140,8 @@ const make = Effect.gen(function* () {
       if (data.merge) {
         yield* swapTetrominos;
       }
-    }).pipe(Effect.tap(() => Effect.log('Board updated')));
+    });
+    // .pipe(Effect.tap(() => Effect.log('Board updated')));
   }
 
   function getMoveUnitState(moveUnit: Position.Position) {

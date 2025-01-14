@@ -1,7 +1,6 @@
 import * as Equal from 'effect/Equal';
 import * as Hash from 'effect/Hash';
-// import { makeMutable } from 'react-native-reanimated';
-// import type { Mutable } from 'react-native-reanimated/lib/typescript/commonTypes';
+import type { SharedValue } from 'react-native-reanimated';
 import type { GridLayout } from './Layout.domain';
 import * as Position from './Position.domain';
 
@@ -12,16 +11,22 @@ export interface CellState {
   color: string;
 }
 
+export interface AnimatedCellState {
+  merged: boolean;
+  /** 
+   * interpolation modes: 
+   * 0 - Default Color
+   * 1 - Tetromino Color
+   * */
+  colorMode: SharedValue<number>;
+}
+
 export const defaultCellColor: string = 'rgba(131, 126, 126, 0.3)';
 export class Cell implements Equal.Equal {
   state: CellState = {
     merged: false,
     color: defaultCellColor,
   };
-  // animated: {
-  //   color: Mutable<string>;
-  //   merge: Mutable<boolean>;
-  // };
   constructor(readonly position: Position.Position) {}
 
   [Equal.symbol](that: unknown): boolean {
