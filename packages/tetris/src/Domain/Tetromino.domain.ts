@@ -1,5 +1,5 @@
 import * as TetrominoData from '../Data/Tetrominos.data';
-import * as Bound from './GridBound.domain';
+import * as Grid from './Grid.domain';
 import * as Position from './Position.domain';
 
 export interface Tetromino {
@@ -7,7 +7,7 @@ export interface Tetromino {
   color: string;
   matrix: TetrominoData.TetrominoMatrix;
   drawPositions: Position.Position[];
-  bounds: Bound.GridBound;
+  bounds: Grid.GridBound;
 }
 
 export const of = (tetromino: Tetromino): Tetromino => tetromino;
@@ -17,7 +17,7 @@ export const fromConfig = (config: TetrominoData.TetrominoConfig): Tetromino => 
 
   return {
     drawPositions,
-    bounds: Bound.getFromPositions(drawPositions),
+    bounds: Grid.gridBoundFromPositions(drawPositions),
     name: config.name,
     color: config.color,
     matrix: config.value,
@@ -26,7 +26,7 @@ export const fromConfig = (config: TetrominoData.TetrominoConfig): Tetromino => 
 
 export const mapWithPosition = (tetromino: Tetromino, position: Position.Position) => {
   const positions = tetromino.drawPositions.map((x) => Position.sum(x, position));
-  const bounds = Bound.getFromPositions(positions);
+  const bounds = Grid.gridBoundFromPositions(positions);
   return {
     positions,
     bounds,
@@ -43,8 +43,10 @@ export const getRandomTetromino = (): Tetromino =>
     ],
   );
 
-export const getTetrominoInitialPos = (initialPos: Position.Position, tetromino: Tetromino) =>
-  Position.sum(initialPos, tetromino.bounds.min);
+export const getTetrominoInitialPos = (
+  initialPos: Position.Position,
+  tetromino: Tetromino,
+) => Position.sum(initialPos, tetromino.bounds.min);
 
 export const moveTeTromino = (tetromino: Tetromino, to: Position.Position): Tetromino =>
   of({

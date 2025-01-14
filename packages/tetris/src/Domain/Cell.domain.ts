@@ -1,7 +1,7 @@
 import * as Equal from 'effect/Equal';
 import * as Hash from 'effect/Hash';
 import type { SharedValue } from 'react-native-reanimated';
-import type { GridLayout } from './Layout.domain';
+import type { GridLayout } from './Grid.domain';
 import * as Position from './Position.domain';
 
 const GameCellSymbolKey = 'tetris/cell';

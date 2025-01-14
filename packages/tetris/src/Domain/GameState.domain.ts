@@ -1,6 +1,5 @@
 import * as HashMap from 'effect/HashMap';
-import type * as Grid from './Grid.domain';
-import * as GridBound from './GridBound.domain';
+import * as Grid from './Grid.domain';
 import * as Position from './Position.domain';
 import type * as Tetromino from './Tetromino.domain';
 
@@ -20,14 +19,14 @@ export interface GameState {
 export type GameRunState = 'InProgress' | 'GameOver' | 'Stop';
 
 export const collisionChecker = (bounds: {
-  tetromino: GridBound.GridBound;
-  grid: GridBound.GridBound;
+  tetromino: Grid.GridBound;
+  grid: Grid.GridBound;
 }) => {
   return {
     /** Tetromino min row position is less than grid min row position  */
     gameOver: Position.Order.rowGreatThan(bounds.tetromino.min, bounds.grid.min),
     /** the tetromino bounds are valid grid bounds  */
-    insideGrid: GridBound.validateBounds(bounds.grid, bounds.tetromino),
+    insideGrid: Grid.validateBounds(bounds.grid, bounds.tetromino),
     /** Tetromino is beyond the last row  */
     shouldMerge: Position.Order.rowGreatThan(bounds.tetromino.max, bounds.grid.max),
   };

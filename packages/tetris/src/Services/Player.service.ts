@@ -5,7 +5,7 @@ import * as Queue from 'effect/Queue';
 import type * as GameAction from '../Domain/GameAction.domain';
 
 export const make = Effect.gen(function* () {
-  const playerActions = yield* Queue.unbounded<GameAction.GameAction>();
+  const playerActions = yield* Queue.dropping<GameAction.GameAction>(2);
 
   const publishAction = (action: GameAction.GameAction) =>
     Queue.offer(playerActions, action);

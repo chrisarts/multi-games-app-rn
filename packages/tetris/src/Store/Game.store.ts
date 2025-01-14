@@ -9,6 +9,11 @@ import * as Tetromino from '../Domain/Tetromino.domain';
 
 export interface GameStore extends CustomStore<GameState.GameState> {}
 
+const grid = Grid.makeGridState({
+  screen: Dimensions.get('screen'),
+  size: { rows: 15, columns: 10 },
+});
+
 export const GameStore: GameStore = createStore<GameState.GameState>({
   game: {
     speed: 800,
@@ -17,12 +22,9 @@ export const GameStore: GameStore = createStore<GameState.GameState>({
   tetromino: {
     current: Tetromino.getRandomTetromino(),
     next: Tetromino.getRandomTetromino(),
-    position: Position.zero(),
+    position: grid.layout.initialPosition,
   },
-  grid: Grid.makeGridState({
-    screen: Dimensions.get('screen'),
-    size: { rows: 15, columns: 10 },
-  }),
+  grid,
 });
 
 const makeUnsafeSetter = (f: (state: GameState.GameState) => void) => {

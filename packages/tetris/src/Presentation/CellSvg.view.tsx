@@ -2,7 +2,7 @@ import { Group, Paragraph, RoundedRect, Skia } from '@shopify/react-native-skia'
 import * as HashMap from 'effect/HashMap';
 import { useMemo } from 'react';
 import * as Cell from '../Domain/Cell.domain';
-import type * as Layout from '../Domain/Layout.domain';
+import type * as Grid from '../Domain/Grid.domain';
 import type * as Position from '../Domain/Position.domain';
 import { useRenderCounter } from './hooks/useRenderCounter';
 import { useGameStore } from './hooks/useStore';
@@ -10,11 +10,11 @@ export const cellDefaultColor = 'rgba(131, 126, 126, 0.3)';
 
 interface CellViewProps {
   position: Position.Position;
-  cellLayout: Layout.CellLayout;
+  cellLayout: Grid.CellLayout;
 }
 
 export const TetrisCellSvg = ({ position, cellLayout }: CellViewProps) => {
-  useRenderCounter(`Cell: ${position.row} ${position.column}`)
+  // useRenderCounter(`Cell: ${position.row} ${position.column}`)
   const cellState = useGameStore(
     (selector) => HashMap.unsafeGet(selector.grid.cellsMap, position).state,
   );

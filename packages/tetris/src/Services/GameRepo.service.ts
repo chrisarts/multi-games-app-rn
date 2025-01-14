@@ -5,7 +5,7 @@ import * as Layer from 'effect/Layer';
 import * as Option from 'effect/Option';
 import { defaultCellColor } from '../Domain/Cell.domain';
 import type * as Cell from '../Domain/Cell.domain';
-import * as GridBound from '../Domain/GridBound.domain';
+import * as Grid from '../Domain/Grid.domain';
 import * as Position from '../Domain/Position.domain';
 import * as Tetromino from '../Domain/Tetromino.domain';
 import * as GameStore from '../Store/Game.store';
@@ -25,9 +25,10 @@ const make = Effect.gen(function* () {
       state.tetromino.position = to;
     });
 
-  const startGame = gameStore.unsafeSetState(
-    (state) => (state.game.status = 'InProgress'),
-  );
+  const startGame = gameStore.unsafeSetState((state) => {
+    GameStore.StoreActions.refreshGrid(state.tetromino.position, false);
+    state.game.status = 'InProgress';
+  });
   const stopGame = gameStore.unsafeSetState((state) => (state.game.status = 'Stop'));
   const setGameOver = gameStore.unsafeSetState(
     (state) => (state.game.status = 'GameOver'),
@@ -153,11 +154,11 @@ const make = Effect.gen(function* () {
       const nextPosition = Position.sum(currentPos, moveUnit);
       const nextDraw = Tetromino.mapWithPosition(tetromino, nextPosition);
 
-      const rowBoundValid = GridBound.bothRowBoundsValid(gridBounds, nextDraw.bounds);
-      const minRowValid = GridBound.rowBoundValid(gridBounds, nextDraw.bounds.min);
+      const rowBoundValid = Grid.bothRowBoundsValid(gridBounds, nextDraw.bounds);
+      const minRowValid = Grid.rowBoundValid(gridBounds, nextDraw.bounds.min);
       const gameOver = !rowBoundValid && !minRowValid;
-      const merge = !GridBound.rowBoundValid(gridBounds, nextDraw.bounds.max);
-      const insideGrid = GridBound.validateBounds(gridBounds, nextDraw.bounds);
+      const merge = !Grid.rowBoundValid(gridBounds, nextDraw.bounds.max);
+      const insideGrid = Grid.validateBounds(gridBounds, nextDraw.bounds);
 
       return {
         gameOver,
