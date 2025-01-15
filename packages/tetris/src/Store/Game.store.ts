@@ -1,7 +1,7 @@
 import { type CustomStore, createStore } from '@games/shared';
-import { HashMap, Option } from 'effect';
+import * as HashMap from 'effect/HashMap';
+import * as Option from 'effect/Option';
 import { Dimensions } from 'react-native';
-import { defaultCellColor } from '../Domain/Cell.domain';
 import type * as GameState from '../Domain/GameState.domain';
 import * as Grid from '../Domain/Grid.domain';
 import * as Position from '../Domain/Position.domain';
@@ -53,10 +53,7 @@ const refreshGrid = (
   merged: boolean,
 ) =>
   makeUnsafeSetter((state) => {
-    // clearCurrentCells();
-    // refreshCurrentCells(state.tetromino.current, nextPosition, merged);
     if (tetromino !== state.tetromino.current) {
-      console.log('DIFF');
       state.tetromino.current = tetromino;
     }
 
@@ -73,7 +70,7 @@ const refreshGrid = (
     for (const drawPos of state.tetromino.current.drawPositions) {
       const cell = HashMap.get(
         GameStore.getState().grid.cellsMap,
-        Position.sum(drawPos, state.tetromino.position),
+        Position.sum(state.tetromino.position, drawPos),
       );
       if (Option.isNone(cell)) continue;
 

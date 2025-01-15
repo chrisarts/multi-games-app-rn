@@ -3,8 +3,7 @@ import * as Effect from 'effect/Effect';
 import * as HashMap from 'effect/HashMap';
 import * as Layer from 'effect/Layer';
 import * as Option from 'effect/Option';
-import { defaultCellColor } from '../Domain/Cell.domain';
-import type * as Cell from '../Domain/Cell.domain';
+import * as Cell from '../Domain/Cell.domain';
 import * as Grid from '../Domain/Grid.domain';
 import * as Position from '../Domain/Position.domain';
 import * as Tetromino from '../Domain/Tetromino.domain';
@@ -96,10 +95,6 @@ const make = Effect.gen(function* () {
     merge: boolean;
   }) {
     return Effect.gen(function* () {
-      // console.log('UPDATE: ', {
-      //   moveTo: data.updatedPosition,
-      //   merge: data.merge,
-      // });
       const store = yield* gameStore.store;
       const layout = store.getState().grid.layout;
 
@@ -113,7 +108,7 @@ const make = Effect.gen(function* () {
           if (cell.value.state.merged) continue;
 
           cell.value.state = {
-            color: defaultCellColor,
+            color: Cell.defaultCellColor,
             merged: false,
           };
         }

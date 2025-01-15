@@ -3,7 +3,7 @@ import { GameBoardView } from './Presentation/Board.view';
 
 export const TetrisGame = () => {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.container}>
       <GameBoardView />
     </SafeAreaView>
   );

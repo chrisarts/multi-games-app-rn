@@ -1,7 +1,6 @@
 import * as HashMap from 'effect/HashMap';
 import * as Option from 'effect/Option';
 import type * as Cell from './Cell.domain';
-import { makeMove } from './GameAction.domain';
 import * as Grid from './Grid.domain';
 import * as Position from './Position.domain';
 import type * as Tetromino from './Tetromino.domain';

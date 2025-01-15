@@ -1,27 +1,22 @@
 import {
   Skia,
-  processTransform2d,
   rect,
   rrect,
-  usePathValue,
 } from '@shopify/react-native-skia';
 import { useEffect, useMemo } from 'react';
 import {
   Easing,
   ReduceMotion,
   useDerivedValue,
-  useFrameCallback,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { TetrominoNames } from '../../Data/Tetrominos.data';
-import { createCellUIRect } from '../../Domain/Cell.domain';
-import type { GridState } from '../../Domain/Grid.domain';
-import type { Position } from '../../Domain/Position.domain';
-import type { GridCellLayout } from '../../svg-app/models/GridCell.model';
+import * as Cell from '../../Domain/Cell.domain';
+import type * as Grid from '../../Domain/Grid.domain';
+import type * as Position from '../../Domain/Position.domain';
 import { useGameStore } from './useStore';
 
-export const useTetrominoPath = (grid: GridState) => {
+export const useTetrominoPath = (grid: Grid.GridState) => {
   const cellLayout = grid.layout.cell;
   const tetromino = useGameStore((state) => state.tetromino.current);
   const dropPosition = useGameStore((state) => state.tetromino.position);
@@ -63,11 +58,11 @@ export const useTetrominoPath = (grid: GridState) => {
   };
 };
 
-const createTetrominoPath = (positions: Position[], grid: GridCellLayout) => {
+const createTetrominoPath = (positions: Position.Position[], grid: Grid.CellLayout) => {
   'worklet';
   const path = Skia.Path.Make();
   for (const position of positions) {
-    const cell = createCellUIRect(position, grid);
+    const cell = Cell.createCellUIRect(position, grid);
     path.addRRect(rrect(rect(cell.x, cell.y, cell.width, cell.height), 5, 5));
   }
   path.close();

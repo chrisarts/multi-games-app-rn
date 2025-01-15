@@ -2,7 +2,7 @@ import { Skia, rect, rrect } from '@shopify/react-native-skia';
 import * as Equal from 'effect/Equal';
 import * as Hash from 'effect/Hash';
 import type { SharedValue } from 'react-native-reanimated';
-import type { CellLayout, GridLayout, GridState } from './Grid.domain';
+import type * as Grid from './Grid.domain';
 import * as Position from './Position.domain';
 
 const GameCellSymbolKey = 'tetris/cell';
@@ -61,7 +61,7 @@ export const setColor = (cell: Cell, color: string) =>
     color,
   });
 
-export const getCellSvg = (position: Position.Position, layout: CellLayout) => ({
+export const getCellSvg = (position: Position.Position, layout: Grid.CellLayout) => ({
   x: position.column * layout.containerSize + layout.spacing / 2,
   y: position.row * layout.containerSize + layout.spacing / 2,
   height: layout.size,
@@ -72,7 +72,7 @@ export const getCellSvg = (position: Position.Position, layout: CellLayout) => (
 
 export const calculateUICellDraw = (
   position: Position.Position,
-  cellLayout: CellLayout,
+  cellLayout: Grid.CellLayout,
 ) => {
   'worklet';
   const x = position.column * cellLayout.containerSize + cellLayout.spacing / 2;
@@ -87,7 +87,7 @@ export const calculateUICellDraw = (
   };
 };
 
-export const createCellUIRect = (position: Position.Position, cellLayout: CellLayout) => {
+export const createCellUIRect = (position: Position.Position, cellLayout: Grid.CellLayout) => {
   'worklet';
   const { x, y, width, height } = calculateUICellDraw(position, cellLayout);
   return rect(x, y, width, height);
@@ -95,12 +95,12 @@ export const createCellUIRect = (position: Position.Position, cellLayout: CellLa
 
 export const createCellUIRRect = (
   position: Position.Position,
-  cellLayout: CellLayout,
+  cellLayout: Grid.CellLayout,
 ) => {
   return rrect(createCellUIRect(position, cellLayout), 5, 5);
 };
 
-export const createCanvasUIPath = (grid: GridState) => {
+export const createCanvasUIPath = (grid: Grid.GridState) => {
   'worklet';
   const path = Skia.Path.Make();
   for (const position of grid.positions) {

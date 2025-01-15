@@ -1,10 +1,9 @@
 import { Path } from '@shopify/react-native-skia';
-import { useDerivedValue } from 'react-native-reanimated';
-import type { GridState } from '../Domain/Grid.domain';
+import type * as GridState from '../Domain/Grid.domain';
 import { useTetrominoPath } from './hooks/useTetromino';
 
 interface TetrominoViewProps {
-  grid: GridState;
+  grid: GridState.GridState;
 }
 
 export const TetrominoView = ({ grid }: TetrominoViewProps) => {

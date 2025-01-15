@@ -11,7 +11,6 @@ export const MoveTetrominoProgram = (nextMove: GameAction.MoveAction) =>
     const currentPosition = store.getState().tetromino.position;
     const nextPos = Position.sum(nextMove, currentPosition);
 
-    const prevShape = store.getState().tetromino.current;
     const currentShape = yield* Effect.sync(() => {
       const current = store.getState().tetromino.current;
       if (nextMove._tag !== 'rotate') return current;

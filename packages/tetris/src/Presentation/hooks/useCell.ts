@@ -1,11 +1,9 @@
-import { ColorChannel, Skia } from '@shopify/react-native-skia';
-import { HashMap } from 'effect';
+import { Skia } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 import * as Cell from '../../Domain/Cell.domain';
 import type * as Grid from '../../Domain/Grid.domain';
 import type * as Position from '../../Domain/Position.domain';
-import { GameStore } from '../../Store/Game.store';
 
 export const useAnimatedCell = (
   position: Position.Position,

@@ -1,4 +1,4 @@
-import { Canvas, Fill, Group, Path, RoundedRect } from '@shopify/react-native-skia';
+import { Canvas, Fill } from '@shopify/react-native-skia';
 import { TetrisCellSvg } from './CellSvg.view';
 import { TetrominoView } from './Tetromino.view';
 import { useRRectGrid } from './hooks/useGrid';
@@ -26,22 +26,6 @@ export const GameCanvas = () => {
         />
       ))}
       <TetrominoView grid={grid} />
-      {/* {cellRects.map((rect) => (
-        <RoundedRect
-          key={`${rect.rect.x},${rect.rect.y}`}
-          rect={rect}
-          r={5}
-          color={defaultCellColor}
-          style='fill'
-          strokeWidth={3}
-        />
-      ))} */}
-      {/* <Group>
-        <Path path={clip} style='fill' color={defaultCellColor} />
-      </Group>
-      <Group>
-        <Path path={tetrominoClip} style='fill' color={tetromino.color} />
-      </Group> */}
     </Canvas>
   );
 };
