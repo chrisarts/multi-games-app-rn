@@ -16,6 +16,7 @@ export interface GameState {
     speed: number;
   };
   grid: Grid.GridState;
+  debug: boolean;
 }
 
 export type GameRunState = 'InProgress' | 'GameOver' | 'Stop';

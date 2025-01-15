@@ -2,8 +2,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getDeviceDimensions } from '@games/shared';
 import { Pressable } from 'react-native';
 import Animated, { SlideOutLeft, SlideInRight } from 'react-native-reanimated';
-import { runActionOnUI } from '../../Application/RunPlayerAction.program';
-import { useGameStore } from '../hooks/useStore';
+import { runActionOnUI } from '../Application/RunPlayerAction.program';
+import { useGameStore } from './hooks/useStore';
 
 export const GridControls = () => {
   const gameState = useGameStore((state) => state.game.status);

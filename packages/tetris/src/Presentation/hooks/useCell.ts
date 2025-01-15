@@ -36,6 +36,7 @@ export const useCellParagraph = (
       .addText(`${position.row}:${position.column}`)
       .pushStyle({
         color: Skia.Color('white'),
+        backgroundColor: Skia.Color('red'),
       })
       .build();
     para.layout(cellLayout.size);

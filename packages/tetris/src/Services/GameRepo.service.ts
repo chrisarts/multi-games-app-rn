@@ -49,6 +49,7 @@ const make = Effect.gen(function* () {
           next: Tetromino.getRandomTetromino(),
           position: x.grid.layout.initialPosition,
         },
+        debug: x.debug,
       }),
   );
 

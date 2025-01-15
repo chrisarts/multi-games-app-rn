@@ -77,8 +77,8 @@ export const calculateUICellDraw = (
   'worklet';
   const x = position.column * cellLayout.containerSize + cellLayout.spacing / 2;
   const y = position.row * cellLayout.containerSize + cellLayout.spacing / 2;
-  const width = cellLayout.size - cellLayout.spacing;
-  const height = cellLayout.size - cellLayout.spacing;
+  const width = cellLayout.containerSize - cellLayout.spacing / 2;
+  const height = cellLayout.containerSize - cellLayout.spacing / 2;
   return {
     x,
     y,

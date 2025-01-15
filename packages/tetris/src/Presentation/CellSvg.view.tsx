@@ -1,5 +1,15 @@
-import { Group, Paragraph, RoundedRect, type SkRRect } from '@shopify/react-native-skia';
+import {
+  Group,
+  Paragraph,
+  RoundedRect,
+  type SkRRect,
+  Skia,
+  interpolateColors,
+} from '@shopify/react-native-skia';
 import * as HashMap from 'effect/HashMap';
+import { useEffect } from 'react';
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import * as Cell from '../Domain/Cell.domain';
 import type { CellLayout } from '../Domain/Grid.domain';
 import type * as Position from '../Domain/Position.domain';
 import { useCellParagraph } from './hooks/useCell';
@@ -12,20 +22,41 @@ interface CellViewProps {
 }
 
 export const TetrisCellSvg = (props: CellViewProps) => {
+  const mergedValue = useSharedValue(0);
   const state = useGameStore(
     (state) => HashMap.unsafeGet(state.grid.cellsMap, props.position).state,
   );
+  const debug = useGameStore((state) => state.debug);
   const paragraph = useCellParagraph(props.position, props.layout);
+
+  useEffect(() => {
+    mergedValue.value = state.merged ? 1 : 0;
+  }, [state.merged, mergedValue]);
+
+  const cellColor = useDerivedValue(() => {
+    return interpolateColors(
+      mergedValue.value,
+      [0, 1],
+      [debug ? Cell.defaultCellColor : Skia.Color('transparent'), state.color],
+    );
+  });
 
   return (
     <Group>
-      <RoundedRect rect={props.cell} style='fill' color={state.color} />
-      <Paragraph
-        paragraph={paragraph}
-        width={props.cell.rect.width}
-        x={props.cell.rect.x}
-        y={props.cell.rect.y}
+      <RoundedRect
+        rect={props.cell}
+        style='fill'
+        color={cellColor}
       />
+      {/* {debug && (
+        <Paragraph
+          paragraph={paragraph}
+          style='fill'
+          width={props.cell.rect.width}
+          x={props.cell.rect.x}
+          y={props.cell.rect.y}
+        />
+      )} */}
     </Group>
   );
 };

@@ -25,6 +25,7 @@ export const GameStore: GameStore = createStore<GameState.GameState>({
     position: grid.layout.initialPosition,
   },
   grid,
+  debug: true,
 });
 
 const makeUnsafeSetter = (f: (state: GameState.GameState) => void) => {

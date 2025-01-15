@@ -1,14 +1,11 @@
-import {
-  Skia,
-  rect,
-  rrect,
-} from '@shopify/react-native-skia';
+import { Skia, rect, rrect } from '@shopify/react-native-skia';
 import { useEffect, useMemo } from 'react';
 import {
   Easing,
   ReduceMotion,
   useDerivedValue,
   useSharedValue,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import * as Cell from '../../Domain/Cell.domain';
@@ -38,15 +35,19 @@ export const useTetrominoPath = (grid: Grid.GridState) => {
   ]);
 
   useEffect(() => {
-    animatedPosition.value = withTiming(
+    const position = Cell.calculateUICellDraw(dropPosition, cellLayout);
+    animatedPosition.value = withSpring(
       {
-        columnX: dropPosition.column * cellLayout.containerSize + cellLayout.spacing / 2,
-        rowY: dropPosition.row * cellLayout.containerSize + cellLayout.spacing / 2,
+        columnX: position.x,
+        rowY: position.y,
       },
       {
         duration: dropPosition.row === 0 ? 0 : 100,
-        easing: Easing.linear,
+        dampingRatio: 10,
+        restSpeedThreshold: 0.5,
         reduceMotion: ReduceMotion.Never,
+        stiffness: 500,
+        velocity: 5
       },
     );
   }, [dropPosition, animatedPosition, cellLayout]);
