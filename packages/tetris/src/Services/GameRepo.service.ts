@@ -26,7 +26,11 @@ const make = Effect.gen(function* () {
     });
 
   const startGame = gameStore.unsafeSetState((state) => {
-    GameStore.StoreActions.refreshGrid(state.tetromino.position, false);
+    GameStore.StoreActions.refreshGrid(
+      state.tetromino.current,
+      state.tetromino.position,
+      false,
+    );
     state.game.status = 'InProgress';
   });
   const stopGame = gameStore.unsafeSetState((state) => (state.game.status = 'Stop'));

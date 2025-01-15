@@ -12,10 +12,6 @@ export const RunActionsQueue = (actions: Iterable<GameAction.GameAction>) => {
           MoveTetrominoProgram(x.to).pipe(
             Effect.tap((x) => Effect.log('FINISH MOVE', x)),
           ),
-        rotate: (x) =>
-          MoveTetrominoProgram(x.to).pipe(
-            Effect.tap(() => Effect.log('FINISH MOVE', action)),
-          ),
         statusChange: (x) =>
           Effect.sync(() =>
             GameStore.setState((prev) => {

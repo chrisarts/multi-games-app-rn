@@ -115,7 +115,16 @@ export const getGridLayout = ({ screen, size }: GridConfig): GridLayout => {
 export const gridBoundOf = (bounds: GridBound): GridBound => bounds;
 
 export const makeBound = (min: Position.Position, max: Position.Position) =>
-  gridBoundOf({ min, max });
+  gridBoundOf({
+    min: {
+      column: min.column,
+      row: min.row,
+    },
+    max: {
+      column: max.column,
+      row: max.row,
+    },
+  });
 
 export const zeroBound = (): GridBound =>
   gridBoundOf({ max: Position.zero(), min: Position.zero() });

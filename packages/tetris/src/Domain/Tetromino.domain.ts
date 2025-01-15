@@ -48,11 +48,28 @@ export const getTetrominoInitialPos = (
   tetromino: Tetromino,
 ) => Position.sum(initialPos, tetromino.bounds.min);
 
-export const moveTeTromino = (tetromino: Tetromino, to: Position.Position): Tetromino =>
+export const moveTetromino = (tetromino: Tetromino, to: Position.Position): Tetromino =>
   of({
     ...tetromino,
     drawPositions: getMatrixPositions(tetromino.matrix, to),
   });
+
+export const rotateTetromino = (tetromino: Tetromino) => {
+  // Make the rows to become cols (transpose)
+  const shape = tetromino.matrix.map((_, i) =>
+    tetromino.matrix.map((column) => column[i]),
+  );
+  // Reverse each row to get a rotated matrix
+  const nextMatrix = shape.map((row) => row.reverse());
+  const nextPositions = getMatrixPositions(nextMatrix, Position.zero());
+
+  return of({
+    ...tetromino,
+    matrix: nextMatrix,
+    drawPositions: nextPositions,
+    bounds: Grid.gridBoundFromPositions(nextPositions),
+  });
+};
 
 const getMatrixPositions = (
   matrix: TetrominoData.TetrominoConfig['value'],

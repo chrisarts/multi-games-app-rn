@@ -3,8 +3,8 @@ import * as Effect from 'effect/Effect';
 import { StyleSheet, View } from 'react-native';
 import { runForkedTetris } from '../Application/RunGame';
 import { TetrisRuntime } from '../Services/Runtime.layers';
-import { GridControls } from './GameControls.view';
-import { GridView } from './GridSvg.view';
+import { GameCanvas } from './GameCanvas';
+import { GridControls } from './atoms/GameControls.view';
 import { useRenderCounter } from './hooks/useRenderCounter';
 
 TetrisRuntime.runFork(
@@ -16,7 +16,7 @@ export const GameBoardView = () => {
 
   return (
     <View style={styles.container}>
-      <GridView />
+      <GameCanvas />
       <GridControls />
     </View>
   );

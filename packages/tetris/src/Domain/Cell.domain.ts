@@ -1,7 +1,8 @@
+import { Skia, rect, rrect } from '@shopify/react-native-skia';
 import * as Equal from 'effect/Equal';
 import * as Hash from 'effect/Hash';
 import type { SharedValue } from 'react-native-reanimated';
-import type { GridLayout } from './Grid.domain';
+import type { CellLayout, GridLayout, GridState } from './Grid.domain';
 import * as Position from './Position.domain';
 
 const GameCellSymbolKey = 'tetris/cell';
@@ -13,12 +14,23 @@ export interface CellState {
 
 export interface AnimatedCellState {
   merged: boolean;
-  /** 
-   * interpolation modes: 
+  /**
+   * interpolation modes:
    * 0 - Default Color
    * 1 - Tetromino Color
    * */
   colorMode: SharedValue<number>;
+}
+
+export interface CellGameObj {
+  id: string;
+  x: SharedValue<number>;
+  y: SharedValue<number>;
+  r: number;
+  color: string;
+  mergeColor: SharedValue<number>;
+  height: number;
+  width: number;
 }
 
 export const defaultCellColor: string = 'rgba(131, 126, 126, 0.3)';
@@ -49,7 +61,7 @@ export const setColor = (cell: Cell, color: string) =>
     color,
   });
 
-export const getCellSvg = (position: Position.Position, layout: GridLayout['cell']) => ({
+export const getCellSvg = (position: Position.Position, layout: CellLayout) => ({
   x: position.column * layout.containerSize + layout.spacing / 2,
   y: position.row * layout.containerSize + layout.spacing / 2,
   height: layout.size,
@@ -57,3 +69,44 @@ export const getCellSvg = (position: Position.Position, layout: GridLayout['cell
   style: 'fill',
   r: 5,
 });
+
+export const calculateUICellDraw = (
+  position: Position.Position,
+  cellLayout: CellLayout,
+) => {
+  'worklet';
+  const x = position.column * cellLayout.containerSize + cellLayout.spacing / 2;
+  const y = position.row * cellLayout.containerSize + cellLayout.spacing / 2;
+  const width = cellLayout.size - cellLayout.spacing;
+  const height = cellLayout.size - cellLayout.spacing;
+  return {
+    x,
+    y,
+    width,
+    height,
+  };
+};
+
+export const createCellUIRect = (position: Position.Position, cellLayout: CellLayout) => {
+  'worklet';
+  const { x, y, width, height } = calculateUICellDraw(position, cellLayout);
+  return rect(x, y, width, height);
+};
+
+export const createCellUIRRect = (
+  position: Position.Position,
+  cellLayout: CellLayout,
+) => {
+  return rrect(createCellUIRect(position, cellLayout), 5, 5);
+};
+
+export const createCanvasUIPath = (grid: GridState) => {
+  'worklet';
+  const path = Skia.Path.Make();
+  for (const position of grid.positions) {
+    const cell = createCellUIRect(position, grid.layout.cell);
+    path.addRRect(rrect(rect(cell.x, cell.y, cell.width, cell.height), 5, 5));
+  }
+  path.close();
+  return path;
+};

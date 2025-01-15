@@ -7,12 +7,12 @@ export type MoveAction = Data.TaggedEnum<{
   down: Position.Position;
   left: Position.Position;
   right: Position.Position;
+  rotate: Position.Position;
 }>;
 export const MoveAction = Data.taggedEnum<MoveAction>();
 
 export type GameAction = Data.TaggedEnum<{
   move: { to: MoveAction };
-  rotate: { to: MoveAction };
   statusChange: { state: GameState.GameRunState };
 }>;
 
@@ -23,4 +23,5 @@ export const makeMove = {
   down: () => MoveAction.down(Position.of({ column: 0, row: 1 })),
   left: () => MoveAction.left(Position.of({ column: -1, row: 0 })),
   right: () => MoveAction.right(Position.of({ column: 1, row: 0 })),
+  rotate: () => MoveAction.rotate(Position.of({ column: 0, row: 0 })),
 };

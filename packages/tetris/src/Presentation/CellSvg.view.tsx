@@ -1,80 +1,121 @@
-import { Group, Paragraph, RoundedRect, Skia } from '@shopify/react-native-skia';
+import { Group, Paragraph, RoundedRect, type SkRRect } from '@shopify/react-native-skia';
 import * as HashMap from 'effect/HashMap';
-import { useMemo } from 'react';
-import * as Cell from '../Domain/Cell.domain';
-import type * as Grid from '../Domain/Grid.domain';
+import type { CellLayout } from '../Domain/Grid.domain';
 import type * as Position from '../Domain/Position.domain';
-import { useRenderCounter } from './hooks/useRenderCounter';
+import { useCellParagraph } from './hooks/useCell';
 import { useGameStore } from './hooks/useStore';
-export const cellDefaultColor = 'rgba(131, 126, 126, 0.3)';
 
 interface CellViewProps {
+  cell: SkRRect;
   position: Position.Position;
-  cellLayout: Grid.CellLayout;
+  layout: CellLayout;
 }
 
-export const TetrisCellSvg = ({ position, cellLayout }: CellViewProps) => {
-  // useRenderCounter(`Cell: ${position.row} ${position.column}`)
-  const cellState = useGameStore(
-    (selector) => HashMap.unsafeGet(selector.grid.cellsMap, position).state,
+export const TetrisCellSvg = (props: CellViewProps) => {
+  const state = useGameStore(
+    (state) => HashMap.unsafeGet(state.grid.cellsMap, props.position).state,
   );
+  const paragraph = useCellParagraph(props.position, props.layout);
 
-  const paragraph = useMemo(() => {
-    const para = Skia.ParagraphBuilder.Make()
-      .addText(`${position.row}:${position.column}`)
-      .build();
-    para.layout(cellLayout.size);
-    return para;
-  }, [position, cellLayout]);
-
-  const svg = Cell.getCellSvg(position, cellLayout);
   return (
     <Group>
-      <RoundedRect
-        height={svg.height}
-        width={svg.width}
-        r={svg.r}
-        x={svg.x}
-        y={svg.y}
-        style='fill'
-        color={cellState.color}
-      />
+      <RoundedRect rect={props.cell} style='fill' color={state.color} />
       <Paragraph
         paragraph={paragraph}
-        width={cellLayout.size * 0.9}
-        x={svg.x + cellLayout.spacing}
-        y={svg.y + cellLayout.spacing}
+        width={props.cell.rect.width}
+        x={props.cell.rect.x}
+        y={props.cell.rect.y}
       />
     </Group>
   );
 };
 
-// interface TetrisShapeCellSvgProps {
-//   position: SharedValue<BoardPosition>;
-//   width: number;
-//   height: number;
-//   color: SharedValue<string>;
-//   containerSize: number;
-//   padding: number;
-//   coords: BoardPosition;
-// }
-// export const TetrisShapeCellSvg = ({
-//   coords,
-//   color,
-//   height,
-//   width,
-//   position,
-//   containerSize,
-//   padding,
-// }: TetrisShapeCellSvgProps) => {
-//   const coordinate = useDerivedValue(() => {
-//     return {
-//       x: (coords.y + position.value.y) * containerSize + padding / 2,
-//       y: (coords.x + position.value.x) * containerSize + padding / 2,
-//     };
-//   });
-//   const x = useDerivedValue(() => coordinate.value.x);
-//   const y = useDerivedValue(() => coordinate.value.y);
+// return (
+//   <Fill>
+//     <RoundedRect rect={props.cell} style='fill' color={cellColor} />
+//     {/* <Paragraph
+//       paragraph={paragraph}
+//       width={props.cellLayout.size * 0.9}
+//       x={svg.x + props.cellLayout.spacing}
+//       y={svg.y + props.cellLayout.spacing}
+//     /> */}
+//   </Fill>
+// );
 
-//   return <RoundedRect x={x} y={y} width={width} height={height} color={color} r={5} />;
+// useEffect(() => {
+//   const subscription = GameStore.GameStore.subscribe((state) => {
+//     'worklet';
+//     if (state.tetromino.current.color !== nextColorRef.current.color) {
+//       nextColorRef.current = state.tetromino.current;
+//     }
+
+//     const includesCell = state.tetromino.current.drawPositions.some((x) =>
+//       Position.Eq.equals(props.position, Position.sum(state.tetromino.position, x)),
+//     );
+//     if (
+//       props.position.row <= state.grid.bounds.max.row &&
+//       includesCell &&
+//       cellObject.mergeColor.value === 0
+//     ) {
+//       cellObject.mergeColor.value = withSpring(includesCell ? 1 : 0, {
+//         duration: 100,
+//         reduceMotion: ReduceMotion.Never,
+//         dampingRatio: 50,
+//       });
+//     } else if (
+//       cellObject.mergeColor.value === 1 &&
+//       props.position.row <= state.grid.bounds.max.row
+//     ) {
+//       cellObject.mergeColor.value = withSpring(includesCell ? 1 : 0, {
+//         duration: 100,
+//         reduceMotion: ReduceMotion.Never,
+//         stiffness: 100,
+//         dampingRatio: 500,
+//         restDisplacementThreshold: 10,
+//       });
+//     }
+//   });
+
+//   return () => {
+//     subscription();
+//   };
+// }, [props.position]);
+
+// const cellColor = useDerivedValue(() => {
+//   return interpolateColors(
+//     cellObject.mergeColor.value,
+//     [0, 1],
+//     [defaultCellColor, nextColorRef.current.color],
+//   );
+// });
+// const opacity = useDerivedValue(() => {
+//   return interpolate(
+//     cellObject.mergeColor.value,
+//     [0, 0.5, 0],
+//     [1, 0.5, 1],
+//     Extrapolate.CLAMP,
+//   );
+// });
+
+// const useCellSvgState = (cell: CellViewProps) => {
+//   // useRenderCounter(`Cell: ${position.row} ${position.column}`)
+//   const cellState = useGameStore(
+//     (selector) => HashMap.unsafeGet(selector.grid.cellsMap, cell.position).state,
+//   );
+
+//   const paragraph = useMemo(() => {
+//     const para = Skia.ParagraphBuilder.Make()
+//       .addText(`${cell.position.row}:${cell.position.column}`)
+//       .build();
+//     para.layout(cell.cellLayout.size);
+//     return para;
+//   }, [cell]);
+
+//   const svg = Cell.getCellSvg(cell.position, cell.cellLayout);
+
+//   return {
+//     svg,
+//     paragraph,
+//     cellState,
+//   };
 // };

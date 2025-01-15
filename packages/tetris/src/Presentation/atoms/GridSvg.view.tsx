@@ -1,8 +1,9 @@
 import { Canvas } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
-import { TetrisCellSvg } from './CellSvg.view';
-import { useRenderCounter } from './hooks/useRenderCounter';
-import { useGameStore } from './hooks/useStore';
+import { createCellUIRRect } from '../../Domain/Cell.domain';
+import { TetrisCellSvg } from '../CellSvg.view';
+import { useRenderCounter } from '../hooks/useRenderCounter';
+import { useGameStore } from '../hooks/useStore';
 
 export const GridView = () => {
   useRenderCounter('GridView');
@@ -13,8 +14,9 @@ export const GridView = () => {
       grid.positions.map((gridPoint) => (
         <TetrisCellSvg
           key={`[${gridPoint.row},${gridPoint.column}]`}
+          cell={createCellUIRRect(gridPoint, grid.layout.cell)}
           position={gridPoint}
-          cellLayout={grid.layout.cell}
+          layout={grid.layout.cell}
         />
       )),
     [grid.positions, grid.layout],

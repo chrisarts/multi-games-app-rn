@@ -47,59 +47,50 @@ const setCurrentStatus = (nextStatus: GameState.GameRunState) =>
     state.game.status = nextStatus;
   });
 
-const refreshCurrentCells = (
+const refreshGrid = (
   tetromino: Tetromino.Tetromino,
-  position: Position.Position,
+  nextPosition: Position.Position,
   merged: boolean,
-) => {
-  for (const drawPos of tetromino.drawPositions) {
-    const cell = HashMap.get(
-      GameStore.getState().grid.cellsMap,
-      Position.sum(drawPos, position),
-    );
-    if (Option.isNone(cell)) continue;
-
-    cell.value.state = {
-      color: tetromino.color,
-      merged,
-    };
-  }
-};
-const clearCurrentCells = () => {
-  for (const drawPos of GameStore.getState().tetromino.current.drawPositions) {
-    const cell = HashMap.get(
-      GameStore.getState().grid.cellsMap,
-      Position.sum(drawPos, GameStore.getState().tetromino.position),
-    );
-    if (Option.isNone(cell)) continue;
-
-    cell.value.state = {
-      color: cell.value.state.merged ? cell.value.state.color : defaultCellColor,
-      merged: cell.value.state.merged,
-    };
-  }
-};
-const refreshGrid = (nextPosition: Position.Position, merged: boolean) =>
+) =>
   makeUnsafeSetter((state) => {
-    clearCurrentCells();
-    refreshCurrentCells(state.tetromino.current, nextPosition, merged);
-    state.tetromino.position = nextPosition;
-    if (!merged) return;
+    // clearCurrentCells();
+    // refreshCurrentCells(state.tetromino.current, nextPosition, merged);
+    if (tetromino !== state.tetromino.current) {
+      console.log('DIFF');
+      state.tetromino.current = tetromino;
+    }
+
+    if (!merged) {
+      state.tetromino.position = nextPosition;
+      return;
+    }
     const nextTetromino = Tetromino.getRandomTetromino();
-    state.tetromino.current = state.tetromino.next;
-    state.tetromino.next = nextTetromino;
     const initialPosition = Tetromino.getTetrominoInitialPos(
       state.grid.layout.initialPosition,
       nextTetromino,
     );
 
+    for (const drawPos of state.tetromino.current.drawPositions) {
+      const cell = HashMap.get(
+        GameStore.getState().grid.cellsMap,
+        Position.sum(drawPos, state.tetromino.position),
+      );
+      if (Option.isNone(cell)) continue;
+
+      cell.value.state = {
+        color: state.tetromino.current.color,
+        merged: true,
+      };
+    }
+
+    state.tetromino.current = state.tetromino.next;
+    state.tetromino.next = nextTetromino;
+
     state.tetromino.position = initialPosition;
-    refreshCurrentCells(state.tetromino.current, initialPosition, false);
   });
 
 export const StoreActions = {
   setCurrentPosition,
   setCurrentStatus,
   refreshGrid,
-  refreshCurrentCells,
 };

@@ -4,67 +4,80 @@ import * as GameState from '../Domain/GameState.domain';
 import * as Position from '../Domain/Position.domain';
 import * as Tetromino from '../Domain/Tetromino.domain';
 import * as GameStore from '../Store/Game.store';
-import { debugObjectLog } from '../utils/log.utils';
 
 export const MoveTetrominoProgram = (nextMove: GameAction.MoveAction) =>
   Effect.gen(function* () {
     const store = GameStore.GameStore;
-
     const currentPosition = store.getState().tetromino.position;
-    const currentShape = store.getState().tetromino.current;
-    const gridBounds = store.getState().grid.bounds;
-    const cellsMap = store.getState().grid.cellsMap;
-
     const nextPos = Position.sum(nextMove, currentPosition);
-    console.log('NEXT_POS: ', nextPos);
-    const nextDrawAndBounds = Tetromino.mapWithPosition(currentShape, nextPos);
 
+    const prevShape = store.getState().tetromino.current;
+    const currentShape = yield* Effect.sync(() => {
+      const current = store.getState().tetromino.current;
+      if (nextMove._tag !== 'rotate') return current;
+      return Tetromino.rotateTetromino(current);
+    });
+
+    const gridState = store.getState().grid;
     const collisions = GameState.collisionChecker({
-      grid: gridBounds,
-      tetromino: nextDrawAndBounds.bounds,
-    });
-
-    if (collisions.gameOver) {
-      debugObjectLog('GAME_OVER', nextDrawAndBounds.bounds);
-      return 'game over';
-    }
-
-    if (collisions.shouldMerge) {
-      debugObjectLog('MERGE: ', nextDrawAndBounds.bounds);
-      yield* Effect.sync(() => GameStore.StoreActions.refreshGrid(currentPosition, true));
-      return 'merge shape';
-    }
-
-    if (!collisions.insideGrid) {
-      console.log('INVALID_NEXT_POS: ', {
-        collisions,
-        bounds: nextDrawAndBounds.bounds,
-        pos: nextPos,
-      });
-      return 'invalid position';
-    }
-
-    const siblingCollision = GameState.checkMergedSiblings({
-      cells: cellsMap,
-      position: nextPos,
+      grid: gridState,
       tetromino: currentShape,
+      position: nextPos,
     });
 
-    if (siblingCollision.siblings) {
-      GameStore.StoreActions.refreshGrid(currentPosition, siblingCollision.merge);
-      return 'sibling collide';
+    const debugData = {
+      collisions: collisions.checks,
+      currentPosition,
+      nextPosition: nextPos,
+      tetrominoBounds: currentShape.bounds,
+      move: nextMove,
+    };
+
+    if (collisions.checks.isGameOver) {
+      GameStore.StoreActions.setCurrentStatus('GameOver');
+      return {
+        run: 'GameOver',
+        debugData,
+      };
     }
 
-    // const { positions } = Tetromino.mapWithPosition(tetromino, currentPos);
+    if (collisions.checks.hasCellCollisions) {
+      if (nextMove._tag === 'down') {
+        GameStore.StoreActions.refreshGrid(currentShape, currentPosition, true);
+      }
+      return {
+        run: 'MergeWithSiblings',
+        debugData,
+      };
+    }
 
-    // yield* gameRepo.unsafeUpdateBoard({
-    //   tetromino: currentBlock,
-    //   updatedPosition: collisions.shouldMerge ? currentPos : nextPos,
-    //   fromPositions: currentBlock.drawPositions.map((x) => Position.sum(x, currentPos)),
-    //   toPositions: nextBlockPos.positions,
-    //   merge: collisions.shouldMerge,
-    // });
-    
-    GameStore.StoreActions.refreshGrid(nextPos, false);
-    return 'normal refresh';
-  });
+    if (collisions.checks.hasInvalidPosition && collisions.checks.isBeyondOrAtMaxRow) {
+      if (nextMove._tag === 'down') {
+        GameStore.StoreActions.refreshGrid(currentShape, currentPosition, true);
+      }
+      return {
+        run: 'BlockShapeOrMergeDown',
+        debugData,
+      };
+    }
+
+    if (collisions.checks.hasInvalidPosition) {
+      return {
+        run: 'InvalidPosition',
+        debugData,
+      };
+    }
+
+    GameStore.StoreActions.refreshGrid(currentShape, nextPos, false);
+    return {
+      run: 'MoveTetromino',
+      debugData,
+    };
+  }).pipe(
+    Effect.catchAll((x) =>
+      Effect.succeed({
+        run: 'Failed',
+        debugData: x,
+      }),
+    ),
+  );

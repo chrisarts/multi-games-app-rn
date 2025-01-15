@@ -21,7 +21,7 @@ const moveDown = async () =>
 
 const rotate = async () =>
   publishPlayerAction(
-    GameAction.GameAction.rotate({ to: GameAction.MoveAction.down(Position.zero()) }),
+    GameAction.GameAction.move({ to: GameAction.makeMove.rotate() })
   );
 
 const startGame = async () =>
