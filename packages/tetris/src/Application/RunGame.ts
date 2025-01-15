@@ -14,7 +14,7 @@ export const runForkedTetris = Effect.gen(function* () {
   const updatesDequeue = yield* Queue.take(playerActions).pipe(
     Effect.map((action) => {
       if (action._tag === 'move') {
-        return MoveTetrominoProgram(action.to);
+        return MoveTetrominoProgram(action);
       }
       if (action._tag === 'statusChange') {
         return onStatusAction(action.state);
@@ -34,9 +34,7 @@ export const runForkedTetris = Effect.gen(function* () {
 
     yield* Effect.sleep(Duration.millis(speed));
     if (!stop) {
-      yield* publishAction(
-        GameAction.GameAction.move({ to: GameAction.makeMove.down() }),
-      );
+      yield* publishAction(GameAction.GameAction.move(GameAction.makeMove.down()));
     }
   }).pipe(
     Effect.repeat({

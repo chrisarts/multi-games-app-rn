@@ -55,21 +55,6 @@ export class Cell implements Equal.Equal {
 
 export const makeCell = (position: Position.Position): Cell => new Cell(position);
 
-export const setColor = (cell: Cell, color: string) =>
-  (cell.state = {
-    ...cell.state,
-    color,
-  });
-
-export const getCellSvg = (position: Position.Position, layout: Grid.CellLayout) => ({
-  x: position.column * layout.containerSize + layout.spacing / 2,
-  y: position.row * layout.containerSize + layout.spacing / 2,
-  height: layout.size,
-  width: layout.size,
-  style: 'fill',
-  r: 5,
-});
-
 export const calculateUICellDraw = (
   position: Position.Position,
   cellLayout: Grid.CellLayout,
@@ -97,6 +82,7 @@ export const createCellUIRRect = (
   position: Position.Position,
   cellLayout: Grid.CellLayout,
 ) => {
+  'worklet';
   return rrect(createCellUIRect(position, cellLayout), 5, 5);
 };
 

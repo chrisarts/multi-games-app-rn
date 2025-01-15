@@ -5,15 +5,15 @@ import * as Position from '../Domain/Position.domain';
 import * as Tetromino from '../Domain/Tetromino.domain';
 import * as GameStore from '../Store/Game.store';
 
-export const MoveTetrominoProgram = (nextMove: GameAction.MoveAction) =>
+export const MoveTetrominoProgram = (move: GameAction.MoveAction) =>
   Effect.gen(function* () {
     const store = GameStore.GameStore;
     const currentPosition = store.getState().tetromino.position;
-    const nextPos = Position.sum(nextMove, currentPosition);
+    const nextPos = Position.sum(move.unit, currentPosition);
 
     const currentShape = yield* Effect.sync(() => {
       const current = store.getState().tetromino.current;
-      if (nextMove._tag !== 'rotate') return current;
+      if (move.direction !== 'rotate') return current;
       return Tetromino.rotateTetromino(current);
     });
 
@@ -29,7 +29,7 @@ export const MoveTetrominoProgram = (nextMove: GameAction.MoveAction) =>
       currentPosition,
       nextPosition: nextPos,
       tetrominoBounds: currentShape.bounds,
-      move: nextMove,
+      move: move,
     };
 
     if (collisions.checks.isGameOver) {
@@ -41,7 +41,7 @@ export const MoveTetrominoProgram = (nextMove: GameAction.MoveAction) =>
     }
 
     if (collisions.checks.hasCellCollisions) {
-      if (nextMove._tag === 'down') {
+      if (move.direction === 'down') {
         GameStore.StoreActions.refreshGrid(currentShape, currentPosition, true);
       }
       return {
@@ -51,7 +51,7 @@ export const MoveTetrominoProgram = (nextMove: GameAction.MoveAction) =>
     }
 
     if (collisions.checks.hasInvalidPosition && collisions.checks.isBeyondOrAtMaxRow) {
-      if (nextMove._tag === 'down') {
+      if (move.direction === 'down') {
         GameStore.StoreActions.refreshGrid(currentShape, currentPosition, true);
       }
       return {

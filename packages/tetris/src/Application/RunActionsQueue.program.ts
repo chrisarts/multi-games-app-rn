@@ -8,7 +8,7 @@ export const RunActionsQueue = (actions: Iterable<GameAction.GameAction>) =>
   Effect.all(
     Iterable.map(actions, (action) =>
       GameAction.GameAction.$match(action, {
-        move: (x) => MoveTetrominoProgram(x.to),
+        move: (x) => MoveTetrominoProgram(x),
         statusChange: (x) =>
           Effect.sync(() =>
             GameStore.setState((prev) => {

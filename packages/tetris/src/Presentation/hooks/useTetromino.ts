@@ -36,18 +36,15 @@ export const useTetrominoPath = (grid: Grid.GridState) => {
 
   useEffect(() => {
     const position = Cell.calculateUICellDraw(dropPosition, cellLayout);
-    animatedPosition.value = withSpring(
+    animatedPosition.value = withTiming(
       {
         columnX: position.x,
         rowY: position.y,
       },
       {
         duration: dropPosition.row === 0 ? 0 : 100,
-        dampingRatio: 10,
-        restSpeedThreshold: 0.5,
         reduceMotion: ReduceMotion.Never,
-        stiffness: 500,
-        velocity: 5
+        easing: Easing.steps(1000, true),
       },
     );
   }, [dropPosition, animatedPosition, cellLayout]);
@@ -66,6 +63,7 @@ const createTetrominoPath = (positions: Position.Position[], grid: Grid.CellLayo
     const cell = Cell.createCellUIRect(position, grid);
     path.addRRect(rrect(rect(cell.x, cell.y, cell.width, cell.height), 5, 5));
   }
+  path.transform(Skia.Matrix([1, 2, 3, 4, 5, 6, 7, 8, 9]));
   path.close();
   return path;
 };

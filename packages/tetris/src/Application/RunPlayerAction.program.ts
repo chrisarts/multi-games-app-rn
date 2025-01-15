@@ -10,18 +10,16 @@ export const publishPlayerAction = (action: GameAction.GameAction) =>
   );
 
 const moveLeft = () =>
-  publishPlayerAction(GameAction.GameAction.move({ to: GameAction.makeMove.left() }));
+  publishPlayerAction(GameAction.GameAction.move(GameAction.makeMove.left()));
 
 const moveRight = () =>
-  publishPlayerAction(GameAction.GameAction.move({ to: GameAction.makeMove.right() }));
+  publishPlayerAction(GameAction.GameAction.move(GameAction.makeMove.right()));
 
 const moveDown = async () =>
-  publishPlayerAction(GameAction.GameAction.move({ to: GameAction.makeMove.down() }));
+  publishPlayerAction(GameAction.GameAction.move(GameAction.makeMove.down()));
 
 const rotate = async () =>
-  publishPlayerAction(
-    GameAction.GameAction.move({ to: GameAction.makeMove.rotate() })
-  );
+  publishPlayerAction(GameAction.GameAction.move(GameAction.makeMove.rotate()));
 
 const startGame = async () =>
   publishPlayerAction(GameAction.GameAction.statusChange({ state: 'InProgress' }));
