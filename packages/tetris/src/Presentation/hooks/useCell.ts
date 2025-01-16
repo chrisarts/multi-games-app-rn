@@ -4,12 +4,13 @@ import { useSharedValue } from 'react-native-reanimated';
 import * as Cell from '../../Domain/Cell.domain';
 import type * as Grid from '../../Domain/Grid.domain';
 import type * as Position from '../../Domain/Position.domain';
+import { calculateUICellDraw } from '../worklets/cell.worklet';
 
 export const useAnimatedCell = (
   position: Position.Position,
   cellLayout: Grid.CellLayout,
 ) => {
-  const cellRect = Cell.calculateUICellDraw(position, cellLayout);
+  const cellRect = calculateUICellDraw(position, cellLayout);
   const cellObject: Cell.CellGameObj = {
     id: `[${position.row},${position.column}]`,
     r: 5,

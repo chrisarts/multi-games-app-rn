@@ -1,22 +1,15 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { TetrisGame } from '@games/tetris';
-import { useFonts } from 'expo-font';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
-    'Digital-Regular': require('./assets/fonts/Digital-Regular.ttf'),
-    'Digital-Bold': require('./assets/fonts/Digital-Bold.ttf'),
-    'Digital-Italic': require('./assets/fonts/Digital-Italic.ttf'),
-    'Digital-ItalicBold': require('./assets/fonts/Digital-ItalicBold.ttf'),
-  });
-  if (!fontsLoaded) return null;
-
+  console.log("METRICS: ", initialWindowMetrics)
   return (
     <GestureHandlerRootView style={styles.container}>
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <TetrisGame />
-      </SafeAreaView>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

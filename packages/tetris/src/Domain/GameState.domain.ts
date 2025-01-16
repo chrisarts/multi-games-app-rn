@@ -1,3 +1,4 @@
+import { Array } from 'effect';
 import * as HashMap from 'effect/HashMap';
 import * as Option from 'effect/Option';
 import type * as Cell from './Cell.domain';
@@ -13,6 +14,7 @@ export interface GameState {
   };
   game: {
     status: GameRunState;
+    lines: number;
     speed: number;
   };
   grid: Grid.GridState;
@@ -73,32 +75,3 @@ export const collisionChecker = (check: {
     },
   };
 };
-
-// export const checkMergedSiblings = (state: {
-//   cells: Grid.GridState['cellsMap'];
-//   tetromino: Tetromino.Tetromino;
-//   /** This position must be valid or this method will throw */
-//   position: Position.Position;
-// }) => {
-//   let collided = false;
-//   let overlaps = false;
-//   const positionBounds = {
-//     max: Position.sum(state.tetromino.bounds.max, state.position),
-//     min: Position.sum(state.tetromino.bounds.min, state.position),
-//   };
-//   for (const drawPos of state.tetromino.drawPositions) {
-//     const nextPos = Position.sum(drawPos, state.position);
-//     const cell = HashMap.unsafeGet(state.cells, nextPos);
-//     const isBellow = Position.Order.rowGreatThan(positionBounds.max, cell.position);
-//     const isSamePos = Position.Eq.equals(cell.position, nextPos);
-
-//     collided = collided || (cell.state.merged && isBellow);
-//     overlaps = overlaps || (cell.state.merged && isSamePos);
-//   }
-
-//   return {
-//     overlaps,
-//     collided,
-//     mergeCurrentPos: collided && overlaps,
-//   };
-// };

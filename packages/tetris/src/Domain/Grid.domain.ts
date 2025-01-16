@@ -36,6 +36,7 @@ export interface GridLayout extends GridConfig {
   initialPosition: Position.Position;
   canvas: GridConfig['screen'];
   cell: CellLayout;
+  remainingSpace: number;
 }
 
 /**
@@ -94,12 +95,15 @@ export const getGridLayout = ({ screen, size }: GridConfig): GridLayout => {
   const canvasWidth = height;
   const canvasHeight = size.rows * squareContainerSize;
 
+  const remainingSpace = height - canvasHeight;
+
   const midX = Math.floor(size.columns / 3);
   return {
     screen,
     size,
     initialPosition: Position.of({ row: 0, column: midX }),
     canvas: { width: canvasWidth, height: canvasHeight },
+    remainingSpace,
     cell: {
       containerSize: squareContainerSize,
       size: squareSize,

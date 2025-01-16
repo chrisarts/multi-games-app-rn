@@ -43,12 +43,8 @@ export const TetrisCellSvg = (props: CellViewProps) => {
 
   return (
     <Group>
-      <RoundedRect
-        rect={props.cell}
-        style='fill'
-        color={cellColor}
-      />
-      {/* {debug && (
+      <RoundedRect rect={props.cell} style='fill' color={cellColor} />
+      {debug && (
         <Paragraph
           paragraph={paragraph}
           style='fill'
@@ -56,7 +52,7 @@ export const TetrisCellSvg = (props: CellViewProps) => {
           x={props.cell.rect.x}
           y={props.cell.rect.y}
         />
-      )} */}
+      )}
     </Group>
   );
 };

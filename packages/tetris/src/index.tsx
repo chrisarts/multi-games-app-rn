@@ -1,11 +1,11 @@
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { GameBoardView } from './Presentation/Board.view';
 
 export const TetrisGame = () => {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <GameBoardView />
-    </SafeAreaView>
+    </View>
   );
 };
 
