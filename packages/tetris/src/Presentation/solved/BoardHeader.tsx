@@ -9,12 +9,12 @@ import {
 } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
 import type { EdgeInsets } from 'react-native-safe-area-context';
-import { makeGridState } from '../Domain/Grid.domain';
-import * as Position from '../Domain/Position.domain';
-import { getTetrominoInitialPos } from '../Domain/Tetromino.domain';
-import { useGameStore } from './hooks/useStore';
-import { useTetrominoPath } from './hooks/useTetromino';
-import { calculateUICellDraw } from './worklets/cell.worklet';
+import { makeGridState } from '../../Domain/Grid.domain';
+import * as Position from '../../Domain/Position.domain';
+import { getTetrominoInitialPos } from '../../Domain/Tetromino.domain';
+import { useGameStore } from '../hooks/useStore';
+import { useTetrominoPath } from '../hooks/useTetromino';
+import { calculateUICellDraw } from '../worklets/cell.worklet';
 
 export const BoardHeader = ({ insets }: { insets: EdgeInsets }) => {
   const lines = useGameStore((x) => x.game.lines);

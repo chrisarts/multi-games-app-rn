@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { GameBoardView } from './Presentation/Board.view';
+import { GameBoardView } from './Presentation/solved/Board.view';
 
 export const TetrisGame = () => {
   return (

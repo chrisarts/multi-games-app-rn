@@ -6,6 +6,7 @@ import {
   type SharedValue,
   useDerivedValue,
   useSharedValue,
+  withRepeat,
   withTiming,
 } from 'react-native-reanimated';
 import type * as GridState from '../Domain/Grid.domain';
@@ -20,6 +21,7 @@ interface TetrominoViewProps {
   layout: GridState.CellLayout;
   position: SharedValue<{ x: number; y: number }>;
 }
+
 
 export const TetrominoView = ({ tetromino, layout, position }: TetrominoViewProps) => {
   const tetrominoPath = useMemo(
@@ -62,27 +64,35 @@ export const CurrentTetromino = () => {
   const initialPosition = useGameStore((x) => x.grid.layout.initialPosition);
   const tetromino = useGameStore((x) => x.tetromino.current);
   const drawPosition = useGameStore((x) => x.tetromino.position);
+  const speed = useGameStore((x) => x.game.speed);
   const cellLayout = useGameStore((x) => x.grid.layout.cell);
 
+  const celPos = useMemo(
+    () => calculateUICellDraw(drawPosition, cellLayout),
+    [drawPosition, cellLayout],
+  );
   const animatedPosition = useSharedValue({
     x: initialPosition.column,
     y: initialPosition.row,
   });
 
   useEffect(() => {
-    const celPos = calculateUICellDraw(drawPosition, cellLayout);
-    animatedPosition.value = withTiming(
-      {
-        x: celPos.x - cellLayout.spacing / 2,
-        y: celPos.y - cellLayout.spacing / 2,
-      },
-      {
-        duration: drawPosition.row === 0 ? 0 : 100,
-        reduceMotion: ReduceMotion.Never,
-        easing: Easing.steps(1000, true),
-      },
+    animatedPosition.value = withRepeat(
+      withTiming(
+        {
+          x: celPos.x - cellLayout.spacing / 2,
+          y: celPos.y - cellLayout.spacing / 2,
+        },
+        {
+          duration: drawPosition.row === 0 ? 0 : speed,
+          reduceMotion: ReduceMotion.Never,
+          easing: Easing.in(Easing.linear),
+        },
+      ),
+      -1,
+      false,
     );
-  }, [drawPosition, animatedPosition, cellLayout]);
+  }, [drawPosition, animatedPosition, cellLayout, speed, celPos]);
 
   return (
     <TetrominoView

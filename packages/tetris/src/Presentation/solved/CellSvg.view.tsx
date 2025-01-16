@@ -9,11 +9,11 @@ import {
 import * as HashMap from 'effect/HashMap';
 import { useEffect } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
-import * as Cell from '../Domain/Cell.domain';
-import type { CellLayout } from '../Domain/Grid.domain';
-import type * as Position from '../Domain/Position.domain';
-import { useCellParagraph } from './hooks/useCell';
-import { useGameStore } from './hooks/useStore';
+import * as Cell from '../../Domain/Cell.domain';
+import type { CellLayout } from '../../Domain/Grid.domain';
+import type * as Position from '../../Domain/Position.domain';
+import { useCellParagraph } from '../hooks/useCell';
+import { useGameStore } from '../hooks/useStore';
 
 interface CellViewProps {
   cell: SkRRect;
