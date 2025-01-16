@@ -1,8 +1,8 @@
 import * as Effect from 'effect/Effect';
 import * as Fiber from 'effect/Fiber';
 import { useEffect, useSyncExternalStore } from 'react';
+import { useRenderCounter } from '../../App/Presentation/hooks/useRenderCounter';
 import { GameRunState } from '../../Domain/Game.domain';
-import { useRenderCounter } from '../../Presentation/hooks/useRenderCounter';
 import type { MoveDirection } from '../models/Action.model';
 import { _GameState } from '../old-models/Board.model';
 import { tetrisContext } from '../programs/game.program';

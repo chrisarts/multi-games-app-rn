@@ -1,9 +1,9 @@
 import * as Context from 'effect/Context';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
+import { GridStore } from '../../App/Store/Grid.store';
 import * as Bounds from '../../Domain/GridBound.domain';
 import type * as Position from '../../Domain/Position.domain';
-import { GridStore } from '../../Store/Grid.store';
 import * as BoardModel from '../models/GameBoard';
 
 export const make = Effect.gen(function* () {

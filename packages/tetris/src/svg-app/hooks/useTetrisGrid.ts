@@ -1,6 +1,6 @@
 import * as Effect from 'effect/Effect';
 import { useState, useSyncExternalStore } from 'react';
-import { useRenderCounter } from '../../Presentation/hooks/useRenderCounter';
+import { useRenderCounter } from '../../App/Presentation/hooks/useRenderCounter';
 import { GameRunState, MoveDirection, PlayerAction } from '../../models/Action.model';
 import { getTetrisGameHandler } from '../programs/game.program';
 import { TetrisRuntime } from '../programs/tetris.runtime';

@@ -6,9 +6,9 @@ import Animated, {
   FlipOutEasyY,
   ReduceMotion,
 } from 'react-native-reanimated';
+import { TetrisRuntime } from '../../App/Services/Runtime.layers';
 import { runForkedTetris } from '../../Application/RunGame';
 import * as Position from '../../Domain/Position.domain';
-import { TetrisRuntime } from '../../Services/Runtime.layers';
 import { GridControls } from '../GameControls.view';
 import { useRenderCounter } from '../hooks/useRenderCounter';
 import { useGridStore } from '../hooks/useStore';

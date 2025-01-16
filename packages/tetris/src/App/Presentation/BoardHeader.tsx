@@ -1,17 +1,13 @@
-import { getDeviceDimensions } from '@games/shared';
 import {
   FillType,
   Group,
   Path,
   Skia,
   StrokeCap,
-  center,
-  processTransform2d,
   rect,
   rrect,
 } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
-import { StyleSheet } from 'react-native';
 import type { EdgeInsets } from 'react-native-safe-area-context';
 import { makeGridState } from '../Domain/Grid.domain';
 import * as Position from '../Domain/Position.domain';
