@@ -9,12 +9,12 @@ import {
 } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRRectGrid } from '../hooks/useGrid';
-import { useGameStore } from '../hooks/useStore';
 import { BoardHeader } from './BoardHeader';
 import { TetrisCellSvg } from './CellSvg.view';
 import { TetrisShader } from './Shader';
 import { CurrentTetromino } from './Tetromino.view';
+import { useRRectGrid } from './hooks/useGrid';
+import { useGameStore } from './hooks/useStore';
 
 export const GameCanvas = () => {
   const clock = useClock();

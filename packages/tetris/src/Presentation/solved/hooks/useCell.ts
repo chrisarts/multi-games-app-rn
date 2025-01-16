@@ -1,18 +1,18 @@
 import { Skia } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
-import * as Cell from '../../Domain/Cell.domain';
-import type * as Grid from '../../Domain/Grid.domain';
-import type * as Position from '../../Domain/Position.domain';
-import { calculateUICellDraw } from '../worklets/cell.worklet';
+import * as Cell from '../../../Domain/Cell.domain';
+import type * as Grid from '../../../Domain/Grid.domain';
+import type * as Position from '../../../Domain/Position.domain';
+import { calculateUICellDraw } from '../../worklets/cell.worklet';
 
 export const useAnimatedCell = (
   position: Position.Position,
   cellLayout: Grid.CellLayout,
 ) => {
   const cellRect = calculateUICellDraw(position, cellLayout);
-  const cellObject: Cell.CellGameObj = {
-    id: `[${position.row},${position.column}]`,
+  const cellObject: any = {
+    id: `[${position.y},${position.x}]`,
     r: 5,
     x: useSharedValue(cellRect.x),
     y: useSharedValue(cellRect.y),
@@ -34,7 +34,7 @@ export const useCellParagraph = (
 ) =>
   useMemo(() => {
     const para = Skia.ParagraphBuilder.Make()
-      .addText(`${position.row}:${position.column}`)
+      .addText(`${position.y}:${position.x}`)
       .pushStyle({
         color: Skia.Color('white'),
         backgroundColor: Skia.Color('red'),

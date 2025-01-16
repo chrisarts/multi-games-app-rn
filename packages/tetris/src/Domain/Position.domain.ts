@@ -1,33 +1,30 @@
-import * as Data from 'effect/Data';
+import type { SkPoint } from '@shopify/react-native-skia';
 import * as Equal from 'effect/Equal';
 import * as Equivalence from 'effect/Equivalence';
 import * as Ord from 'effect/Order';
 
-export interface Position {
-  row: number;
-  column: number;
-}
-export const Position = Data.struct<Position>;
-export const of = Position;
-export const zero = () => Position({ row: 0, column: 0 });
+export interface Position extends SkPoint {}
+export const make = (point: Position) => point;
+export const of = make;
+export const zero = () => make({ y: 0, x: 0 });
 
 // export const reduce = (position: Position, collection: Position[]) =>
 //   collection.reduce(sum, position);
 
 export const sum = (self: Position, that: Position): Position =>
-  of({ row: self.row + that.row, column: self.column + that.column });
+  of({ y: self.y + that.y, x: self.x + that.x });
 
 export const minus = (self: Position, that: Position): Position =>
-  of({ row: self.row - that.row, column: self.column - that.column });
+  of({ y: self.y - that.y, x: self.x - that.x });
 
-const getRow = (position: Position): number => position.row;
-const getColumn = (position: Position): number => position.column;
+const getRow = (position: Position): number => position.y;
+const getColumn = (position: Position): number => position.x;
 
 const ordRow = Ord.mapInput(Ord.number, getRow);
 const ordColumn = Ord.mapInput(Ord.number, getColumn);
 const sort: Ord.Order<Position> = Ord.make<Position>((a, b) => {
-  if (a.row < b.row) return -1;
-  if (a.row === b.row && a.column < b.column) return -1;
+  if (a.y < b.y) return -1;
+  if (a.y === b.y && a.x < b.x) return -1;
 
   return 1;
 });
@@ -48,8 +45,7 @@ export const Eq = {
   eqRow: Equivalence.mapInput(Equivalence.number, getRow),
   eqColumn: Equivalence.mapInput(Equivalence.number, getColumn),
   equals: Equivalence.make<Position>(
-    (self, that) =>
-      Equal.equals(self, that) || (self.row === that.row && self.column === that.column),
+    (self, that) => Equal.equals(self, that) || (self.y === that.y && self.x === that.x),
   ),
 };
 

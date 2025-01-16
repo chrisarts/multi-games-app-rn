@@ -1,5 +1,5 @@
 import { RoundedRect } from '@shopify/react-native-skia';
-import type { TetrisCell_ } from '../../Domain/AnimatedTetris';
+import type { TetrisCell_ } from '../Domain/AnimatedTetris';
 
 interface AnimatedTetrisCellProps {
   cell: TetrisCell_;

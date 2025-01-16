@@ -1,57 +1,38 @@
-import { useEffect, useMemo } from 'react';
-import {
-  Easing,
-  ReduceMotion,
-  useDerivedValue,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { useState } from 'react';
+import { type SharedValue, useSharedValue } from 'react-native-reanimated';
 import type * as Grid from '../../Domain/Grid.domain';
-import type { Position } from '../../Domain/Position.domain';
-import type { Tetromino } from '../../Domain/Tetromino.domain';
-import { calculateUICellDraw } from '../worklets/cell.worklet';
+import * as Tetromino from '../../Domain/Tetromino.domain';
 import { createTetrominoPath } from '../worklets/tetromino.worklet';
 
-export const useTetrominoPath = ({
-  layout,
-  tetromino,
-  position,
-}: { layout: Grid.CellLayout; tetromino: Tetromino; position: Position }) => {
-
-  const animatedPosition = useSharedValue({
-    columnX: position.column,
-    rowY: position.row,
-  });
-
-  const tetrominoPath = useMemo(
-    () => createTetrominoPath(tetromino.drawPositions, layout),
-    [tetromino, layout],
+export const useTetromino = (layout: Grid.CellLayout) => {
+  const positionX = useSharedValue(0);
+  const positionY = useSharedValue(0);
+  const [tetromino] = useState(() =>
+    createRandom(layout, { x: positionX, y: positionY }),
   );
 
-  const transforms = useDerivedValue(() => [
-    {
-      translate: [animatedPosition.value.columnX, animatedPosition.value.rowY] as const,
-    },
-  ]);
-
-  useEffect(() => {
-    const celPos = calculateUICellDraw(position, layout);
-    animatedPosition.value = withTiming(
-      {
-        columnX: celPos.x,
-        rowY: celPos.y,
-      },
-      {
-        duration: position.row === 0 ? 0 : 100,
-        reduceMotion: ReduceMotion.Never,
-        easing: Easing.steps(1000, true),
-      },
-    );
-  }, [position, animatedPosition, layout]);
-
   return {
-    tetrominoPath,
     tetromino,
-    transforms,
+  };
+};
+
+const createRandom = (
+  layout: Grid.CellLayout,
+  sharedVals: {
+    x: SharedValue<number>;
+    y: SharedValue<number>;
+  },
+): Tetromino.Tetromino_ => {
+  const tetromino = Tetromino.getRandomTetromino();
+  return {
+    bounds: tetromino.bounds,
+    cells: tetromino.drawPositions,
+    color: tetromino.color,
+    layout,
+    matrix: tetromino.matrix,
+    name: tetromino.name,
+    positionX: sharedVals.x,
+    positionY: sharedVals.y,
+    skPath: createTetrominoPath(tetromino.drawPositions, layout),
   };
 };

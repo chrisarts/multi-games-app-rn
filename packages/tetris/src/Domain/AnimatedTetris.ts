@@ -1,4 +1,11 @@
-import { type SkPoint, type SkRRect, rect, rrect } from '@shopify/react-native-skia';
+import {
+  type SkPoint,
+  type SkRRect,
+  Skia,
+  point,
+  rect,
+  rrect,
+} from '@shopify/react-native-skia';
 import type { SharedValue } from 'react-native-reanimated';
 import type * as Grid from './Grid.domain';
 
@@ -9,7 +16,21 @@ export interface TetrisCell_ {
   color: SharedValue<number>;
 }
 
-export const createTetrisCellRRect = (layout: Grid.CellLayout, position: SkPoint) => {
+export const createCanvasUIPath_ = (grid: Grid.GridState) => {
+  'worklet';
+  const path = Skia.Path.Make();
+  for (const position of grid.positions) {
+    const cell = createTetrisCellRRect(
+      grid.layout.cell,
+      point(position.x, position.y),
+    );
+    path.addRRect(cell);
+  }
+  path.close();
+  return path;
+};
+
+const createTetrisCellRRect = (layout: Grid.CellLayout, position: SkPoint) => {
   'worklet';
   const { height, width, x, y } = calculateUICellDraw_(position, layout);
   return rrect(rect(x, y, width, height), 5, 5);

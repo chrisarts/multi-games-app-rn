@@ -5,10 +5,10 @@ import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { runForkedTetris } from '../../Application/RunGame';
 import { TetrisRuntime } from '../../Services/Runtime.layers';
-import { GameCanvas } from '../GameCanvas';
-import { useRenderCounter } from '../hooks/useRenderCounter';
-import { useGameStore } from '../hooks/useStore';
+import { GameCanvas } from './GameCanvas';
 import { GridControls } from './GameControls.view';
+import { useRenderCounter } from './hooks/useRenderCounter';
+import { useGameStore } from './hooks/useStore';
 
 export const GameBoardView = () => {
   useRenderCounter('GridView');

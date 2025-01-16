@@ -44,7 +44,7 @@ export interface GridLayout extends GridConfig {
  */
 
 const createGridColumns = (atRow: number, size: number) =>
-  Array.makeBy(size, (n) => Position.Position({ row: atRow, column: n }));
+  Array.makeBy(size, (n) => Position.make({ y: atRow, x: n }));
 
 const createGridRows = (rows: number, columns: number): Position.Position[][] =>
   Array.makeBy(rows, (n) => createGridColumns(n, columns));
@@ -79,8 +79,8 @@ export const makeGridState = ({ screen, size }: GridConfig): GridState => {
 export const getGridBounds = (layout: GridConfig) =>
   gridBoundOf({
     max: Position.of({
-      row: layout.size.rows - 1,
-      column: layout.size.columns - 1,
+      y: layout.size.rows - 1,
+      x: layout.size.columns - 1,
     }),
     min: Position.zero(),
   });
@@ -92,7 +92,7 @@ export const getGridLayout = ({ screen, size }: GridConfig): GridLayout => {
   const squareContainerSize = width / size.columns;
   const squareSize = squareContainerSize - spacing;
 
-  const canvasWidth = height;
+  const canvasWidth = width;
   const canvasHeight = size.rows * squareContainerSize;
 
   const remainingSpace = height - canvasHeight;
@@ -101,7 +101,7 @@ export const getGridLayout = ({ screen, size }: GridConfig): GridLayout => {
   return {
     screen,
     size,
-    initialPosition: Position.of({ row: 0, column: midX }),
+    initialPosition: Position.of({ y: 0, x: midX }),
     canvas: { width: canvasWidth, height: canvasHeight },
     remainingSpace,
     cell: {
@@ -121,12 +121,12 @@ export const gridBoundOf = (bounds: GridBound): GridBound => bounds;
 export const makeBound = (min: Position.Position, max: Position.Position) =>
   gridBoundOf({
     min: {
-      column: min.column,
-      row: min.row,
+      x: min.x,
+      y: min.y,
     },
     max: {
-      column: max.column,
-      row: max.row,
+      x: max.x,
+      y: max.y,
     },
   });
 
@@ -149,9 +149,9 @@ export const boundDistanceFrom = (toBound: GridBound) => (from: Position.Positio
   Position.minus(toBound.max, from);
 
 export const columnBoundValid = (bounds: GridBound, position: Position.Position) =>
-  position.column >= bounds.min.column && position.column <= bounds.max.column;
+  position.x >= bounds.min.x && position.x <= bounds.max.x;
 export const rowBoundValid = (bounds: GridBound, position: Position.Position) =>
-  position.row >= bounds.min.row && position.row <= bounds.max.row;
+  position.y >= bounds.min.y && position.y <= bounds.max.y;
 
 export const bothRowBoundsValid = (self: GridBound, that: GridBound) =>
   rowBoundValid(self, that.max) && rowBoundValid(self, that.min);
@@ -169,10 +169,10 @@ export const gridBoundFromPositions = (positions: Position.Position[]): GridBoun
   const bounds = positions.reduce(
     (prev, current) => {
       const { column, row } = prev;
-      if (current.row > row.max) row.max = current.row;
-      if (current.row < row.min) row.min = current.row;
-      if (current.column > column.max) column.max = current.column;
-      if (current.column < column.min) column.min = current.column;
+      if (current.y > row.max) row.max = current.y;
+      if (current.y < row.min) row.min = current.y;
+      if (current.x > column.max) column.max = current.x;
+      if (current.x < column.min) column.min = current.x;
       return prev;
     },
     {
@@ -187,7 +187,7 @@ export const gridBoundFromPositions = (positions: Position.Position[]): GridBoun
     },
   );
   return gridBoundOf({
-    min: Position.of({ row: bounds.row.min, column: bounds.column.min }),
-    max: Position.of({ row: bounds.row.max, column: bounds.column.max }),
+    min: Position.of({ y: bounds.row.min, x: bounds.column.min }),
+    max: Position.of({ y: bounds.row.max, x: bounds.column.max }),
   });
 };

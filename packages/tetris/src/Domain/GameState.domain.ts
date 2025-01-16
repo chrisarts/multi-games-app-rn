@@ -1,4 +1,3 @@
-import { Array } from 'effect';
 import * as HashMap from 'effect/HashMap';
 import * as Option from 'effect/Option';
 import type * as Cell from './Cell.domain';
@@ -41,10 +40,14 @@ export const collisionChecker = (check: {
     const pos = Position.sum(check.position, drawPos);
     drawPositions.push(pos);
 
-    if (pos.column > nextBounds.max.column) nextBounds.max.column = pos.column;
-    if (pos.column < nextBounds.min.column) nextBounds.min.column = pos.column;
-    if (pos.row > nextBounds.max.row) nextBounds.max.row = pos.row;
-    if (pos.row < nextBounds.min.row) nextBounds.min.row = pos.row;
+    if (pos.x > nextBounds.max.x)
+      nextBounds.max = Position.of({ y: nextBounds.max.y, x: pos.x });
+    if (pos.x < nextBounds.min.x) 
+      nextBounds.min = Position.of({ y: nextBounds.min.y, x: pos.x });
+    if (pos.y > nextBounds.max.y) 
+      nextBounds.max = Position.of({ y: pos.y, x: nextBounds.min.x });
+    if (pos.y < nextBounds.min.y) 
+      nextBounds.min = Position.of({ y: pos.y, x: nextBounds.min.x });
 
     const cell = Option.getOrNull(HashMap.get(check.grid.cellsMap, pos));
     if (cell) drawCells.push(cell);
@@ -54,7 +57,7 @@ export const collisionChecker = (check: {
 
   const hasInvalidPosition = invalidPositions.length > 0;
   const hasCellCollisions = mergedCells.length > 0;
-  const isGameOver = hasCellCollisions && drawPositions.some((x) => x.row <= 1);
+  const isGameOver = hasCellCollisions && drawPositions.some((x) => x.y <= 1);
   const isBeyondOrAtMaxRow = Position.Order.rowGreatThanOrEquals(
     check.grid.bounds.max,
     check.position,

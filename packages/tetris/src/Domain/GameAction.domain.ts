@@ -21,9 +21,9 @@ export type GameAction = Data.TaggedEnum<{
 export const GameAction = Data.taggedEnum<GameAction>();
 
 export const makeMove = {
-  up: () => moveActionOf('up', Position.of({ column: 0, row: -1 })),
-  down: () => moveActionOf('down', Position.of({ column: 0, row: 1 })),
-  left: () => moveActionOf('left', Position.of({ column: -1, row: 0 })),
-  right: () => moveActionOf('right', Position.of({ column: 1, row: 0 })),
-  rotate: () => moveActionOf('rotate', Position.of({ column: 0, row: 0 })),
+  up: () => moveActionOf('up', Position.of({ x: 0, y: -1 })),
+  down: () => moveActionOf('down', Position.of({ x: 0, y: 1 })),
+  left: () => moveActionOf('left', Position.of({ x: -1, y: 0 })),
+  right: () => moveActionOf('right', Position.of({ x: 1, y: 0 })),
+  rotate: () => moveActionOf('rotate', Position.of({ x: 0, y: 0 })),
 };

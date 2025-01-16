@@ -12,9 +12,9 @@ import type { EdgeInsets } from 'react-native-safe-area-context';
 import { makeGridState } from '../../Domain/Grid.domain';
 import * as Position from '../../Domain/Position.domain';
 import { getTetrominoInitialPos } from '../../Domain/Tetromino.domain';
-import { useGameStore } from '../hooks/useStore';
-import { useTetrominoPath } from '../hooks/useTetromino';
 import { calculateUICellDraw } from '../worklets/cell.worklet';
+import { useGameStore } from './hooks/useStore';
+import { useTetrominoPath } from './hooks/useTetromino';
 
 export const BoardHeader = ({ insets }: { insets: EdgeInsets }) => {
   const lines = useGameStore((x) => x.game.lines);
@@ -43,14 +43,14 @@ export const BoardHeader = ({ insets }: { insets: EdgeInsets }) => {
   const { tetrominoPath } = useTetrominoPath({
     layout: cellsGrid.cell,
     position: getTetrominoInitialPos(
-      Position.of({ column: nextTetromino.bounds.max.column, row: 0 }),
+      Position.of({ x: nextTetromino.bounds.max.x, y: 0 }),
       nextTetromino,
     ),
     tetromino: nextTetromino,
   });
 
   const cellSize = calculateUICellDraw(
-    Position.of({ column: 3, row: 0 }),
+    Position.of({ x: 3, y: 0 }),
     cellsGrid.cell,
   );
 

@@ -9,11 +9,11 @@ import {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import type * as GridState from '../Domain/Grid.domain';
-import type * as Tetromino from '../Domain/Tetromino.domain';
+import type * as GridState from '../../Domain/Grid.domain';
+import type * as Tetromino from '../../Domain/Tetromino.domain';
+import { calculateUICellDraw } from '../worklets/cell.worklet';
+import { createTetrominoPath } from '../worklets/tetromino.worklet';
 import { useGameStore } from './hooks/useStore';
-import { calculateUICellDraw } from './worklets/cell.worklet';
-import { createTetrominoPath } from './worklets/tetromino.worklet';
 
 interface TetrominoViewProps {
   color: string;
@@ -72,8 +72,8 @@ export const CurrentTetromino = () => {
     [drawPosition, cellLayout],
   );
   const animatedPosition = useSharedValue({
-    x: initialPosition.column,
-    y: initialPosition.row,
+    x: initialPosition.x,
+    y: initialPosition.y,
   });
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export const CurrentTetromino = () => {
           y: celPos.y - cellLayout.spacing / 2,
         },
         {
-          duration: drawPosition.row === 0 ? 0 : speed,
+          duration: drawPosition.y === 0 ? 0 : speed,
           reduceMotion: ReduceMotion.Never,
           easing: Easing.in(Easing.linear),
         },

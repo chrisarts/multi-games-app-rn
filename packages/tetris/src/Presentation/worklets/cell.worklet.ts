@@ -7,8 +7,8 @@ export const calculateUICellDraw = (
   cellLayout: Grid.CellLayout,
 ) => {
   'worklet';
-  const x = position.column * cellLayout.containerSize + cellLayout.spacing / 2;
-  const y = position.row * cellLayout.containerSize + cellLayout.spacing / 2;
+  const x = position.x * cellLayout.containerSize + cellLayout.spacing / 2;
+  const y = position.y * cellLayout.containerSize + cellLayout.spacing / 2;
   const width = cellLayout.containerSize - cellLayout.spacing / 2;
   const height = cellLayout.containerSize - cellLayout.spacing / 2;
   return {

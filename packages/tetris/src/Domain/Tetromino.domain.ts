@@ -1,3 +1,5 @@
+import type { SkPath } from '@shopify/react-native-skia';
+import type { SharedValue } from 'react-native-reanimated';
 import * as TetrominoData from '../Data/Tetrominos.data';
 import * as Grid from './Grid.domain';
 import * as Position from './Position.domain';
@@ -8,6 +10,18 @@ export interface Tetromino {
   matrix: TetrominoData.TetrominoMatrix;
   drawPositions: Position.Position[];
   bounds: Grid.GridBound;
+}
+
+export interface Tetromino_ {
+  name: string;
+  color: string;
+  matrix: TetrominoData.TetrominoMatrix;
+  cells: Position.Position[];
+  layout: Grid.CellLayout;
+  bounds: Grid.GridBound;
+  skPath: SkPath;
+  positionX: SharedValue<number>;
+  positionY: SharedValue<number>;
 }
 
 export const of = (tetromino: Tetromino): Tetromino => tetromino;
@@ -79,7 +93,7 @@ const getMatrixPositions = (
     .map((rows, x) =>
       rows.map((column, y) => {
         if (column === 0) return null;
-        return Position.sum(Position.of({ row: x, column: y }), sumPos);
+        return Position.sum(Position.of({ y: x, x: y }), sumPos);
       }),
     )
     .flatMap((x) => x.filter((y) => y !== null));

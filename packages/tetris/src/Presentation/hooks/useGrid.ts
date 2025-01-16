@@ -1,27 +1,27 @@
-import { processTransform2d, usePathValue } from '@shopify/react-native-skia';
-import type * as Grid from '../../Domain/Grid.domain';
-import { createCanvasUIPath, createCellUIRRect } from '../worklets/cell.worklet';
+import { useMemo } from 'react';
+import { useWindowDimensions } from 'react-native';
+import * as Tetris from '../../Domain/AnimatedTetris';
+import * as Grid from '../../Domain/Grid.domain';
 
-export const useRRectGrid = (grid: Grid.GridState) => {
-  const cellLayout = grid.layout.cell;
+export const useGrid = () => {
+  const dims = useWindowDimensions();
 
-  const cellRects = grid.positions.map(
-    (position) => [createCellUIRRect(position, cellLayout), position] as const,
+  const grid = useMemo(
+    () =>
+      Grid.makeGridState({
+        screen: { height: dims.height, width: dims.width },
+        size: { columns: 10, rows: 15 },
+      }),
+    [dims],
   );
 
-  return { cellRects };
-};
-
-export const useGridPath = (grid: Grid.GridState) => {
-  const gridPath = createCanvasUIPath(grid);
-
-  const clip = usePathValue((path) => {
-    'worklet';
-    path.transform(processTransform2d([]));
-  }, gridPath);
+  const gridPath = useMemo(() => Tetris.createCanvasUIPath_(grid), [grid]);
 
   return {
+    cellsLayout: grid.layout.cell,
+    gridSize: grid.layout.size,
+    gridBounds: grid.bounds,
     gridPath,
-    clip,
+    canvasSize: { width: dims.width, height: dims.height },
   };
 };

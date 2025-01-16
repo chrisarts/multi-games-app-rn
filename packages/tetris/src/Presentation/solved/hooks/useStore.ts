@@ -1,7 +1,7 @@
 import type { CustomStore } from '@games/shared';
 import { useSyncExternalStore } from 'react';
-import type * as GameState from '../../Domain/GameState.domain';
-import * as GameStore from '../../Store/Game.store';
+import type * as GameState from '../../../Domain/GameState.domain';
+import * as GameStore from '../../../Store/Game.store';
 
 export const useStore = <StoreShape, Output>(
   store: CustomStore<StoreShape>,

@@ -70,7 +70,7 @@ const moveDownFrom = (
   rowIndex: number,
 ) => {
   for (const row of matrix.filter((x) => x.rowIndex <= rowIndex)) {
-    const sumPos = Position.of({ row: -1, column: 0 });
+    const sumPos = Position.of({ y: -1, x: 0 });
     for (const cell of row.cells) {
       const nextPos = Position.sum(cell.position, sumPos);
       const nextCell = HashMap.get(grid.cellsMap, nextPos);
@@ -125,7 +125,7 @@ const refreshGrid = (
       .reverse()
       .map((index) => ({
         rowIndex: index,
-        cells: allCells.filter((cell) => cell.position.row === index),
+        cells: allCells.filter((cell) => cell.position.y === index),
       }));
 
     for (const row of rowCellsMatrix) {
