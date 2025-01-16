@@ -3,5 +3,6 @@
   "compilerOptions": {
     "exactOptionalPropertyTypes": true,
     "rootDir": "src"
-  }
+  },
+  "exclude": ["svg-app"]
 }

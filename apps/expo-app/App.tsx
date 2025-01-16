@@ -4,7 +4,6 @@ import { TetrisGame } from '@games/tetris';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 
 export default function App() {
-  console.log("METRICS: ", initialWindowMetrics)
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>

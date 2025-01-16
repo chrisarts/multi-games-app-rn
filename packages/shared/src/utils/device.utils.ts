@@ -1,7 +1,7 @@
-import { Dimensions } from "react-native";
+import { Dimensions } from 'react-native';
 
 export const getDeviceDimensions = () => {
-  const dimensions = Dimensions.get("window");
+  const dimensions = Dimensions.get('window');
   return {
     WIDTH: dimensions.width,
     HEIGHT: dimensions.height,

@@ -73,8 +73,8 @@ export const CurrentTetromino = () => {
     const celPos = calculateUICellDraw(drawPosition, cellLayout);
     animatedPosition.value = withTiming(
       {
-        x: celPos.x,
-        y: celPos.y,
+        x: celPos.x - cellLayout.spacing / 2,
+        y: celPos.y - cellLayout.spacing / 2,
       },
       {
         duration: drawPosition.row === 0 ? 0 : 100,
