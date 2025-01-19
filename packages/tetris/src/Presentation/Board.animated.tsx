@@ -4,11 +4,11 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useDerivedValue, useFrameCallback } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getCellUIRect } from '../Domain/Grid.domain';
-import { TetrisGridCell, TetrisGridView } from './components/Grid.view';
+import { checkCollisions } from '../Domain/Tetromino.domain';
+import { inclusiveClamp } from '../utils/animation.utils';
+import { TetrisGridCell, TetrisGridView } from './TetrisGrid.view';
 import { useCurrentShape } from './hooks/useCurrentShape';
 import { useGrid } from './hooks/useGrid';
-import { inclusiveClamp } from './worklets/game.worklets';
-import { checkCollisions } from './worklets/tetromino.worklet';
 
 export const AnimatedBoard = () => {
   const grid = useGrid();

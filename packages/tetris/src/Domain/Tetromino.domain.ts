@@ -1,92 +1,104 @@
-// import {
-//   type SkHostRect,
-//   type SkPath,
-//   type SkPoint,
-//   type SkRect,
-//   type Vector,
-//   add,
-//   vec,
-// } from '@shopify/react-native-skia';
-// import * as TetrominoData from '../Data/Tetrominos.data';
+import { type Vector, bounds, vec } from '@shopify/react-native-skia';
+import type { SharedValue } from 'react-native-reanimated';
+import * as TetrominoData from '../Data/Tetrominos.data';
+import * as Grid from './Grid.domain';
 
-// export interface Tetromino {
-//   name: string;
-//   color: string;
-//   matrix: TetrominoData.TetrominoMatrix;
-//   drawPositions: SkPoint[];
-// }
-// export interface UITetromino {
-//   color: string;
-//   bounds: SkRect;
-//   vectors: SkPoint[];
-//   rects: SkHostRect[];
-//   position: SkPoint;
-//   skPath: SkPath;
-//   merged: boolean;
-// }
+export const getShapePosition = (
+  position: Vector,
+  shape: SharedValue<Grid.TetrisGrid>,
+  cellSize: number,
+) => {
+  'worklet';
+  const shapeBounds = bounds(shape.value.cells);
 
-// export interface MergedTetromino {
-//   color: string;
-//   drawPoints: SkPoint[];
-//   position: Vector;
-//   sweep: boolean;
-//   path: SkPath;
-// }
+  const shapePos = {
+    left: position.x,
+    right: Math.ceil(position.x + shapeBounds.width / 2),
+    top: position.y,
+    bottom: Math.floor(position.y + shapeBounds.height),
+  };
 
-// export const of = (tetromino: Tetromino): Tetromino => tetromino;
+  const shapeCoords = {
+    left: Math.floor(shapePos.left / cellSize),
+    right: Math.floor(shapePos.right / cellSize),
+    top: Math.floor(shapePos.top / cellSize),
+    bottom: Math.floor(shapePos.bottom / cellSize),
+  };
 
-// export const fromConfig = (config: TetrominoData.TetrominoConfig): Tetromino => {
-//   const drawPositions = getMatrixPositions(config.value);
+  return {
+    shapePos,
+    shapeCoords,
+  };
+};
 
-//   return {
-//     drawPositions,
-//     name: config.name,
-//     color: config.color,
-//     matrix: config.value,
-//   };
-// };
+export const checkCollisions = (
+  position: Vector,
+  shape: SharedValue<Grid.TetrisGrid>,
+  gridConfig: Grid.GridConfig,
+) => {
+  'worklet';
+  const { shapeCoords, shapePos } = getShapePosition(
+    position,
+    shape,
+    gridConfig.cellContainerSize,
+  );
 
-// export const fromName = (name: TetrominoData.TetrominoConfig['name']): Tetromino =>
-//   fromConfig(TetrominoData.TetrominosData[name]);
+  return {
+    shapePos,
+    shapeCoords,
+    wall: {
+      left: shapeCoords.left === 0,
+      top: shapeCoords.top === 0,
+      right: shapeCoords.right >= gridConfig.columns,
+      bottom: shapeCoords.bottom >= gridConfig.rows,
+    },
+  };
+};
 
-// export const getRandomTetromino = (): Tetromino =>
-//   fromName(
-//     TetrominoData.TetrominoNames[
-//       Math.floor(Math.random() * TetrominoData.TetrominoNames.length)
-//     ],
-//   );
+const mapToTetrisGrid = (
+  shape: TetrominoData.TetrominoConfig,
+  gridConfig: Grid.GridConfigInput,
+  cellSize: number,
+  name: string,
+): Grid.TetrisGrid => {
+  'worklet';
+  const vectors = shape.value
+    .flatMap((_, y) => _.map((col, x) => (col === 1 ? vec(x, y) : null)))
+    .filter((x) => x !== null)
+    .sort((v1, v2) => v1.x - v2.x);
 
-// export const moveTetromino = (tetromino: Tetromino, to: SkPoint): Tetromino =>
-//   of({
-//     ...tetromino,
-//     drawPositions: getMatrixPositions(tetromino.matrix, to),
-//   });
+  // const rects = vectors.map((vector) => Grid.getCellUIRect(vector, cellSize));
 
-// export const rotateTetromino = (tetromino: Tetromino) => {
-//   // Make the rows to become cols (transpose)
-//   const shape = tetromino.matrix.map((_, i) =>
-//     tetromino.matrix.map((column) => column[i]),
-//   );
-//   // Reverse each row to get a rotated matrix
-//   const nextMatrix = shape.map((row) => row.reverse());
-//   const nextPositions = getMatrixPositions(nextMatrix, vec(0, 0));
+  return {
+    name,
+    // bounds: Sk.bounds(rects.flat()),
+    color: shape.color,
+    cells: vectors.map((vector) => Grid.getCellUIRect(vector, cellSize)),
+    matrix: shape.value,
+    position: vec(Math.floor((gridConfig.columns * cellSize) / 2), 0),
+    // rects,
+    vectors,
+    // skPath: Grid.createGridUIPath(rects),
+  };
+};
 
-//   return of({
-//     ...tetromino,
-//     matrix: nextMatrix,
-//     drawPositions: nextPositions,
-//   });
-// };
+export const getAllTetrominos = (gridConfig: Grid.GridConfigInput, cellSize: number) => {
+  'worklet';
+  return Object.values(TetrominoData.TetrominosData).map((shape) => {
+    return mapToTetrisGrid(shape, gridConfig, cellSize, shape._tag);
+  });
+};
 
-// const getMatrixPositions = (
-//   matrix: TetrominoData.TetrominoConfig['value'],
-//   sumPos = vec(0, 0),
-// ): SkPoint[] =>
-//   matrix
-//     .map((rows, y) =>
-//       rows.map((column, x) => {
-//         if (column === 0) return null;
-//         return add(vec(x, y), sumPos);
-//       }),
-//     )
-//     .flatMap((x) => x.filter((y) => y !== null));
+export const getRandomTetromino = (
+  gridConfig: Grid.GridConfigInput,
+  cellSize: number,
+): Grid.TetrisGrid => {
+  'worklet';
+  const shape =
+    TetrominoData.TetrominosData[
+      TetrominoData.TetrominoNames[
+        Math.floor(Math.random() * TetrominoData.TetrominoNames.length)
+      ]
+    ];
+  return mapToTetrisGrid(shape, gridConfig, cellSize, shape._tag);
+};

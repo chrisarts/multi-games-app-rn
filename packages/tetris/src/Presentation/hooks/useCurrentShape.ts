@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import type { GridConfig } from '../../Domain/Grid.domain';
-import { getAllTetrominos, getRandomTetromino } from '../worklets/tetromino.worklet';
+import { getAllTetrominos, getRandomTetromino } from '../../Domain/Tetromino.domain';
 
 export const useCurrentShape = (gridConfig: GridConfig) => {
   const firstShape = useMemo(

@@ -5,7 +5,7 @@ import {
   type GridConfig,
   type TetrisGrid,
   getCellUIRect,
-} from '../../Domain/Grid.domain';
+} from '../Domain/Grid.domain';
 
 interface GridProps {
   grid: SharedValue<TetrisGrid>;
