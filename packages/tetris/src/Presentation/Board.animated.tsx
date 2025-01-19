@@ -1,93 +1,110 @@
-import { Canvas, Fill, Group, Path, type SkPath } from '@shopify/react-native-skia';
+import * as Sk from '@shopify/react-native-skia';
+import { Dimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
-  Easing,
-  ReduceMotion,
-  type SharedValue,
-  useDerivedValue,
+  runOnJS,
   useFrameCallback,
+  withDelay,
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Cell from '../Domain/Cell.domain';
-import type * as Grid from '../Domain/Grid.domain';
-import { useGameState } from './hooks/useGameState';
-import { useGrid } from './hooks/useGrid';
-import { useTetromino } from './hooks/useTetromino';
+import { GRID } from '../Data/Grid.data';
+import { GridDebugView, TetrominoCellsView } from './components/Grid.view';
+import { useGame } from './hooks/useGameState';
+import { inclusiveClamp } from './worklets/game.worklets';
+import { checkCollisions } from './worklets/tetromino.worklet';
 
 export const AnimatedBoard = () => {
   const insets = useSafeAreaInsets();
-  const { cellsLayout, gridBounds, canvasSize, gridPath, gridSize } = useGrid();
-  const { dropPosition } = useGameState();
-  const { tetromino } = useTetromino(cellsLayout);
-
-  const gesture = Gesture.Pan().onChange((e) => {
-    const cellSize = cellsLayout.containerSize;
-    let movedCells = Math.floor(Math.abs(e.x) / cellSize);
-
-    if (movedCells >= gridBounds.max.x - 1) {
-      movedCells -= tetromino.bounds.max.x;
-    }
-
-    dropPosition.x.value = movedCells;
-  });
+  const { dropPosition, shape, actions, game, grid } = useGame();
 
   useFrameCallback((frame) => {
     if (!frame.timeSincePreviousFrame) return;
-    if (Math.floor(frame.timeSinceFirstFrame % 800) === 0) {
-      dropPosition.y.value = withTiming(dropPosition.y.value + 1, {
-        duration: 790,
-        easing: Easing.linear,
-        reduceMotion: ReduceMotion.Never,
+    const tetromino = shape.current.value;
+
+    const collisions = checkCollisions(
+      {
+        x: dropPosition.x.value,
+        y: dropPosition.y.value,
+      },
+      shape.current,
+    );
+
+    if (collisions.wall.bottom && !shape.collided.value) {
+      shape.collided.value = true;
+      runOnJS(actions.onMergeTetromino)({
+        color: tetromino.color,
+        rects: tetromino.rects,
+        bounds: tetromino.bounds,
+        merged: true,
+        vectors: tetromino.vectors,
+        position: Sk.vec(dropPosition.x.value, dropPosition.y.value),
+        skPath: tetromino.skPath,
       });
+      dropPosition.y.value = withDelay(
+        game.gameSpeed.value,
+        withTiming(0, { duration: 1 }, (finished) => {
+          if (finished) {
+            shape.collided.value = false;
+            shape.index.value = actions.getNextTetrominoIndex();
+            dropPosition.y.value = 0;
+          }
+        }),
+      );
+    }
+
+    if (!shape.collided.value && !collisions.wall.bottom) {
+      const moveRate =
+        GRID.cellSize / (game.gameSpeed.value / frame.timeSincePreviousFrame) / 2;
+      dropPosition.y.value += moveRate;
     }
   });
 
+  const gesture = Gesture.Pan()
+    .onChange((e) => {
+      dropPosition.x.value = inclusiveClamp(
+        dropPosition.x.value + e.changeX,
+        0,
+        GRID.gridRect.width - shape.current.value.bounds.width,
+      );
+    })
+    .maxPointers(1);
+
   return (
     <GestureDetector gesture={gesture}>
-      <Canvas style={canvasSize}>
-        <Group
+      <Sk.Canvas style={Dimensions.get('window')}>
+        <Sk.Fill />
+        <Sk.Group
           transform={[
             {
-              translateY: (cellsLayout.containerSize * gridSize.columns) / 2 - insets.top,
+              translateY: GRID.gridRect.width / 2 - insets.top,
             },
           ]}
         >
-          <Fill />
-          <Path path={gridPath} style='fill' color={Cell.defaultCellColor} />
-          <TetrominoView
-            color={tetromino.color}
-            dropPosition={{
-              x: dropPosition.x,
-              y: dropPosition.y,
-            }}
-            path={tetromino.skPath}
-            layout={cellsLayout}
-          />
-        </Group>
-      </Canvas>
+          <GridDebugView color={grid.cellsColor} cells={grid.cells} />
+          <Sk.Group>
+            <Sk.Image
+              image={shape.image}
+              height={GRID.gridRect.height}
+              width={GRID.gridRect.width}
+              transform={shape.transform}
+            />
+          </Sk.Group>
+
+          {grid.mergedShapes.map((merged, i) => (
+            <Sk.Group
+              key={`${merged.color}-${merged.rects.map((x) => `${x.x},${x.y}`).join('')}-${i}`}
+              transform={[
+                {
+                  translate: [merged.position.x, merged.position.y],
+                },
+              ]}
+            >
+              <TetrominoCellsView color={merged.color} cells={merged.rects} />
+            </Sk.Group>
+          ))}
+        </Sk.Group>
+      </Sk.Canvas>
     </GestureDetector>
   );
-};
-
-interface TetrominoProps {
-  path: SkPath;
-  layout: Grid.CellLayout;
-  color: string;
-  dropPosition: {
-    x: SharedValue<number>;
-    y: SharedValue<number>;
-  };
-}
-
-const TetrominoView = ({ dropPosition, layout, path, color }: TetrominoProps) => {
-  const transform = useDerivedValue(() => [
-    {
-      translate: [
-        dropPosition.x.value * layout.containerSize,
-        dropPosition.y.value * layout.containerSize,
-      ] as const,
-    },
-  ]);
-  return <Path path={path} transform={transform} style='fill' color={color} />;
 };

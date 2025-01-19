@@ -5,7 +5,7 @@ import { createCanvasUIPath, createCellUIRRect } from '../../worklets/cell.workl
 export const useRRectGrid = (grid: Grid.GridState) => {
   const cellLayout = grid.layout.cell;
 
-  const cellRects = grid.positions.map(
+  const cellRects = grid.cellPoints.map(
     (position) => [createCellUIRRect(position, cellLayout), position] as const,
   );
 

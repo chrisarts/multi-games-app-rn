@@ -4,15 +4,20 @@ import * as Equivalence from 'effect/Equivalence';
 import * as Ord from 'effect/Order';
 
 export interface Position extends SkPoint {}
-export const make = (point: Position) => point;
+export const make = (point: Position) => {
+  'worklet';
+  return point;
+};
 export const of = make;
 export const zero = () => make({ y: 0, x: 0 });
 
 // export const reduce = (position: Position, collection: Position[]) =>
 //   collection.reduce(sum, position);
 
-export const sum = (self: Position, that: Position): Position =>
-  of({ y: self.y + that.y, x: self.x + that.x });
+export const sum = (self: Position, that: Position): Position => {
+  'worklet';
+  return of({ y: self.y + that.y, x: self.x + that.x });
+};
 
 export const minus = (self: Position, that: Position): Position =>
   of({ y: self.y - that.y, x: self.x - that.x });

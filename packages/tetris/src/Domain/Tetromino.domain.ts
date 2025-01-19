@@ -1,7 +1,11 @@
-import type { SkPath } from '@shopify/react-native-skia';
-import type { SharedValue } from 'react-native-reanimated';
+import type {
+  SkHostRect,
+  SkPath,
+  SkPoint,
+  SkRect,
+  Vector,
+} from '@shopify/react-native-skia';
 import * as TetrominoData from '../Data/Tetrominos.data';
-import * as Grid from './Grid.domain';
 import * as Position from './Position.domain';
 
 export interface Tetromino {
@@ -9,19 +13,23 @@ export interface Tetromino {
   color: string;
   matrix: TetrominoData.TetrominoMatrix;
   drawPositions: Position.Position[];
-  bounds: Grid.GridBound;
+}
+export interface UITetromino {
+  color: string;
+  bounds: SkRect;
+  vectors: SkPoint[];
+  rects: SkHostRect[];
+  position: SkPoint;
+  skPath: SkPath;
+  merged: boolean;
 }
 
-export interface Tetromino_ {
-  name: string;
+export interface MergedTetromino {
   color: string;
-  matrix: TetrominoData.TetrominoMatrix;
-  cells: Position.Position[];
-  layout: Grid.CellLayout;
-  bounds: Grid.GridBound;
-  skPath: SkPath;
-  positionX: SharedValue<number>;
-  positionY: SharedValue<number>;
+  drawPoints: SkPoint[];
+  position: Vector;
+  sweep: boolean;
+  path: SkPath;
 }
 
 export const of = (tetromino: Tetromino): Tetromino => tetromino;
@@ -31,19 +39,9 @@ export const fromConfig = (config: TetrominoData.TetrominoConfig): Tetromino => 
 
   return {
     drawPositions,
-    bounds: Grid.gridBoundFromPositions(drawPositions),
     name: config.name,
     color: config.color,
     matrix: config.value,
-  };
-};
-
-export const mapWithPosition = (tetromino: Tetromino, position: Position.Position) => {
-  const positions = tetromino.drawPositions.map((x) => Position.sum(x, position));
-  const bounds = Grid.gridBoundFromPositions(positions);
-  return {
-    positions,
-    bounds,
   };
 };
 
@@ -56,11 +54,6 @@ export const getRandomTetromino = (): Tetromino =>
       Math.floor(Math.random() * TetrominoData.TetrominoNames.length)
     ],
   );
-
-export const getTetrominoInitialPos = (
-  initialPos: Position.Position,
-  tetromino: Tetromino,
-) => Position.sum(initialPos, tetromino.bounds.min);
 
 export const moveTetromino = (tetromino: Tetromino, to: Position.Position): Tetromino =>
   of({
@@ -81,7 +74,6 @@ export const rotateTetromino = (tetromino: Tetromino) => {
     ...tetromino,
     matrix: nextMatrix,
     drawPositions: nextPositions,
-    bounds: Grid.gridBoundFromPositions(nextPositions),
   });
 };
 

@@ -1,7 +1,6 @@
 import { type SkPoint, Skia, rect, rrect } from '@shopify/react-native-skia';
 import * as Array from 'effect/Array';
 import { Dimensions } from 'react-native';
-import type { CellLayout } from '../../Domain/Grid.domain';
 
 export const makeGridPoints = (rows: number, columns: number) => {
   'worklet';
@@ -30,7 +29,7 @@ export const makeGridPoints = (rows: number, columns: number) => {
   };
 };
 
-export const calculateUICellDraw = (position: SkPoint, cellLayout: CellLayout) => {
+export const calculateUICellDraw = (position: SkPoint, cellLayout: any) => {
   'worklet';
   const x = position.x * cellLayout.containerSize + cellLayout.spacing / 2;
   const y = position.y * cellLayout.containerSize + cellLayout.spacing / 2;
@@ -44,13 +43,13 @@ export const calculateUICellDraw = (position: SkPoint, cellLayout: CellLayout) =
   };
 };
 
-export const createCellUIRect = (position: SkPoint, cell: CellLayout) => {
+export const createCellUIRect = (position: SkPoint, cell: any) => {
   'worklet';
   const { x, y, width, height } = calculateUICellDraw(position, cell);
   return rect(x, y, width, height);
 };
 
-export const createCellUIRRect = (position: SkPoint, cellLayout: CellLayout) => {
+export const createCellUIRRect = (position: SkPoint, cellLayout: any) => {
   'worklet';
   return rrect(createCellUIRect(position, cellLayout), 5, 5);
 };

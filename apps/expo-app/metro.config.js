@@ -1,6 +1,9 @@
 const { getDefaultConfig } = require('@expo/metro-config');
 const path = require('path');
-
+// metro.config.js
+const {
+  wrapWithReanimatedMetroConfig,
+} = require('react-native-reanimated/metro-config');
 // eslint-disable-next-line no-undef
 const projectRoot = __dirname;
 
@@ -15,4 +18,4 @@ defaultConfig.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
-module.exports = defaultConfig;
+module.exports = wrapWithReanimatedMetroConfig(defaultConfig);
