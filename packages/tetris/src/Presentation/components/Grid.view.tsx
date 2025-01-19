@@ -1,42 +1,56 @@
 import * as Sk from '@shopify/react-native-skia';
 import { useMemo } from 'react';
 import type { SharedValue } from 'react-native-reanimated';
-import { GRID } from '../../Data/Grid.data';
+import {
+  type GridConfig,
+  type TetrisGrid,
+  getCellUIRect,
+} from '../../Domain/Grid.domain';
 
-export const TetrominoCellsView = ({
-  cells,
-  color,
-}: { cells: Sk.SkHostRect[]; color: string }) => {
+interface GridProps {
+  grid: SharedValue<TetrisGrid>;
+  config: GridConfig;
+}
+export const TetrisGridView = ({ grid, config }: GridProps) => {
   return (
     <Sk.Group>
-      {cells.map((rect) => (
-        <Sk.Group key={`cell-${rect.x}:${rect.y}`}>
-          <Sk.RoundedRect rect={Sk.rrect(rect, 5, 5)} color={color} width={GRID.cellSize} height={GRID.cellSize} />
-          <GridDebugRowCol rect={rect} />
+      {grid.get().vectors.map((point) => (
+        <Sk.Group key={`cell-${point.x}:${point.y}`}>
+          <Sk.RoundedRect
+            rect={Sk.rrect(getCellUIRect(point, config.cellContainerSize), 5, 5)}
+            color={grid.value.color}
+          />
+          <GridDebugRowCol
+            rect={getCellUIRect(point, config.cellContainerSize)}
+            cellSize={config.cellContainerSize}
+          />
         </Sk.Group>
       ))}
     </Sk.Group>
   );
 };
 
-export const GridDebugView = ({
-  cells,
+export const TetrisGridCell = ({
+  rect,
   color,
-}: { cells: SharedValue<Sk.SkHostRect[]>; color: SharedValue<string> }) => {
+  debug,
+  cellSize,
+}: {
+  rect: Sk.SkRect;
+  color: SharedValue<string>;
+  cellSize: number;
+  debug?: boolean;
+}) => {
   return (
     <Sk.Group>
-      {cells.get().map((rect) => (
-        <Sk.Group key={`cell-${rect.x}:${rect.y}`}>
-          <Sk.RoundedRect rect={Sk.rrect(rect, 5, 5)} color={color} />
-          <GridDebugRowCol rect={rect} />
-        </Sk.Group>
-      ))}
+      <Sk.RoundedRect rect={Sk.rrect(rect, 5, 5)} color={color} />
+      {debug ? <GridDebugRowCol rect={rect} cellSize={cellSize} /> : null}
     </Sk.Group>
   );
 };
 
-const GridDebugRowCol = ({ rect }: { rect: Sk.SkRect }) => {
-  const text = `${Math.floor(rect.x / GRID.cellSize)}:${Math.floor(rect.y / GRID.cellSize)}`;
+const GridDebugRowCol = ({ rect, cellSize }: { rect: Sk.SkRect; cellSize: number }) => {
+  const text = `${Math.floor(rect.x / cellSize)}:${Math.floor(rect.y / cellSize)}`;
 
   const paragraph = useMemo(
     () => Sk.Skia.ParagraphBuilder.Make().addText(text).build(),
@@ -45,8 +59,8 @@ const GridDebugRowCol = ({ rect }: { rect: Sk.SkRect }) => {
   return (
     <Sk.Paragraph
       width={rect.width}
-      x={rect.x + GRID.cellSize / text.length - 3}
-      y={rect.y + GRID.cellSize / text.length - 1}
+      x={rect.x + cellSize / text.length - 3}
+      y={rect.y + cellSize / text.length}
       color='white'
       paragraph={paragraph}
     />

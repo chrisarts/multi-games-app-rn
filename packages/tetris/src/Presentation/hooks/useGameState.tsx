@@ -1,27 +1,38 @@
 import * as Sk from '@shopify/react-native-skia';
-import { useState } from 'react';
+import { useMemo } from 'react';
+import { useWindowDimensions } from 'react-native';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
-import { GRID } from '../../Data/Grid.data';
 import * as Grid from '../../Domain/Grid.domain';
-import type * as Tetromino from '../../Domain/Tetromino.domain';
-import { tetrominoTextures } from '../worklets/textures.worklet';
+import { getAllTetrominos, getRandomTetromino } from '../worklets/tetromino.worklet';
 
 export const useGame = () => {
-  const [mergedTetrominos, setMergedTetrominos] = useState<Tetromino.UITetromino[]>([]);
+  const screen = useWindowDimensions();
+  const gridConfig = useMemo(
+    () => Grid.getGridConfig(screen.width, { rows: 15, columns: 10 }),
+    [screen],
+  );
+  const tetrisGrid = useMemo(
+    () => Grid.getGridLayout(gridConfig, gridConfig),
+    [gridConfig],
+  );
+  const allTetrominos = useMemo(
+    () => getAllTetrominos(gridConfig, gridConfig.cellSize + 1),
+    [gridConfig],
+  );
+  const mergedTetrominos = useSharedValue<Grid.TetrisGrid[]>([]);
 
-  const gridPath = useSharedValue(Grid.createCanvasUIPath());
+  const gridPath = useSharedValue(Grid.createGridUIPath(tetrisGrid.cells));
   const mergedPath = useSharedValue(Sk.Skia.Path.Make());
   const collided = useSharedValue(false);
   const gameSpeed = useSharedValue(800);
   const dropPositionX = useSharedValue(0);
   const dropPositionY = useSharedValue(0);
 
-  const textureIndex = useSharedValue(
-    Math.floor(Math.random() * tetrominoTextures.length),
-  );
+  const textureIndex = useSharedValue(Math.floor(Math.random() * allTetrominos.length));
 
-  const currentTetromino = useDerivedValue(() => tetrominoTextures[textureIndex.value]);
-  const currentTetrominoImage = useDerivedValue(() => currentTetromino.value.texture);
+  const currentTetromino = useSharedValue(
+    getRandomTetromino(gridConfig, gridConfig.cellSize + 1),
+  );
 
   const currentShapeTransform = useDerivedValue(() => {
     return [
@@ -31,20 +42,13 @@ export const useGame = () => {
     ];
   });
 
-  const cellsColor = useSharedValue(Grid.defaultCellColor);
-  const gridCells = useSharedValue(GRID.cells);
-
   const getNextTetrominoIndex = () => {
     'worklet';
-    const nextIdx = Math.floor(Math.random() * tetrominoTextures.length);
+    const nextIdx = Math.floor(Math.random() * allTetrominos.length);
     if (nextIdx === textureIndex.get()) {
-      return Math.floor(Math.random() * tetrominoTextures.length);
+      return Math.floor(Math.random() * allTetrominos.length);
     }
     return nextIdx;
-  };
-
-  const onMergeTetromino = (tetromino: Tetromino.UITetromino) => {
-    setMergedTetrominos((p) => [...p, tetromino]);
   };
 
   return {
@@ -53,15 +57,15 @@ export const useGame = () => {
       y: dropPositionY,
     },
     grid: {
-      cellsColor,
-      cells: gridCells,
       mergedShapes: mergedTetrominos,
       mergedPath,
       gridPath,
+      gridConfig,
+      tetrisGrid,
     },
     shape: {
+      allTetrominos,
       index: textureIndex,
-      image: currentTetrominoImage,
       current: currentTetromino,
       transform: currentShapeTransform,
       collided,
@@ -71,7 +75,6 @@ export const useGame = () => {
     },
     actions: {
       getNextTetrominoIndex,
-      onMergeTetromino,
     },
   };
 };

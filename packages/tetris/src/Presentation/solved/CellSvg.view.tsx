@@ -17,7 +17,7 @@ import { useGameStore } from './hooks/useStore';
 
 interface CellViewProps {
   cell: SkRRect;
-  position: Position.Position;
+  position: SkPoint;
   layout: CellLayout;
 }
 

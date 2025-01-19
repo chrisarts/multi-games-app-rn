@@ -1,11 +1,10 @@
 import { Path, type SkPath } from '@shopify/react-native-skia';
 import { type SharedValue, useDerivedValue } from 'react-native-reanimated';
-import type * as Tetromino from '../Domain/Tetromino.domain';
 
 interface CurrentTetrominoView {
   layout: any;
   data: {
-    tetromino: Tetromino.Tetromino;
+    tetromino: any;
     path: SkPath;
   };
   position: {

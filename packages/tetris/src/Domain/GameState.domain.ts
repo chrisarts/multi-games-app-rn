@@ -1,12 +1,10 @@
-import type * as Grid from './Grid.domain';
-import type * as Position from './Position.domain';
-import type * as Tetromino from './Tetromino.domain';
+import type { SkPoint } from '@shopify/react-native-skia';
 
 export interface GameState {
   tetromino: {
-    current: Tetromino.Tetromino;
-    next: Tetromino.Tetromino;
-    position: Position.Position;
+    current: any;
+    next: any;
+    position: SkPoint;
   };
   game: {
     status: GameRunState;
@@ -20,12 +18,12 @@ export interface GameState {
 export type GameRunState = 'InProgress' | 'GameOver' | 'Stop';
 
 // export const collisionChecker = (check: {
-//   tetromino: Tetromino.Tetromino;
-//   position: Position.Position;
+//   tetromino: any;
+//   position: SkPoint;
 //   grid: Grid.GridState;
 // }) => {
-//   const drawPositions = [] as Position.Position[];
-//   const invalidPositions = [] as Position.Position[];
+//   const drawPositions = [] as SkPoint[];
+//   const invalidPositions = [] as SkPoint[];
 //   const drawCells = [] as Cell.Cell[];
 //   const mergedCells = [] as Cell.Cell[];
 //   const nextBounds = Grid.makeBound(

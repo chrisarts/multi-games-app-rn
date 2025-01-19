@@ -43,7 +43,7 @@ const makeUnsafeSetter = (f: (state: GameState.GameState) => void) => {
 };
 
 /** @category unsafe setters */
-const setCurrentPosition = (newPosition: Position.Position) =>
+const setCurrentPosition = (newPosition: SkPoint) =>
   makeUnsafeSetter((state) => {
     state.tetromino.position = newPosition;
   });
@@ -85,7 +85,7 @@ const moveDownFrom = (
 
 const refreshGrid = (
   tetromino: Tetromino.Tetromino,
-  nextPosition: Position.Position,
+  nextPosition: SkPoint,
   merged: boolean,
 ) =>
   makeUnsafeSetter((state) => {

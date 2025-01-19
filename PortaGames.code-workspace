@@ -17,5 +17,15 @@
 			"path": "packages/shared"
 		}
 	],
-	"settings": {}
+	"settings": {},
+	"launch": {
+		"configurations": [
+			{
+				"type": "radon-ide",
+				"request": "launch",
+				"name": "Radon IDE panel",
+				"ios": {}
+			}
+		]
+	}
 }

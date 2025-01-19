@@ -19,7 +19,7 @@ const make = Effect.gen(function* () {
     state.tetromino.position = state.grid.layout.initialPosition;
   });
 
-  const updateDropPosition = (to: Position.Position) =>
+  const updateDropPosition = (to: SkPoint) =>
     gameStore.unsafeSetState((state) => {
       state.tetromino.position = to;
     });
@@ -53,15 +53,15 @@ const make = Effect.gen(function* () {
       }),
   );
 
-  const getCellAt = (position: Position.Position) =>
+  const getCellAt = (position: SkPoint) =>
     gameStore.selector((x) => HashMap.get(x.grid.cellsMap, position));
 
-  const mutateCellAt = (position: Position.Position, f: (cell: Cell.Cell) => void) =>
+  const mutateCellAt = (position: SkPoint, f: (cell: Cell.Cell) => void) =>
     gameStore.unsafeSetState((state) => {
       HashMap.get(state.grid.cellsMap, position).pipe(Option.map(f));
     });
 
-  const mapCellState = (position: Position.Position, f: (cell: Cell.Cell) => Cell.Cell) =>
+  const mapCellState = (position: SkPoint, f: (cell: Cell.Cell) => Cell.Cell) =>
     gameStore.unsafeSetState((state) => {
       HashMap.modify(state.grid.cellsMap, position, f);
       return state;
@@ -90,9 +90,9 @@ const make = Effect.gen(function* () {
   // If any provided position is invalid this will throw
   function unsafeUpdateBoard(data: {
     tetromino: Tetromino.Tetromino;
-    toPositions: Position.Position[];
-    fromPositions: Position.Position[];
-    updatedPosition: Position.Position;
+    toPositions: SkPoint[];
+    fromPositions: SkPoint[];
+    updatedPosition: SkPoint;
     merge: boolean;
   }) {
     return Effect.gen(function* () {
@@ -145,7 +145,7 @@ const make = Effect.gen(function* () {
     // .pipe(Effect.tap(() => Effect.log('Board updated')));
   }
 
-  function getMoveUnitState(moveUnit: Position.Position) {
+  function getMoveUnitState(moveUnit: SkPoint) {
     return Effect.gen(function* () {
       const gridBounds = yield* gameStore.selector((x) => x.grid.bounds);
       const state = yield* gameStore.selector((x) => x);

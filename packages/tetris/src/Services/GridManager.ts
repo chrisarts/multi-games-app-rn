@@ -3,7 +3,7 @@ import { Dimensions } from 'react-native';
 import type * as Grid from '../Domain/Grid.domain';
 
 export class GridManager {
-  private layout: Grid.GridLayout;
+  private layout: Grid.TetrisGrid;
   constructor() {
     this.layout = getGridLayout();
   }
@@ -14,9 +14,9 @@ export class GridManager {
   get bounds() {
     return {
       topLeft: Sk.vec(0, 0),
-      topRight: Sk.vec(this.layout.canvas.width, 0),
-      bottomLeft: Sk.vec(0, this.layout.canvas.height),
-      bottomRight: Sk.vec(this.layout.canvas.width, this.layout.canvas.height),
+      topRight: Sk.vec(this.layout.gridSize.width, 0),
+      bottomLeft: Sk.vec(0, this.layout.gridSize.height),
+      bottomRight: Sk.vec(this.layout.gridSize.width, this.layout.gridSize.height),
     };
   }
 }

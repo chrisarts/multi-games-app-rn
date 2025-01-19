@@ -7,7 +7,7 @@ import type * as Position from '../../../Domain/Position.domain';
 import { calculateUICellDraw } from '../../worklets/cell.worklet';
 
 export const useAnimatedCell = (
-  position: Position.Position,
+  position: SkPoint,
   cellLayout: Grid.CellLayout,
 ) => {
   const cellRect = calculateUICellDraw(position, cellLayout);
@@ -29,7 +29,7 @@ export const useAnimatedCell = (
 };
 
 export const useCellParagraph = (
-  position: Position.Position,
+  position: SkPoint,
   cellLayout: Grid.CellLayout,
 ) =>
   useMemo(() => {
