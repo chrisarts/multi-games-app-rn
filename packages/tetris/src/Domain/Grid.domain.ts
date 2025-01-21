@@ -1,11 +1,20 @@
 import * as Sk from '@shopify/react-native-skia';
+import type { SharedValue } from 'react-native-reanimated';
+
+export interface TetrisAnimatedMatrix {
+  point: Sk.SkPoint;
+  value: SharedValue<number>;
+  color: SharedValue<string>;
+}
 
 export interface TetrisGrid {
   name: string;
   position: Sk.Vector;
   color: string;
-  vectors: Sk.Vector[];
-  cells: Sk.SkRect[];
+  cells: {
+    point: Sk.SkPoint;
+    value: number;
+  }[];
   matrix: number[][];
 }
 
@@ -22,14 +31,14 @@ export interface GridConfig extends GridConfigInput {
   cellContainerSize: number;
 }
 
-const vectorIdent = (vector: Sk.Vector) => {
+export const matrixToPoints = (matrix: number[][]) => {
   'worklet';
-  return vector;
-};
-
-export const matrixToPoints = (matrix: number[][], mapVector = vectorIdent) => {
-  'worklet';
-  return matrix.flatMap((_, row) => _.map((_, column) => mapVector(Sk.vec(column, row))));
+  return matrix.flatMap((_, iy) =>
+    _.map((value, ix) => ({
+      point: Sk.vec(ix, iy),
+      value,
+    })),
+  );
 };
 
 export const getCellUIRect = (position: Sk.Vector, cellSize: number): Sk.SkRect => {
@@ -46,8 +55,8 @@ export const getGridConfig = (width: number, config: GridConfigInput): GridConfi
   const spacing = 3;
   const cellContainerSize = Math.floor(width / config.columns);
   const cellSize = cellContainerSize - spacing / 3;
-  const canvasWidth = width;
-  const canvasHeight = config.rows * (cellContainerSize - spacing);
+  const canvasWidth = cellContainerSize * config.columns;
+  const canvasHeight = cellContainerSize * (config.rows + spacing * 3);
   const midX = Math.floor(config.columns / 3);
   return {
     cellSize,
@@ -69,13 +78,10 @@ export const getGridLayout = (
   const matrix: number[][] = Array(rows)
     .fill(0)
     .map(() => Array(columns).fill(0));
-  const vectors = matrixToPoints(matrix);
-  const cells = vectors.map((vector) => getCellUIRect(vector, cellSize.cellContainerSize));
 
   return {
-    vectors,
+    cells: matrixToPoints(matrix),
     matrix,
-    cells,
     color: 'rgba(131, 126, 126, 0.3)',
     position: { y: 0, x: Math.floor(columns / 3) },
     name: 'Grid',

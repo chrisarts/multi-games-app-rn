@@ -1,11 +1,7 @@
 import * as Sk from '@shopify/react-native-skia';
 import { useMemo } from 'react';
 import type { SharedValue } from 'react-native-reanimated';
-import {
-  type GridConfig,
-  type TetrisGrid,
-  getCellUIRect,
-} from '../Domain/Grid.domain';
+import type { GridConfig, TetrisGrid } from '../Domain/Grid.domain';
 
 interface GridProps {
   grid: SharedValue<TetrisGrid>;
@@ -14,16 +10,10 @@ interface GridProps {
 export const TetrisGridView = ({ grid, config }: GridProps) => {
   return (
     <Sk.Group>
-      {grid.get().vectors.map((point) => (
-        <Sk.Group key={`cell-${point.x}:${point.y}`}>
-          <Sk.RoundedRect
-            rect={Sk.rrect(getCellUIRect(point, config.cellContainerSize), 5, 5)}
-            color={grid.value.color}
-          />
-          <GridDebugRowCol
-            rect={getCellUIRect(point, config.cellContainerSize)}
-            cellSize={config.cellContainerSize}
-          />
+      {grid.get().cells.map((rect) => (
+        <Sk.Group key={`cell-${rect.x}:${rect.y}`}>
+          <Sk.RoundedRect rect={Sk.rrect(rect, 5, 5)} color={grid.value.color} />
+          <GridDebugRowCol rect={rect} cellSize={config.cellContainerSize} />
         </Sk.Group>
       ))}
     </Sk.Group>

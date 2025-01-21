@@ -1,120 +1,102 @@
 import * as Sk from '@shopify/react-native-skia';
 import { Dimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { useDerivedValue, useFrameCallback } from 'react-native-reanimated';
+import { useFrameCallback } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getCellUIRect } from '../Domain/Grid.domain';
-import { checkCollisions } from '../Domain/Tetromino.domain';
-import { inclusiveClamp } from '../utils/animation.utils';
-import { TetrisGridCell, TetrisGridView } from './TetrisGrid.view';
-import { useCurrentShape } from './hooks/useCurrentShape';
-import { useGrid } from './hooks/useGrid';
+import { TetrisMatrixView } from './TetrisMatrix';
+import { useGame } from './hooks/useGame';
 
 export const AnimatedBoard = () => {
-  const grid = useGrid();
-  const shape = useCurrentShape(grid.gridConfig);
+  const { gameState, grid, tetromino, actions } = useGame();
   const insets = useSafeAreaInsets();
 
   useFrameCallback((frame) => {
     if (!frame.timeSincePreviousFrame) return;
+    const elapsed = Date.now() - gameState.startTime.value;
+    const toSpeed = gameState.turboActive.value ? 100 : gameState.speed.value;
 
-    const collisions = checkCollisions(
-      {
-        x: shape.translateX.value,
-        y: shape.translateY.value,
-      },
-      shape.currentShape,
-      grid.gridConfig,
-    );
-    if (collisions.wall.bottom) {
-      console.log(
-        'COLLIDED: ',
-        JSON.stringify(
-          {
-            pos: collisions.shapePos,
-            coords: collisions.shapeCoords,
-            wall: collisions.wall,
-            gridSize: grid.gridConfig.cellContainerSize * grid.gridConfig.rows,
-          },
-          null,
-          2,
-        ),
-        '\n\n',
-      );
-    }
-    if (collisions.wall.bottom && !shape.collided.value) {
-      shape.collided.value = true;
+    if (elapsed > toSpeed) {
+      const nextPosition = {
+        x: tetromino.position.x.value,
+        y: tetromino.position.y.value + 1,
+      };
 
-      const nextShape =
-        shape.allTetrominos[Math.floor(Math.random() * shape.allTetrominos.length)];
-
-      shape.translateY.value = 0;
-      shape.translateX.value = 0;
-      shape.currentShape.value = nextShape;
-      shape.collided.value = false;
-    }
-
-    if (!shape.collided.value && !collisions.wall.bottom) {
-      const moveRate =
-        grid.gridConfig.cellContainerSize /
-        (shape.speed.value / frame.timeSincePreviousFrame);
-      shape.translateY.value += moveRate;
+      if (actions.isValidPosition(nextPosition, tetromino.shape.value.matrix)) {
+        actions.moveTetromino(nextPosition);
+      } else {
+        gameState.turboActive.value = false;
+        actions.mergeShape();
+      }
+      gameState.startTime.value = Date.now();
     }
   });
-
-  const tetrominoSkPath = useDerivedValue(() => {
-    const skPath = Sk.Skia.Path.Make();
-    const cells = shape.currentShape.value.vectors.map((vector) =>
-      getCellUIRect(vector, grid.gridConfig.cellContainerSize),
-    );
-    for (const cell of cells) {
-      skPath.addRRect(Sk.rrect(cell, 5, 5));
-    }
-    return skPath;
-  });
-
-  const currentTetrominoColor = useDerivedValue(() => shape.currentShape.value.color);
 
   const gesture = Gesture.Pan()
     .onChange((e) => {
-      console.log('Y', e.absoluteY);
-      shape.translateX.value = inclusiveClamp(
-        shape.translateX.value + e.changeX,
-        0,
-        grid.gridConfig.width -
-          Sk.bounds(
-            shape.currentShape.value.vectors.map((x) =>
-              getCellUIRect(x, grid.gridConfig.cellContainerSize),
-            ),
-          ).width,
+      const posX = Math.floor(
+        e.x -
+          (tetromino.skPath.value.getBounds().width + grid.config.cellContainerSize) / 2,
       );
+      const moveTo = Math.floor(posX / grid.config.cellContainerSize);
+
+      const calcMove = Math.floor(
+        (Math.ceil(e.velocityX / e.changeX) / grid.config.midX) % grid.config.columns,
+      );
+
+      // console.log('CALC_MOVE: ', {
+      //   changeX: Math.ceil(e.changeX),
+      //   calcMove,
+      //   translationX: Math.round(e.translationX),
+      // });
+
+      if (
+        Number.isInteger(tetromino.position.y.value) &&
+        moveTo !== tetromino.position.x.value
+      ) {
+        actions.moveTetromino({ x: moveTo, y: tetromino.position.y.value });
+      }
     })
+    .minDistance(grid.config.cellContainerSize * 1.5)
+    .failOffsetY(grid.config.cellContainerSize / 2)
     .maxPointers(1);
 
-  const tetrisGrid = useDerivedValue(() => grid.tetrisGrid);
+  const accelerate = Gesture.Pan()
+    .onChange((e) => {
+      if (e.changeY > 0) {
+        gameState.turboActive.value = true;
+      } else {
+        gameState.turboActive.value = false;
+      }
+    })
+    .minDistance(grid.config.cellContainerSize * 2)
+    .activeOffsetY(grid.config.cellContainerSize * 2)
+    .failOffsetX(grid.config.cellContainerSize / 2)
+    .maxPointers(1);
+
+  const tap = Gesture.Tap().onEnd((e) => {
+    actions.rotateTetromino();
+  });
 
   return (
-    <GestureDetector gesture={gesture}>
-      <Sk.Canvas style={Dimensions.get('window')}>
+    <GestureDetector gesture={Gesture.Race(accelerate, gesture, tap)}>
+      <Sk.Canvas style={Dimensions.get('window')} debug>
         <Sk.Fill />
-        <Sk.Group
-          transform={[{ translateY: grid.gridConfig.width / 2 - insets.top }]}
-          invertClip
-        >
-          <TetrisGridView grid={tetrisGrid} config={grid.gridConfig} />
-          {grid.tetrisGridCells.map(({ color, coords, rect }) => (
-            <TetrisGridCell
-              key={`gridCell-${coords.x}:${coords.y}`}
-              rect={rect}
-              cellSize={grid.gridConfig.cellContainerSize}
-              color={color}
+        <Sk.Group transform={[{ translateY: grid.config.width / 2 - insets.top }]}>
+          <Sk.Group
+            clip={Sk.rect(
+              0,
+              0,
+              grid.config.width,
+              grid.config.cellContainerSize * grid.config.rows,
+            )}
+          >
+            <TetrisMatrixView matrix={grid.matrix} config={grid.config} />
+            <Sk.Path
+              path={tetromino.skPath}
+              color={tetromino.color}
+              // transform={shape.transform}
             />
-          ))}
-          <Sk.Path
-            path={tetrominoSkPath}
-            color={currentTetrominoColor}
-            transform={shape.transform}
-          />
+          </Sk.Group>
         </Sk.Group>
       </Sk.Canvas>
     </GestureDetector>
