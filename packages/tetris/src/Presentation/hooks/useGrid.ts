@@ -18,7 +18,7 @@ export const useGrid = () => {
     coords: vector,
   }));
 
-  const matrix = tetrisGrid.matrix.map((row, iy) =>
+  const matrix: Grid.TetrisAnimatedMatrix[][] = tetrisGrid.matrix.map((row, iy) =>
     row.map((column, ix) => ({
       point: vec(ix, iy),
       value: useSharedValue(column),
@@ -65,7 +65,10 @@ export const useGrid = () => {
     });
   };
 
-  const drawShape = (shape: SharedValue<Grid.TetrisGrid>, position: SkPoint) => {
+  const drawShape = (
+    shape: SharedValue<Grid.TetrisGrid>,
+    position: SkPoint,
+  ) => {
     'worklet';
     shape.value.matrix.forEach((row, dy) => {
       row.forEach((value, dx) => {

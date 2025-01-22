@@ -1,7 +1,7 @@
-import { processTransform3d, rrect, usePathValue } from '@shopify/react-native-skia';
+import { point } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
-import { type GridConfig, getCellUIRect } from '../../Domain/Grid.domain';
+import type { GridConfig } from '../../Domain/Grid.domain';
 import { getAllTetrominos, getRandomTetromino } from '../../Domain/Tetromino.domain';
 
 export const useCurrentShape = (gridConfig: GridConfig) => {
@@ -12,8 +12,6 @@ export const useCurrentShape = (gridConfig: GridConfig) => {
 
   const shape = useSharedValue(firstShape);
   const allTetrominos = getAllTetrominos(gridConfig, gridConfig.cellContainerSize);
-  // const translateX = useSharedValue(0);
-  // const translateY = useSharedValue(0);
   const position = {
     x: useSharedValue(0),
     y: useSharedValue(0),
@@ -46,35 +44,30 @@ export const useCurrentShape = (gridConfig: GridConfig) => {
     }
   };
 
-  const skShapePath = usePathValue((skPath) => {
+  const currentPosition = useDerivedValue(() =>
+    point(position.x.value, position.y.value),
+  );
+
+  const rotateShape = () => {
     'worklet';
-    for (const cell of shape.value.cells) {
-      if (cell.value === 0) continue;
-      skPath.addPath;
-      skPath.addRRect(
-        rrect(getCellUIRect(cell.point, gridConfig.cellContainerSize), 5, 5),
-      );
-    }
-    skPath.transform(
-      processTransform3d([
-        {
-          translate: [
-            position.x.value * gridConfig.cellContainerSize,
-            position.y.value * gridConfig.cellContainerSize,
-          ] as const,
-        },
-      ]),
-    );
-    return skPath;
-  });
+    const nextMatrix = shape.value.matrix
+      .map((_, i) => shape.value.matrix.map((column) => column[i]))
+      .map((row) => row.reverse());
+    const currentPos = point(currentPosition.value.x, currentPosition.value.y);
+    return {
+      nextMatrix,
+      currentPos,
+    };
+  };
 
   return {
     position,
+    currentPosition,
     shape: shape,
+    rotateShape,
     moveTo,
     color: currentTetrominoColor,
     collided,
-    skShapePath,
     allTetrominos,
     nextTetromino,
   };
