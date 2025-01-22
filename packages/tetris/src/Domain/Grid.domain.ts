@@ -18,6 +18,10 @@ export interface TetrisGrid {
   matrix: number[][];
 }
 
+export interface GridCoordinates {
+  column: number;
+  row: number;
+}
 export interface GridConfigInput {
   rows: number;
   columns: number;
@@ -85,6 +89,31 @@ export const getGridLayout = (
     color: 'rgba(131, 126, 126, 0.3)',
     position: { y: 0, x: Math.floor(columns / 3) },
     name: 'Grid',
+  };
+};
+
+export const isEmptyPoint = (grid: TetrisGrid, point: Sk.SkPoint) => {
+  'worklet';
+};
+
+export const restartMatrix = (grid: TetrisGrid) => {
+  'worklet';
+  for (let r = 0; r < grid.matrix.length; r++) {
+    grid.matrix[r] = [];
+    for (let c = 0; c < grid.matrix[r].length; c++) {
+      grid.matrix[r][c] = 0;
+    }
+  }
+};
+
+export const getBoardCoordinates = (
+  coords: GridCoordinates,
+  config: GridConfig,
+): Sk.SkPoint => {
+  'worklet';
+  return {
+    x: coords.column * config.cellContainerSize,
+    y: coords.row * config.cellContainerSize,
   };
 };
 

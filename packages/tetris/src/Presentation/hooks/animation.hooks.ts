@@ -152,7 +152,7 @@ export const useAnimation = <S extends AnimationState>(
     if (pause?.value) {
       offset.value += ts ?? 0;
     } else {
-      if (gen && gen.value) {
+      if (gen && gen.value && gen.value.next && ts) {
         gen.value.next(ts);
       }
     }
