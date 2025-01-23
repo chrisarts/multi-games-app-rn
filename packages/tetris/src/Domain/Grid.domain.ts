@@ -1,5 +1,6 @@
 import * as Sk from '@shopify/react-native-skia';
 import type { SharedValue } from 'react-native-reanimated';
+import { createRange } from '../utils/common.utils';
 
 export interface TetrisAnimatedMatrix {
   point: Sk.SkPoint;
@@ -7,14 +8,21 @@ export interface TetrisAnimatedMatrix {
   color: SharedValue<string>;
 }
 
+export interface TetrisGridCell {
+  point: Sk.SkPoint;
+  value: number;
+  color: string;
+}
+
+export interface TetrisCell {
+  point: Sk.SkPoint;
+  value: number;
+}
 export interface TetrisGrid {
   name: string;
   position: Sk.Vector;
   color: string;
-  cells: {
-    point: Sk.SkPoint;
-    value: number;
-  }[];
+  cells: TetrisCell[];
   matrix: number[][];
 }
 
@@ -22,11 +30,11 @@ export interface GridCoordinates {
   column: number;
   row: number;
 }
-export interface GridConfigInput {
+export interface GridSize {
   rows: number;
   columns: number;
 }
-export interface GridConfig extends GridConfigInput {
+export interface GridConfig extends GridSize {
   width: number;
   height: number;
   midX: number;
@@ -54,7 +62,7 @@ export const getCellUIRect = (position: Sk.Vector, cellSize: number): Sk.SkRect 
   return Sk.rect(x, y, width, height);
 };
 
-export const getGridConfig = (width: number, config: GridConfigInput): GridConfig => {
+export const getGridConfig = (width: number, config: GridSize): GridConfig => {
   'worklet';
   const spacing = 3;
   const cellContainerSize = Math.floor(width / config.columns);
@@ -74,7 +82,7 @@ export const getGridConfig = (width: number, config: GridConfigInput): GridConfi
 };
 
 export const getGridLayout = (
-  { columns, rows }: GridConfigInput,
+  { columns, rows }: GridSize,
   cellSize: GridConfig,
 ): TetrisGrid => {
   'worklet';
@@ -202,5 +210,55 @@ export const clearLines = (matrix: TetrisAnimatedMatrix[][], grid: TetrisGrid) =
 
   return {
     lines: linesToClear.length,
+  };
+};
+
+const moveDownFrom = (
+  gridMatrix: TetrisAnimatedMatrix[][],
+  matrix: { rowIndex: number; cells: TetrisAnimatedMatrix[] }[],
+  rowIndex: number,
+) => {
+  'worklet';
+  for (const row of matrix.filter((x) => x.rowIndex <= rowIndex)) {
+    for (const cell of row.cells) {
+      const nextPos = { x: cell.point.x, y: cell.point.y + 1 };
+      const nextCell = getMatrixCellAt(nextPos, gridMatrix);
+      if (!nextCell) continue;
+
+      cell.color.value = nextCell.color.value;
+      cell.value.value = nextCell.value.value;
+    }
+  }
+};
+
+const sweepRowAndMoveDown = (row: TetrisAnimatedMatrix[], color: string) => {
+  'worklet';
+  for (const cell of row) {
+    cell.color.value = color;
+    cell.value.value = 0;
+  }
+};
+
+export const sweepLines = (matrix: TetrisAnimatedMatrix[][], grid: TetrisGrid) => {
+  'worklet';
+  const clearLines = matrix.filter((row) => row.every((cell) => cell.value.value > 0));
+
+  const rowCellsMatrix = createRange(matrix.length - 1)
+    .reverse()
+    .map((index) => ({
+      rowIndex: index,
+      cells: matrix.flat().filter((cell) => cell.point.y === index),
+    }));
+
+  for (const row of rowCellsMatrix) {
+    if (row.cells.every((x) => x.value.value > 0)) {
+      console.log('SWEEP: ', row.rowIndex);
+      sweepRowAndMoveDown(row.cells, grid.color);
+      moveDownFrom(matrix, rowCellsMatrix, row.rowIndex);
+    }
+  }
+
+  return {
+    count: clearLines.length,
   };
 };

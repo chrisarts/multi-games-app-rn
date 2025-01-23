@@ -9,21 +9,21 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import { mergeShapeAt, shapeCollisionsAt } from '../../Domain/Grid.domain';
+import { getRandomTetromino, rotateTetromino } from '../../Domain/Tetromino.domain';
 import { useGameContext } from '../context/GameContext';
 import { useTetrisGame } from './useTetrisGame';
 
 export const useAnimatedGame = () => {
-  const { gridConfig, getRandomShapeIndex, allShapes } = useGameContext();
+  const { gridConfig } = useGameContext();
   const { gameState, tetromino, moves, tetrisMatrix } = useTetrisGame();
   const lastTouchedX = useSharedValue<number | null>(tetromino.position.x.value);
 
   const moveX = Gesture.Pan()
     .onBegin((e) => {
-      moves.movingX.value = true;
       lastTouchedX.value = e.absoluteX;
     })
     .onChange((e) => {
-      if (!moves.movingX.value || !lastTouchedX.value) return;
+      if (!lastTouchedX.value) return;
 
       if (Math.abs(e.translationY) > gridConfig.cellContainerSize * 2) {
         moves.turbo.value = e.translationY > 0;
@@ -55,14 +55,13 @@ export const useAnimatedGame = () => {
       }
     })
     .onEnd(() => {
-      moves.movingX.value = false;
       moves.moveX.value = 0;
     })
-    .minDistance(gridConfig.cellContainerSize * 0.7)
+    .minDistance(gridConfig.cellContainerSize * 0.5)
     .maxPointers(1);
 
   const rotate = Gesture.Tap().onTouchesUp(() => {
-    tetromino.rotateTetromino();
+    rotateTetromino(tetromino.currentShape, tetromino.position, tetrisMatrix);
   });
 
   useFrameCallback((frame) => {
@@ -87,7 +86,7 @@ export const useAnimatedGame = () => {
 
       if (!collision.merge && !collision.outsideGrid) {
         tetromino.position.y.value = withTiming(nextPos.y, {
-          duration: toSpeed / 2,
+          duration: 100,
           easing: Easing.linear,
         });
       }
@@ -99,12 +98,14 @@ export const useAnimatedGame = () => {
           return;
         }
 
-        const nextShape = allShapes[getRandomShapeIndex()];
+        const nextShape = getRandomTetromino(gridConfig, gridConfig.cellContainerSize);
         mergeShapeAt(
           point(tetromino.position.x.value, tetromino.position.y.value),
           tetromino.currentShape,
           tetrisMatrix,
         );
+
+        moves.turbo.value = false;
         const nextCollision = shapeCollisionsAt(
           point(0, 0),
           nextShape.cells,

@@ -14,8 +14,7 @@ export const useTetrisGame = () => {
     })),
   );
 
-  const { position, tetromino: currentShape, resetPosition, rotateTetromino } =
-    useTetromino(tetrisMatrix);
+  const { position, tetromino: currentShape, resetPosition } = useTetromino();
 
   const speed = useSharedValue(800);
   const startTime = useSharedValue(Date.now());
@@ -24,7 +23,6 @@ export const useTetrisGame = () => {
   const running = useSharedValue(true);
   const moves = {
     moveX: useSharedValue(0),
-    movingX: useSharedValue(false),
     turbo: useSharedValue(false),
   };
 
@@ -37,7 +35,6 @@ export const useTetrisGame = () => {
     },
     moves,
     tetromino: {
-      rotateTetromino,
       resetPosition,
       currentShape,
       position,
