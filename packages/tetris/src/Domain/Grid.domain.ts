@@ -126,3 +126,81 @@ export const createGridUIPath = (cells: Sk.SkRect[]) => {
   }
   return path;
 };
+
+export const getMatrixCellAt = (point: Sk.SkPoint, matrix: TetrisAnimatedMatrix[][]) => {
+  'worklet';
+  const row = matrix[point.y];
+  if (!row) return undefined;
+  const cell = row[point.x];
+
+  return cell;
+};
+
+export const mergeShapeAt = (
+  point: Sk.SkPoint,
+  shape: SharedValue<TetrisGrid>,
+  matrix: TetrisAnimatedMatrix[][],
+) => {
+  'worklet';
+  for (const shapeCell of shape.value.cells) {
+    const gridPoint = Sk.add(point, shapeCell.point);
+    const gridCell = getMatrixCellAt(gridPoint, matrix);
+    if (shapeCell.value === 0) continue;
+
+    if (!gridCell) {
+      throw new Error('merging at invalid position');
+    }
+    gridCell.color.value = shape.value.color;
+    gridCell.value.value = shapeCell.value;
+  }
+
+  return matrix;
+};
+
+export const shapeCollisionsAt = (
+  at: Sk.SkPoint,
+  shapeCells: TetrisGrid['cells'],
+  matrix: TetrisAnimatedMatrix[][],
+) => {
+  'worklet';
+  for (const shapeCell of shapeCells) {
+    const gridPoint = Sk.add(at, shapeCell.point);
+    const gridCell = getMatrixCellAt(gridPoint, matrix);
+    if (shapeCell.value === 0) continue;
+
+    if (!gridCell) {
+      return {
+        at: gridPoint,
+        merge: gridPoint.y >= matrix.length,
+        outsideGrid: true,
+      };
+    }
+    if (gridCell.value.value > 0) {
+      return {
+        at: gridPoint,
+        merge: true,
+        outsideGrid: false,
+      };
+    }
+  }
+
+  return {
+    outsideGrid: false,
+    merge: false,
+    at: Sk.point(0, 0),
+  };
+};
+
+export const clearLines = (matrix: TetrisAnimatedMatrix[][], grid: TetrisGrid) => {
+  'worklet';
+  const linesToClear = matrix.filter((row) => row.every(({ value }) => value.value > 0));
+  for (const cell of linesToClear.flat()) {
+    const aboveCell = matrix[cell.point.y - 1][cell.point.x];
+    cell.color.value = aboveCell.color.value;
+    cell.value.value = aboveCell.value.value;
+  }
+
+  return {
+    lines: linesToClear.length,
+  };
+};

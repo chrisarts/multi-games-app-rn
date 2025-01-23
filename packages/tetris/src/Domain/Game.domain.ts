@@ -2,6 +2,14 @@ import { Dimensions } from 'react-native';
 import * as Grid from './Grid.domain';
 import { getAllTetrominos } from './Tetromino.domain';
 
+export interface TetrisGame {
+  getRandomShapeIndex: () => number;
+  tetrisGrid: Grid.TetrisGrid;
+  gridConfig: Grid.GridConfig;
+  firstShape: Grid.TetrisGrid;
+  allShapes: Grid.TetrisGrid[];
+}
+
 export const createGame = () => {
   'worklet';
   const dimensions = Dimensions.get('screen');

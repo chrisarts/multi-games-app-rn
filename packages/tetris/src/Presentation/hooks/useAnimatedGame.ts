@@ -1,173 +1,134 @@
-import { type SkPoint, add, point } from '@shopify/react-native-skia';
+import { add, point } from '@shopify/react-native-skia';
+import { Gesture } from 'react-native-gesture-handler';
 import {
-  type SharedValue,
-  useDerivedValue,
+  Easing,
+  ReduceMotion,
+  cancelAnimation,
+  useFrameCallback,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
-import { createGame } from '../../Domain/Game.domain';
-import type { TetrisAnimatedMatrix, TetrisGrid } from '../../Domain/Grid.domain';
-import { timing, useAnimation, wait, waitUntil } from './animation.hooks';
-
-const { getRandomShapeIndex, gridConfig, tetrisGrid, allShapes } = createGame();
+import { mergeShapeAt, shapeCollisionsAt } from '../../Domain/Grid.domain';
+import { useGameContext } from '../context/GameContext';
+import { useTetrisGame } from './useTetrisGame';
 
 export const useAnimatedGame = () => {
-  const { position, tetromino, collided, grid } = useGame();
+  const { gridConfig, getRandomShapeIndex, allShapes } = useGameContext();
+  const { gameState, tetromino, moves, tetrisMatrix } = useTetrisGame();
+  const lastTouchedX = useSharedValue<number | null>(tetromino.position.x.value);
 
-  return {
-    position: position,
-    tetromino,
-    tetrisGrid,
-    collided,
-    grid,
-  };
-};
+  const moveX = Gesture.Pan()
+    .onBegin((e) => {
+      moves.movingX.value = true;
+      lastTouchedX.value = e.absoluteX;
+    })
+    .onChange((e) => {
+      if (!moves.movingX.value || !lastTouchedX.value) return;
 
-const useGame = () => {
-  const { getMatrixCellAt, shapeCollisionsAt, mergeShapeAt, matrix } = useGridMatrix();
-  const speed = useSharedValue(800);
-  const shapeIndex = useSharedValue(getRandomShapeIndex());
-  const gameOver = useSharedValue(false);
-  const running = useSharedValue(true);
-  const position = {
-    x: useSharedValue(0),
-    y: useSharedValue(0),
-  };
-
-  const resetPosition = () => {
-    'worklet';
-    position.x.value = 0;
-    position.y.value = 0;
-  };
-
-  const currentShape = useDerivedValue(() => allShapes[shapeIndex.value]);
-  const color = useDerivedValue(() => currentShape.value.color);
-  const cells = useDerivedValue(() => currentShape.value.cells);
-
-  const collided = useDerivedValue(() => {
-    const currentPoint = point(position.x.value, position.y.value);
-    if (!Number.isInteger(currentPoint.x) || !Number.isInteger(currentPoint.y)) {
-      return false;
-    }
-    const cell = getMatrixCellAt(currentPoint);
-    if (!cell) console.log('COLLIDED');
-    return !!cell;
-  });
-
-  useAnimation(function* () {
-    'worklet';
-    let to = position.y.value + 1;
-    while (true) {
-      const collisions = shapeCollisionsAt({ x: position.x.value, y: to }, currentShape);
-
-      if (!collisions.outsideGrid && !collisions.merge) {
-        yield* timing(position.y, { to, duration: 100 });
-        to = to + 1;
+      if (Math.abs(e.translationY) > gridConfig.cellContainerSize * 2) {
+        moves.turbo.value = e.translationY > 0;
+        return;
       }
 
-      if (collisions.merge) {
-        console.log('CHECK', collisions);
-        mergeShapeAt(point(position.x.value, position.y.value), currentShape);
-        resetPosition();
-        shapeIndex.value = getRandomShapeIndex();
-        to = 1;
-
-        if (!collisions.outsideGrid && collisions.at.y <= 1) {
-          console.log('GAME_OVER', collisions);
-          gameOver.value = true;
-          running.value = false;
-          yield* waitUntil(running);
+      const minMoveX = gridConfig.cellSize * 0.5;
+      if (Math.abs(e.absoluteX - lastTouchedX.value) > minMoveX) {
+        const moveStepX = e.velocityX > 0 ? 1 : -1;
+        const currentPosition = point(
+          tetromino.position.x.value,
+          tetromino.position.y.value,
+        );
+        const nextPoint = add(currentPosition, point(moveStepX, 0));
+        const collision = shapeCollisionsAt(
+          nextPoint,
+          tetromino.currentShape.value.cells,
+          tetrisMatrix,
+        );
+        if (!collision.outsideGrid && !collision.merge) {
+          cancelAnimation(tetromino.position.x);
+          tetromino.position.x.value = withTiming(nextPoint.x, {
+            easing: Easing.linear,
+            duration: 50,
+            reduceMotion: ReduceMotion.Never,
+          });
+          lastTouchedX.value = e.absoluteX;
         }
       }
+    })
+    .onEnd(() => {
+      moves.movingX.value = false;
+      moves.moveX.value = 0;
+    })
+    .minDistance(gridConfig.cellContainerSize * 0.7)
+    .maxPointers(1);
 
-      yield* wait(speed.value);
+  const rotate = Gesture.Tap().onTouchesUp(() => {
+    tetromino.rotateTetromino();
+  });
+
+  useFrameCallback((frame) => {
+    if (!frame.timeSincePreviousFrame) return;
+    const elapsed = Date.now() - gameState.startTime.value;
+    const toSpeed = moves.turbo.value ? 100 : gameState.speed.value;
+
+    if (elapsed > toSpeed) {
+      gameState.startTime.value = Date.now();
+      if (!gameState.running.value || gameState.gameOver.value) return;
+
+      const nextPos = add(
+        point(tetromino.position.x.value, tetromino.position.y.value),
+        point(0, 1),
+      );
+
+      const collision = shapeCollisionsAt(
+        nextPos,
+        tetromino.currentShape.value.cells,
+        tetrisMatrix,
+      );
+
+      if (!collision.merge && !collision.outsideGrid) {
+        tetromino.position.y.value = withTiming(nextPos.y, {
+          duration: toSpeed / 2,
+          easing: Easing.linear,
+        });
+      }
+
+      if (collision.merge) {
+        if (collision.at.y <= 1) {
+          gameState.gameOver.value = true;
+          gameState.running.value = false;
+          return;
+        }
+
+        const nextShape = allShapes[getRandomShapeIndex()];
+        mergeShapeAt(
+          point(tetromino.position.x.value, tetromino.position.y.value),
+          tetromino.currentShape,
+          tetrisMatrix,
+        );
+        const nextCollision = shapeCollisionsAt(
+          point(0, 0),
+          nextShape.cells,
+          tetrisMatrix,
+        );
+        if (nextCollision.merge && nextCollision.at.y < 1) {
+          gameState.gameOver.value = true;
+          gameState.running.value = false;
+          return;
+        }
+        tetromino.resetPosition();
+        tetromino.currentShape.value = nextShape;
+      }
     }
   });
 
   return {
-    position,
-    speed,
-    collided,
-    resetPosition,
-    tetromino: {
-      cells,
-      color,
-    },
+    gameState,
+    tetromino,
+    gestures: { rotate, moveX },
+    moves,
     grid: {
-      matrix,
-      gridConfig,
+      matrix: tetrisMatrix,
+      config: gridConfig,
     },
-  };
-};
-
-const useGridMatrix = () => {
-  const matrix: TetrisAnimatedMatrix[][] = tetrisGrid.matrix.map((row, iy) =>
-    row.map((column, ix) => ({
-      point: point(ix, iy),
-      value: useSharedValue(column),
-      color: useSharedValue('rgba(131, 126, 126, 0.3)'),
-    })),
-  );
-
-  const getMatrixCellAt = (point: SkPoint) => {
-    'worklet';
-    const row = matrix[point.y];
-    if (!row) return undefined;
-    const cell = row[point.x];
-
-    return cell;
-  };
-
-  const shapeCollisionsAt = (at: SkPoint, shape: SharedValue<TetrisGrid>) => {
-    'worklet';
-    for (const shapeCell of shape.value.cells) {
-      const gridPoint = add(at, shapeCell.point);
-      const gridCell = getMatrixCellAt(gridPoint);
-      if (shapeCell.value === 0) continue;
-
-      if (!gridCell) {
-        return {
-          at: gridPoint,
-          merge: gridPoint.y >= gridConfig.rows,
-          outsideGrid: true,
-        };
-      }
-      if (gridCell.value.value > 0) {
-        return {
-          at: gridPoint,
-          merge: true,
-          outsideGrid: false,
-        };
-      }
-    }
-
-    return {
-      outsideGrid: false,
-      merge: false,
-      at: point(0, 0),
-    };
-  };
-
-  const mergeShapeAt = (point: SkPoint, shape: SharedValue<TetrisGrid>) => {
-    'worklet';
-    for (const shapeCell of shape.value.cells) {
-      const gridPoint = add(point, shapeCell.point);
-      const gridCell = getMatrixCellAt(gridPoint);
-      if (shapeCell.value === 0) continue;
-
-      if (!gridCell) {
-        throw new Error('merging at invalid position');
-      }
-      gridCell.color.value = shape.value.color;
-      gridCell.value.value = shapeCell.value;
-    }
-
-    return matrix;
-  };
-
-  return {
-    matrix,
-    getMatrixCellAt,
-    shapeCollisionsAt,
-    mergeShapeAt,
   };
 };

@@ -75,3 +75,8 @@ export const createStoreContext = <StoreShape>(
         Effect.runSync(Ref.get(storeRef).pipe(Effect.map(f))),
     };
   });
+
+export function createRange(end: number, startAt = 0) {
+  'worklet';
+  return [...Array(end).keys()].map((i) => i + startAt);
+}
