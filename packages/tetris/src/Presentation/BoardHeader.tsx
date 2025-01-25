@@ -1,103 +1,178 @@
 import {
   FillType,
   Group,
+  PaintStyle,
   Path,
+  RoundedRect,
+  type SkImage,
   Skia,
   StrokeCap,
-  processTransform3d,
+  StrokeJoin,
   rect,
   rrect,
   usePathValue,
 } from '@shopify/react-native-skia';
-import { useMemo } from 'react';
-import { Dimensions } from 'react-native';
-import type { EdgeInsets } from 'react-native-safe-area-context';
-import { getCellUIRect, getGridConfig, getGridLayout } from '../Domain/Grid.domain';
-import * as Position from '../Domain/Position.domain';
-import { getRandomTetromino } from '../Domain/Tetromino.domain';
-import { useGameContext } from './context/GameContext';
+import {
+  useAnimatedReaction,
+  useDerivedValue,
+  useSharedValue,
+} from 'react-native-reanimated';
+import { type TetrisGrid, gridSizeToMatrix } from '../Domain/Grid.domain';
+import type { TetrisBoardState, TetrisGameState } from '../Domain/Tetris.domain';
+import { useTetrisFont } from './hooks/useTetrisFont';
 
-const dimensions = Dimensions.get('window');
-export const BoardHeader = ({ insets }: { insets: EdgeInsets }) => {
-  const squareGrid = getGridConfig(
-    dimensions.width / 3,
-    { columns: 5, rows: 5 },
-    { showEmptyCells: false },
+interface BoardHeaderProps {
+  board: TetrisBoardState;
+  game: TetrisGameState;
+}
+
+export const BoardHeader = ({ board, game }: BoardHeaderProps) => {
+  const nextShapeGrid = useSharedValue(gridSizeToMatrix({ columns: 6, rows: 5 }));
+
+  const { fontItalicBold } = useTetrisFont();
+  const squareWidth = useDerivedValue(
+    () => board.gridConfig.value.infoSquareRect.width * 0.8,
   );
-  const cellLayout = getGridLayout(squareGrid, squareGrid);
+  const squareHeight = useDerivedValue(() => squareWidth.value * 1.3);
+  const nextShapeImage = useSharedValue<SkImage | null>(null);
+  const nextShapeColor = useDerivedValue(() => board.tetromino.next.value.color);
 
-  const nextTetromino = getRandomTetromino(squareGrid, squareGrid.cellContainerSize);
+  useAnimatedReaction(
+    () => board.tetromino.next,
+    (shape) => {
+      nextShapeGrid.value = gridSizeToMatrix({ columns: 6, rows: 5 });
+      for (const cell of shape.value.cellsMatrix.flat()) {
+        if (cell.value === 0) continue;
+        nextShapeGrid.value[cell.point.y][cell.point.x] = {
+          color: cell.color,
+          point: cell.point,
+          value: 1,
+        };
+      }
 
-  const skShapePath = usePathValue((skPath) => {
+      const surface = Skia.Surface.Make(
+        board.gridConfig.value.screen.width * 2,
+        board.gridConfig.value.size.height,
+      );
+      const canvas = surface?.getCanvas();
+      const cellSize = squareWidth.value * 2;
+      const paint = Skia.Paint();
+      paint.setColor(Skia.Color(shape.value.color));
+      const skPath = getShapePath(shape.value, cellSize);
+      canvas?.drawPath(skPath, paint);
+
+      // canvas?.drawPath(skPath, paint);
+
+      surface?.flush();
+
+      nextShapeImage.value = surface?.makeImageSnapshot() ?? null;
+    },
+  );
+
+  const nextShapePath = usePathValue((skPath) => {
     'worklet';
-    for (const cell of nextTetromino.cellsMatrix.flat()) {
+    const cellSize = squareWidth.value / nextShapeGrid.value.length;
+    for (const cell of nextShapeGrid.value.flat()) {
       if (cell.value === 0) continue;
       skPath.addRRect(
-        rrect(getCellUIRect(cell.point, squareGrid.cellContainerSize), 5, 5),
+        rrect(
+          rect(
+            (cell.point.x + 1) * cellSize,
+            (cell.point.y + 1) * cellSize,
+            cellSize - 1,
+            cellSize - 1,
+          ),
+          3,
+          3,
+        ),
       );
     }
-    skPath.transform(
-      processTransform3d([
-        {
-          translate: [
-            nextTetromino.position.x * squareGrid.cellContainerSize,
-            nextTetromino.position.y * squareGrid.cellContainerSize,
-          ] as const,
-        },
-      ]),
-    );
-    return skPath;
   });
 
-  const containerCells = useMemo(() => {
-    const path = Skia.Path.Make();
-    const cells = Array(3)
-      .fill(null)
-      .map((_, i) =>
-        createCellContainer({
-          ...squareGrid,
-          spacing: squareGrid.cellSpacing,
-          index: i,
-        }),
-      );
-    for (const cell of cells) {
-      path.addPath(cell);
-    }
-    path.setFillType(FillType.InverseEvenOdd);
-    path.stroke({ width: 1, cap: StrokeCap.Round, precision: 10 });
-    path.simplify();
-    path.close();
-    return path;
-  }, [squareGrid]);
+  const textPath = usePathValue((skPath) => {
+    'worklet';
 
+    const container = rect(
+      0,
+      squareWidth.value * -0.4,
+      squareWidth.value,
+      squareWidth.value * 0.3,
+    );
+    skPath.addRRect(rrect(container, 3, 3));
+
+    if (fontItalicBold) {
+      const text = Skia.Path.MakeFromText(
+        'Next',
+        squareWidth.value * 0.25,
+        squareWidth.value * -0.17,
+        fontItalicBold,
+      );
+      if (text) {
+        text.stroke({
+          cap: StrokeCap.Round,
+          join: StrokeJoin.Round,
+        });
+        text.setFillType(FillType.InverseEvenOdd);
+        skPath.addPath(text);
+      }
+    }
+  });
+
+  if (!fontItalicBold) {
+    return null;
+  }
+  const textPaint = Skia.Paint();
+  textPaint.setColor(Skia.Color('white'));
+  textPaint.setStyle(PaintStyle.Fill);
   return (
-    <Group transform={[{ translateY: insets.top }]}>
-      <Path style='stroke' path={containerCells} color={nextTetromino.color} />
+    <Group
+      transform={[
+        {
+          translateY: board.gridConfig.value.content.y * 2,
+        },
+      ]}
+    >
+      <RoundedRect
+        rect={rrect(
+          rect(0, squareWidth.value * -0.2, squareWidth.value, squareHeight.value),
+          5,
+          5,
+        )}
+        color='white'
+        style='stroke'
+      />
+      <Path
+        path={textPath}
+        color='white'
+        fillType='evenOdd'
+        paint={textPaint}
+        // x={board.gridConfig.value.content.x * 0.2}
+        // y={board.gridConfig.value.content.y * -0.2}
+      />
+      <Path path={nextShapePath} color={nextShapeColor} />
     </Group>
   );
 };
+const getShapePath = (nextShape: TetrisGrid, cellSize: number) => {
+  'worklet';
+  const skPath = Skia.Path.Make();
+  for (const cell of nextShape.cellsMatrix.flat()) {
+    if (cell.value === 0) continue;
+    skPath.addRRect(
+      rrect(
+        rect(
+          (cell.point.x + nextShape.position.x) * cellSize,
+          (cell.point.y * cellSize + 1),
+          cellSize - 4,
+          cellSize - 4,
+        ),
+        3,
+        3,
+      ),
+    );
+  }
 
-const createCellContainer = ({
-  height,
-  spacing,
-  width,
-  index,
-}: {
-  spacing: number;
-  width: number;
-  height: number;
-  index: number;
-}) => {
-  const path = Skia.Path.Make();
-  const container = rect(
-    width * index + spacing * 2,
-    0,
-    width - spacing * 4,
-    height - height / 3,
-  );
-  path.addRRect(rrect(container, 5, 5));
-
-  return path;
+  return skPath;
 };
 
 // const squaresPath = useMemo(() => {

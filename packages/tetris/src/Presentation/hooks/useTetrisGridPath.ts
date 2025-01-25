@@ -1,14 +1,17 @@
 import { processTransform3d, rrect, usePathValue } from '@shopify/react-native-skia';
 import type { SharedValue } from 'react-native-reanimated';
-import { type TetrisGrid, getCellUIRect } from '../../Domain/Grid.domain';
+import {
+  type GridConfig,
+  type TetrisGrid,
+  getCellUIRect,
+} from '../../Domain/Grid.domain';
 import type { AnimatedPosition } from '../../Domain/Position.domain';
-import { useGameContext } from '../context/GameContext';
 
 export const useTetrisGridPath = (
   grid: SharedValue<TetrisGrid>,
   position: AnimatedPosition,
+  gridConfig: GridConfig,
 ) => {
-  const { gridConfig } = useGameContext();
   const skShapePath = usePathValue((skPath) => {
     'worklet';
     for (const cell of grid.value.cellsMatrix.flat()) {

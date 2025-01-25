@@ -1,17 +1,16 @@
 import {
+  PaintStyle,
   type Size,
   type SkPoint,
   type SkRect,
   Skia,
+  StrokeCap,
+  StrokeJoin,
   point,
   rect,
   rrect,
 } from '@shopify/react-native-skia';
 import type { EdgeInsets } from 'react-native-safe-area-context';
-
-export interface GridOptions {
-  showEmptyCells: boolean;
-}
 
 export interface TetrisCell {
   point: SkPoint;
@@ -41,15 +40,19 @@ interface CellConfig {
 export interface GridConfig extends GridSize {
   size: Size;
   screen: Size;
+  center: SkPoint;
+  content: SkRect;
   insets: EdgeInsets;
+  infoSquareRect: SkRect;
   midX: number;
-  position: SkPoint;
   defaultColor: string;
   cell: CellConfig;
-  options: GridOptions;
 }
 
-export const matrixToPoints = (matrix: number[][], color: string): GridMatrix => {
+export const matrixToPoints = (
+  matrix: number[][],
+  color = 'rgba(131, 126, 126, 0.3)',
+): GridMatrix => {
   'worklet';
   return matrix.map((_, iy) =>
     _.map((value, ix) => ({
@@ -60,12 +63,12 @@ export const matrixToPoints = (matrix: number[][], color: string): GridMatrix =>
   );
 };
 
-export const getCellUIRect = (position: SkPoint, cellSize: number): SkRect => {
+export const getCellUIRect = (position: SkPoint, cellSize: number, spacing = -1): SkRect => {
   'worklet';
   const x = position.x * cellSize;
   const y = position.y * cellSize;
-  const width = cellSize - 1;
-  const height = cellSize - 1;
+  const width = cellSize + spacing;
+  const height = cellSize + spacing;
   return rect(x, y, width, height);
 };
 
@@ -73,28 +76,36 @@ export const getGridConfig = (
   screen: Size,
   insets: EdgeInsets,
   config: GridSize,
-  options: GridOptions,
 ): GridConfig => {
   'worklet';
   const spacing = 3;
-  const cellContainerSize = Math.floor(
-    (screen.width - (spacing * config.columns) / 2) / config.columns,
+  const canvasMaxWidth = screen.width * 0.8;
+  const cellOuterSize = Math.floor(canvasMaxWidth / config.columns);
+  const cellInnerSize = cellOuterSize - spacing;
+
+  const canvasWidth = cellOuterSize * config.columns;
+  const canvasHeight = cellOuterSize * config.rows + cellOuterSize;
+  const midX = Math.floor(config.columns / 2);
+  const positionX = (screen.width - canvasWidth - spacing * 2);
+  const positionY = screen.height - canvasHeight - insets.bottom / 2;
+
+  const infoSquareRect = rect(
+    1,
+    insets.bottom / 2,
+    screen.width * 0.2,
+    screen.height * 0.2,
   );
-  const cellSize = cellContainerSize - spacing / 3;
-  const canvasWidth = cellContainerSize * config.columns;
-  const canvasHeight = cellContainerSize * config.rows;
-  const midX = Math.floor(config.columns / 3);
+
   return {
     screen,
     insets,
-    position: point(
-      (spacing * config.columns) / 2 / 2,
-      screen.height - canvasHeight - insets.bottom,
-    ),
+    center: point(screen.width / 2, screen.height / 2),
+    content: rect(positionX, positionY, screen.width, canvasHeight),
+    infoSquareRect,
     cell: {
-      size: cellContainerSize,
+      size: cellOuterSize,
       spacing: spacing,
-      innerSize: cellSize,
+      innerSize: cellInnerSize,
     },
     size: {
       width: canvasWidth,
@@ -102,9 +113,17 @@ export const getGridConfig = (
     },
     defaultColor: 'rgba(131, 126, 126, 0.3)',
     midX,
-    options,
     ...config,
   };
+};
+
+export const gridSizeToMatrix = (size: GridSize): GridMatrix => {
+  'worklet';
+  return matrixToPoints(
+    Array(size.rows)
+      .fill(0)
+      .map(() => Array(size.columns).fill(0)),
+  );
 };
 
 export const getGridLayout = (
@@ -126,16 +145,6 @@ export const getGridLayout = (
   };
 };
 
-export const restartMatrix = (grid: TetrisGrid) => {
-  'worklet';
-  for (let r = 0; r < grid.matrix.length; r++) {
-    grid.matrix[r] = [];
-    for (let c = 0; c < grid.matrix[r].length; c++) {
-      grid.matrix[r][c] = 0;
-    }
-  }
-};
-
 export const createGridUIPath = (cells: SkRect[]) => {
   'worklet';
   const path = Skia.Path.Make();
@@ -146,26 +155,30 @@ export const createGridUIPath = (cells: SkRect[]) => {
   return path;
 };
 
-export const getGridCellAt = (point: SkPoint, grid: TetrisGrid) => {
-  'worklet';
-  const row = grid.cellsMatrix[point.y];
-  if (!row) return undefined;
-  const cell = row[point.x];
-
-  return cell;
-};
-
-export const drawGridMatrix = (gridMatrix: GridMatrix, gridConfig: GridConfig) => {
+export const drawGridMatrix = (
+  gridMatrix: GridMatrix,
+  gridConfig: Pick<GridConfig, 'size' | 'cell'>,
+  showEmptyCells: boolean,
+) => {
   'worklet';
   const surface = Skia.Surface.Make(gridConfig.size.width, gridConfig.size.height);
   const canvas = surface?.getCanvas();
   for (const cell of gridMatrix.flat()) {
-    if (!gridConfig.options.showEmptyCells && cell.value === 0) continue;
+    if (!showEmptyCells && cell.value === 0) continue;
 
     const skPath = Skia.Path.Make();
-    skPath.addRRect(rrect(getCellUIRect(cell.point, gridConfig.cell.size), 5, 5));
+    skPath.addRRect(rrect(getCellUIRect(cell.point, gridConfig.cell.size), 3, 3));
     const paint = Skia.Paint();
     paint.setColor(Skia.Color(cell.color));
+    if (cell.value === 0) {
+      paint.setStyle(PaintStyle.Stroke);
+      paint.setColor(Skia.Color('white'));
+      paint.setStrokeWidth(0.2);
+      paint.setStrokeJoin(StrokeJoin.Round);
+      paint.setStrokeCap(StrokeCap.Round);
+      skPath.simplify();
+      skPath.computeTightBounds();
+    }
     canvas?.drawPath(skPath, paint);
   }
   surface?.flush();

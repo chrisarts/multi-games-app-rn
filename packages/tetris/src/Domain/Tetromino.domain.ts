@@ -117,9 +117,9 @@ export const createGridManager = (grid: SharedValue<Grid.GridMatrix>) => {
     'worklet';
     return checkShapeCollisions(grid, at, shape);
   };
-  const draw = (config: Grid.GridConfig) => {
+  const draw = (config: Grid.GridConfig, showEmptyCells = false) => {
     'worklet';
-    return Grid.drawGridMatrix(grid.value, config);
+    return Grid.drawGridMatrix(grid.value, config, showEmptyCells);
   };
   const mergeTetromino = (tetromino: Grid.TetrisGrid) => {
     'worklet';
