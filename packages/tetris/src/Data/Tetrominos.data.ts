@@ -1,7 +1,5 @@
 import { keysOf } from '@games/shared';
 
-export type TetrominoMatrix = number[][];
-
 const OBlock = () => {
   'worklet';
   return {
@@ -105,6 +103,6 @@ export const TetrominoNames = keysOf(TetrominosData);
 
 export type TetrominoConfig = {
   name: string;
-  value: TetrominoMatrix;
+  value: number[][];
   color: string;
 };

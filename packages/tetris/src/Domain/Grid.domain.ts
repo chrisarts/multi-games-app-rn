@@ -36,14 +36,14 @@ export interface GridSize {
 interface CellConfig {
   spacing: number;
   size: number;
+  innerSize: number;
 }
 export interface GridConfig extends GridSize {
-  width: number;
-  height: number;
-  midX: number;
+  size: Size;
   screen: Size;
   insets: EdgeInsets;
-  gridPosition: SkPoint;
+  midX: number;
+  position: SkPoint;
   defaultColor: string;
   cell: CellConfig;
   options: GridOptions;
@@ -87,16 +87,19 @@ export const getGridConfig = (
   return {
     screen,
     insets,
-    gridPosition: {
-      x: (spacing * config.columns) / 2 / 2,
-      y: screen.height - canvasHeight - insets.bottom,
-    },
+    position: point(
+      (spacing * config.columns) / 2 / 2,
+      screen.height - canvasHeight - insets.bottom,
+    ),
     cell: {
       size: cellContainerSize,
       spacing: spacing,
+      innerSize: cellSize,
     },
-    width: canvasWidth,
-    height: canvasHeight,
+    size: {
+      width: canvasWidth,
+      height: canvasHeight,
+    },
     defaultColor: 'rgba(131, 126, 126, 0.3)',
     midX,
     options,
@@ -154,7 +157,7 @@ export const getGridCellAt = (point: SkPoint, grid: TetrisGrid) => {
 
 export const drawGridMatrix = (gridMatrix: GridMatrix, gridConfig: GridConfig) => {
   'worklet';
-  const surface = Skia.Surface.Make(gridConfig.width, gridConfig.height);
+  const surface = Skia.Surface.Make(gridConfig.size.width, gridConfig.size.height);
   const canvas = surface?.getCanvas();
   for (const cell of gridMatrix.flat()) {
     if (!gridConfig.options.showEmptyCells && cell.value === 0) continue;

@@ -14,7 +14,7 @@ export const useTetrisGrid = () => {
     gridConfig.cell.size * 2,
     gridConfig.cell.size * -1,
     gridConfig.screen.width - gridConfig.cell.size * 5,
-    gridConfig.height + gridConfig.cell.size * 2,
+    gridConfig.size.height + gridConfig.cell.size * 2,
   );
 
   const gridManager = createGridManager(gridMatrix);

@@ -35,23 +35,22 @@ export const AnimatedBoard = () => {
         /> */}
         <FitBox
           src={{
+            ...grid.config.size,
             x: 0,
             y: 0,
-            height: grid.config.height,
-            width: grid.config.width,
           }}
           dst={{
-            ...grid.config.gridPosition,
-            height: grid.config.height,
-            width: grid.config.width * 0.9,
+            ...grid.config.size,
+            ...grid.config.position,
+            width: grid.config.size.width,
           }}
           fit='contain'
         >
           <Path path={skShapePath} color={tetrominoColor} />
           <Image
             image={grid.mergedGrid.image}
-            width={grid.config.width}
-            height={grid.config.height}
+            width={grid.config.size.width}
+            height={grid.config.size.height}
           />
         </FitBox>
         {/* <Group
