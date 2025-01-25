@@ -118,7 +118,7 @@ export const makeAnimation = <S extends AnimationState>(
   };
 };
 
-const useSharedValues = <S extends AnimationState>(state: S) => {
+export const useSharedValues = <S extends AnimationState>(state: S) => {
   const [mutable] = useState(() => {
     const values = {} as AnimationValues<S>;
     for (const key in state) {

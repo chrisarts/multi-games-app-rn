@@ -1,59 +1,71 @@
-import {
-  Canvas,
-  Fill,
-  Group,
-  Path,
-  processTransform3d,
-  rrect,
-  usePathValue,
-} from '@shopify/react-native-skia';
-import { Dimensions } from 'react-native';
+import { Canvas, Fill, FitBox, Image, Path } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useDerivedValue } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getCellUIRect } from '../Domain/Grid.domain';
-import { TetrisMatrixView } from './TetrisMatrix';
 import { useAnimatedGame } from './hooks/useAnimatedGame';
+import { useTetrisGridPath } from './hooks/useTetrisGridPath';
 
 export const AnimatedBoard = () => {
-  const insets = useSafeAreaInsets();
-  const { tetromino, grid, gestures } = useAnimatedGame();
+  const { tetromino, grid, gestures, dropPosition } = useAnimatedGame();
+  const { skShapePath } = useTetrisGridPath(tetromino, dropPosition);
+  const tetrominoColor = useDerivedValue(() => tetromino.value.color);
 
-  const skShapePath = usePathValue((skPath) => {
-    'worklet';
-    for (const cell of tetromino.currentShape.value.cells) {
-      if (cell.value === 0) continue;
-      skPath.addPath;
-      skPath.addRRect(
-        rrect(getCellUIRect(cell.point, grid.config.cellContainerSize), 5, 5),
-      );
-    }
-    skPath.transform(
-      processTransform3d([
-        {
-          translate: [
-            tetromino.position.x.value * grid.config.cellContainerSize,
-            tetromino.position.y.value * grid.config.cellContainerSize,
-          ] as const,
-        },
-      ]),
-    );
-    return skPath;
-  });
-
-  const tetrominoColor = useDerivedValue(() => tetromino.currentShape.value.color);
+  // const t = useClock();
+  // const uniforms = useDerivedValue(() => {
+  //   return {
+  //     iResolution: { x: screen.width, y: screen.height },
+  //     iTime: t.value * 0.0005,
+  //   };
+  // });
 
   return (
     <GestureDetector gesture={Gesture.Race(gestures.rotate, gestures.moveX)}>
-      <Canvas style={Dimensions.get('window')} debug>
+      <Canvas style={grid.config.screen} debug>
         <Fill />
         {/* <Rect x={0} y={0} width={screen.width} height={screen.height}>
           <Shader source={TetrisShader} uniforms={uniforms} />
-        </Rect> */}
-        <Group transform={[{ translateY: grid.config.width / 2 - insets.top }]}>
-          <TetrisMatrixView matrix={grid.matrix} config={grid.config} />
+          </Rect> */}
+        {/* <Rect
+          rect={grid.clip}
+          style='stroke'
+          color='white'
+          strokeWidth={grid.config.cellSpacing * 2}
+          transform={[
+            { translate: [0, grid.config.gridPosition.y] },
+          ]}
+        /> */}
+        <FitBox
+          src={{
+            x: 0,
+            y: 0,
+            height: grid.config.height,
+            width: grid.config.width,
+          }}
+          dst={{
+            ...grid.config.gridPosition,
+            height: grid.config.height,
+            width: grid.config.width * 0.9,
+          }}
+          fit='contain'
+        >
           <Path path={skShapePath} color={tetrominoColor} />
-        </Group>
+          <Image
+            image={grid.mergedGrid.image}
+            width={grid.config.width}
+            height={grid.config.height}
+          />
+        </FitBox>
+        {/* <Group
+          transform={[
+            { translate: [grid.config.gridPosition.x, grid.config.gridPosition.y] },
+          ]}
+        >
+          <Path path={skShapePath} color={tetrominoColor} />
+          <Image
+            image={grid.mergedGrid.image}
+            width={grid.config.width}
+            height={grid.config.height}
+          />
+        </Group> */}
       </Canvas>
     </GestureDetector>
   );

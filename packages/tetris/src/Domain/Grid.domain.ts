@@ -1,89 +1,112 @@
-import * as Sk from '@shopify/react-native-skia';
-import type { SharedValue } from 'react-native-reanimated';
-import { createRange } from '../utils/common.utils';
+import {
+  type Size,
+  type SkPoint,
+  type SkRect,
+  Skia,
+  point,
+  rect,
+  rrect,
+} from '@shopify/react-native-skia';
+import type { EdgeInsets } from 'react-native-safe-area-context';
 
-export interface TetrisAnimatedMatrix {
-  point: Sk.SkPoint;
-  value: SharedValue<number>;
-  color: SharedValue<string>;
-}
-
-export interface TetrisGridCell {
-  point: Sk.SkPoint;
-  value: number;
-  color: string;
+export interface GridOptions {
+  showEmptyCells: boolean;
 }
 
 export interface TetrisCell {
-  point: Sk.SkPoint;
+  point: SkPoint;
   value: number;
+  color: string;
 }
 export interface TetrisGrid {
   name: string;
-  position: Sk.Vector;
+  position: SkPoint;
   color: string;
-  cells: TetrisCell[];
+  cellsMatrix: GridMatrix;
   matrix: number[][];
 }
 
-export interface GridCoordinates {
-  column: number;
-  row: number;
-}
+export type GridMatrix = TetrisCell[][];
+
 export interface GridSize {
   rows: number;
   columns: number;
+}
+
+interface CellConfig {
+  spacing: number;
+  size: number;
 }
 export interface GridConfig extends GridSize {
   width: number;
   height: number;
   midX: number;
-  cellSpacing: number;
-  cellSize: number;
-  cellContainerSize: number;
+  screen: Size;
+  insets: EdgeInsets;
+  gridPosition: SkPoint;
+  defaultColor: string;
+  cell: CellConfig;
+  options: GridOptions;
 }
 
-export const matrixToPoints = (matrix: number[][]) => {
+export const matrixToPoints = (matrix: number[][], color: string): GridMatrix => {
   'worklet';
-  return matrix.flatMap((_, iy) =>
+  return matrix.map((_, iy) =>
     _.map((value, ix) => ({
-      point: Sk.vec(ix, iy),
+      point: point(ix, iy),
       value,
+      color,
     })),
   );
 };
 
-export const getCellUIRect = (position: Sk.Vector, cellSize: number): Sk.SkRect => {
+export const getCellUIRect = (position: SkPoint, cellSize: number): SkRect => {
   'worklet';
   const x = position.x * cellSize;
   const y = position.y * cellSize;
   const width = cellSize - 1;
   const height = cellSize - 1;
-  return Sk.rect(x, y, width, height);
+  return rect(x, y, width, height);
 };
 
-export const getGridConfig = (width: number, config: GridSize): GridConfig => {
+export const getGridConfig = (
+  screen: Size,
+  insets: EdgeInsets,
+  config: GridSize,
+  options: GridOptions,
+): GridConfig => {
   'worklet';
   const spacing = 3;
-  const cellContainerSize = Math.floor(width / config.columns);
+  const cellContainerSize = Math.floor(
+    (screen.width - (spacing * config.columns) / 2) / config.columns,
+  );
   const cellSize = cellContainerSize - spacing / 3;
   const canvasWidth = cellContainerSize * config.columns;
-  const canvasHeight = cellContainerSize * (config.rows + spacing * 3);
+  const canvasHeight = cellContainerSize * config.rows;
   const midX = Math.floor(config.columns / 3);
   return {
-    cellSize,
-    cellContainerSize,
+    screen,
+    insets,
+    gridPosition: {
+      x: (spacing * config.columns) / 2 / 2,
+      y: screen.height - canvasHeight - insets.bottom,
+    },
+    cell: {
+      size: cellContainerSize,
+      spacing: spacing,
+    },
     width: canvasWidth,
     height: canvasHeight,
+    defaultColor: 'rgba(131, 126, 126, 0.3)',
     midX,
-    cellSpacing: spacing,
+    options,
     ...config,
   };
 };
 
 export const getGridLayout = (
   { columns, rows }: GridSize,
-  cellSize: GridConfig,
+  config: GridConfig,
 ): TetrisGrid => {
   'worklet';
 
@@ -92,16 +115,12 @@ export const getGridLayout = (
     .map(() => Array(columns).fill(0));
 
   return {
-    cells: matrixToPoints(matrix),
     matrix,
-    color: 'rgba(131, 126, 126, 0.3)',
+    color: config.defaultColor,
     position: { y: 0, x: Math.floor(columns / 3) },
+    cellsMatrix: matrixToPoints(matrix, config.defaultColor),
     name: 'Grid',
   };
-};
-
-export const isEmptyPoint = (grid: TetrisGrid, point: Sk.SkPoint) => {
-  'worklet';
 };
 
 export const restartMatrix = (grid: TetrisGrid) => {
@@ -114,151 +133,38 @@ export const restartMatrix = (grid: TetrisGrid) => {
   }
 };
 
-export const getBoardCoordinates = (
-  coords: GridCoordinates,
-  config: GridConfig,
-): Sk.SkPoint => {
+export const createGridUIPath = (cells: SkRect[]) => {
   'worklet';
-  return {
-    x: coords.column * config.cellContainerSize,
-    y: coords.row * config.cellContainerSize,
-  };
-};
-
-export const createGridUIPath = (cells: Sk.SkRect[]) => {
-  'worklet';
-  const path = Sk.Skia.Path.Make();
+  const path = Skia.Path.Make();
   for (const rect of cells) {
     const cell = getCellUIRect(rect, rect.width);
-    path.addRRect(Sk.rrect(cell, 5, 5));
+    path.addRRect(rrect(cell, 5, 5));
   }
   return path;
 };
 
-export const getMatrixCellAt = (point: Sk.SkPoint, matrix: TetrisAnimatedMatrix[][]) => {
+export const getGridCellAt = (point: SkPoint, grid: TetrisGrid) => {
   'worklet';
-  const row = matrix[point.y];
+  const row = grid.cellsMatrix[point.y];
   if (!row) return undefined;
   const cell = row[point.x];
 
   return cell;
 };
 
-export const mergeShapeAt = (
-  point: Sk.SkPoint,
-  shape: SharedValue<TetrisGrid>,
-  matrix: TetrisAnimatedMatrix[][],
-) => {
+export const drawGridMatrix = (gridMatrix: GridMatrix, gridConfig: GridConfig) => {
   'worklet';
-  for (const shapeCell of shape.value.cells) {
-    const gridPoint = Sk.add(point, shapeCell.point);
-    const gridCell = getMatrixCellAt(gridPoint, matrix);
-    if (shapeCell.value === 0) continue;
+  const surface = Skia.Surface.Make(gridConfig.width, gridConfig.height);
+  const canvas = surface?.getCanvas();
+  for (const cell of gridMatrix.flat()) {
+    if (!gridConfig.options.showEmptyCells && cell.value === 0) continue;
 
-    if (!gridCell) {
-      throw new Error('merging at invalid position');
-    }
-    gridCell.color.value = shape.value.color;
-    gridCell.value.value = shapeCell.value;
+    const skPath = Skia.Path.Make();
+    skPath.addRRect(rrect(getCellUIRect(cell.point, gridConfig.cell.size), 5, 5));
+    const paint = Skia.Paint();
+    paint.setColor(Skia.Color(cell.color));
+    canvas?.drawPath(skPath, paint);
   }
-
-  return matrix;
-};
-
-export const shapeCollisionsAt = (
-  at: Sk.SkPoint,
-  shapeCells: TetrisGrid['cells'],
-  matrix: TetrisAnimatedMatrix[][],
-) => {
-  'worklet';
-  for (const shapeCell of shapeCells) {
-    const gridPoint = Sk.add(at, shapeCell.point);
-    const gridCell = getMatrixCellAt(gridPoint, matrix);
-    if (shapeCell.value === 0) continue;
-
-    if (!gridCell) {
-      return {
-        at: gridPoint,
-        merge: gridPoint.y >= matrix.length,
-        outsideGrid: true,
-      };
-    }
-    if (gridCell.value.value > 0) {
-      return {
-        at: gridPoint,
-        merge: true,
-        outsideGrid: false,
-      };
-    }
-  }
-
-  return {
-    outsideGrid: false,
-    merge: false,
-    at: Sk.point(0, 0),
-  };
-};
-
-export const clearLines = (matrix: TetrisAnimatedMatrix[][], grid: TetrisGrid) => {
-  'worklet';
-  const linesToClear = matrix.filter((row) => row.every(({ value }) => value.value > 0));
-  for (const cell of linesToClear.flat()) {
-    const aboveCell = matrix[cell.point.y - 1][cell.point.x];
-    cell.color.value = aboveCell.color.value;
-    cell.value.value = aboveCell.value.value;
-  }
-
-  return {
-    lines: linesToClear.length,
-  };
-};
-
-const moveDownFrom = (
-  gridMatrix: TetrisAnimatedMatrix[][],
-  matrix: { rowIndex: number; cells: TetrisAnimatedMatrix[] }[],
-  rowIndex: number,
-) => {
-  'worklet';
-  for (const row of matrix.filter((x) => x.rowIndex <= rowIndex)) {
-    for (const cell of row.cells) {
-      const nextPos = { x: cell.point.x, y: cell.point.y + 1 };
-      const nextCell = getMatrixCellAt(nextPos, gridMatrix);
-      if (!nextCell) continue;
-
-      cell.color.value = nextCell.color.value;
-      cell.value.value = nextCell.value.value;
-    }
-  }
-};
-
-const sweepRowAndMoveDown = (row: TetrisAnimatedMatrix[], color: string) => {
-  'worklet';
-  for (const cell of row) {
-    cell.color.value = color;
-    cell.value.value = 0;
-  }
-};
-
-export const sweepLines = (matrix: TetrisAnimatedMatrix[][], grid: TetrisGrid) => {
-  'worklet';
-  const clearLines = matrix.filter((row) => row.every((cell) => cell.value.value > 0));
-
-  const rowCellsMatrix = createRange(matrix.length - 1)
-    .reverse()
-    .map((index) => ({
-      rowIndex: index,
-      cells: matrix.flat().filter((cell) => cell.point.y === index),
-    }));
-
-  for (const row of rowCellsMatrix) {
-    if (row.cells.every((x) => x.value.value > 0)) {
-      console.log('SWEEP: ', row.rowIndex);
-      sweepRowAndMoveDown(row.cells, grid.color);
-      moveDownFrom(matrix, rowCellsMatrix, row.rowIndex);
-    }
-  }
-
-  return {
-    count: clearLines.length,
-  };
+  surface?.flush();
+  return surface?.makeImageSnapshot() ?? null;
 };

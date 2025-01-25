@@ -1,10 +1,10 @@
 import { point } from '@shopify/react-native-skia';
 import { type ReactNode, createContext, useContext, useState } from 'react';
 import { Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   type GridConfig,
   type TetrisGrid,
-  type TetrisGridCell,
   getGridConfig,
   getGridLayout,
 } from '../../Domain/Grid.domain';
@@ -12,15 +12,24 @@ import {
 export interface TetrisGameContext {
   tetrisGrid: TetrisGrid;
   gridConfig: GridConfig;
-  gridMatrix: TetrisGridCell[][];
+  gridMatrix: TetrisGrid['cellsMatrix'];
 }
 
 export const GameContext = createContext<TetrisGameContext>({} as TetrisGameContext);
 
 export const GameContextProvider = ({ children }: { children: ReactNode }) => {
+  const insets = useSafeAreaInsets();
+  const [options, _setOptions] = useState({
+    showEmptyCells: true,
+  });
   const [game] = useState(() => {
-    const dimensions = Dimensions.get('screen');
-    const gridConfig = getGridConfig(dimensions.width, { columns: 10, rows: 15 });
+    const dimensions = Dimensions.get('window');
+    const gridConfig = getGridConfig(
+      dimensions,
+      insets,
+      { columns: 10, rows: 15 },
+      options,
+    );
     const tetrisGrid = getGridLayout(gridConfig, gridConfig);
     return {
       tetrisGrid,
