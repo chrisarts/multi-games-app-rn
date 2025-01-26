@@ -1,6 +1,7 @@
 import type { SharedValue } from 'react-native-reanimated';
-import type { GridConfig, GridMatrix, GridSize, TetrisGrid } from './Grid.domain';
+import type { GridConfig, GridMatrix, GridSize } from './Grid.domain';
 import type { AnimatedPosition } from './Position.domain';
+import type { Tetromino, TetrominosBag } from './Tetromino.domain';
 
 export interface TetrisGameConfig {
   showHiddenCells: SharedValue<boolean>;
@@ -16,13 +17,14 @@ export interface TetrisGameState {
   startTime: SharedValue<number>;
 }
 
+export interface TetrisPlayerState {
+  position: AnimatedPosition;
+  tetromino: SharedValue<Tetromino>;
+  bag: TetrominosBag;
+  lastTouchedX: SharedValue<number | null>;
+}
+
 export interface TetrisBoardState {
   grid: SharedValue<GridMatrix>;
   gridConfig: SharedValue<GridConfig>;
-  dropPosition: AnimatedPosition;
-  lastTouchedX: SharedValue<number | null>;
-  tetromino: {
-    current: SharedValue<TetrisGrid>;
-    next: SharedValue<TetrisGrid>;
-  };
 }

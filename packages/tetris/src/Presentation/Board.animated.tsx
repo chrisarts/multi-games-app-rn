@@ -6,70 +6,48 @@ import {
   Path,
   point,
   processTransform3d,
-  rect,
   rrect,
   usePathValue,
 } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useDerivedValue } from 'react-native-reanimated';
 import { getCellUIRect } from '../Domain/Grid.domain';
-import { BoardHeader } from './BoardHeader';
+import { useGameControls } from './hooks/useGameControls';
 import { useTetris } from './hooks/useTetris';
 import { useTetrisGridPath } from './hooks/useTetrisGridPath';
-import { playIconSvg } from './icons/PlayIcon';
 
 export const AnimatedBoard = () => {
-  const { gestures, board, gridSkImage, game, gridManager } = useTetris();
+  const { gestures, board, gridSkImage, game, gridManager, player } = useTetris();
   const { skShapePath } = useTetrisGridPath(
-    board.tetromino.current,
-    board.dropPosition,
+    player.tetromino,
+    player.position,
     board.gridConfig.value,
   );
-  const tetrominoColor = useDerivedValue(() => board.tetromino.current.value.color);
-
-  const playIconSvgValue = useDerivedValue(() =>
-    game.running.value ? null : playIconSvg,
-  );
-  const playIconRect = useDerivedValue(() =>
-    game.running.value
-      ? rect(0, 0, 0, 0)
-      : rect(
-          board.gridConfig.value.screen.width / 2 -
-            board.gridConfig.value.cell.size * 1.5,
-          board.gridConfig.value.screen.height / 2,
-          board.gridConfig.value.cell.size * 3,
-          board.gridConfig.value.cell.size * 3,
-        ),
-  );
+  const { platButton } = useGameControls(game, board);
+  const tetrominoColor = useDerivedValue(() => player.tetromino.value.color);
 
   const ghostShapePath = usePathValue((skPath) => {
     'worklet';
     const position = point(
-      Math.floor(board.dropPosition.x.value),
-      Math.floor(board.dropPosition.y.value),
+      Math.floor(player.position.x.value),
+      Math.floor(player.position.y.value),
     );
     let finalPoint = point(position.x, position.y);
     for (const row of board.grid.value) {
       const gridPoint = point(position.x, board.grid.value.indexOf(row));
       if (finalPoint.y !== position.y) continue;
 
-      const collision = gridManager.checkCollisions(
-        gridPoint,
-        board.tetromino.current.value,
-      );
+      const collision = gridManager.checkCollisions(gridPoint, player.tetromino.value);
       if (collision.merge) {
         finalPoint = point(gridPoint.x, gridPoint.y - 1);
       }
     }
-    console.log({
-      position: position.y,
-      final: finalPoint.y,
-    });
-    for (const cell of board.tetromino.current.value.cellsMatrix.flat()) {
-      if (cell.value === 0) continue;
-      skPath.addRRect(
-        rrect(getCellUIRect(cell.point, board.gridConfig.value.cell.size), 5, 5),
-      );
+    // console.log({
+    //   position: position.y,
+    //   final: finalPoint.y,
+    // });
+    for (const cell of player.tetromino.value.shape) {
+      skPath.addRRect(rrect(getCellUIRect(cell, board.gridConfig.value.cell.size), 5, 5));
     }
     skPath.transform(
       processTransform3d([
@@ -87,9 +65,9 @@ export const AnimatedBoard = () => {
   return (
     <GestureDetector gesture={Gesture.Race(...gestures)}>
       <Canvas style={board.gridConfig.value.screen} debug>
-        <BoardHeader game={game} board={board} />
+        {/* <BoardHeader game={game} board={board} /> */}
         <Group color='white'>
-          <ImageSVG svg={playIconSvgValue} rect={playIconRect} color='red' />
+          <ImageSVG svg={platButton.svg} rect={platButton.iconRect} color='red' />
         </Group>
 
         <Group
