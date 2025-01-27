@@ -12,16 +12,17 @@ import {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useDerivedValue } from 'react-native-reanimated';
 import { getCellUIRect } from '../Domain/Grid.domain';
+import { BoardInfo } from './BoardInfoRect';
 import { useGameControls } from './hooks/useGameControls';
 import { useTetris } from './hooks/useTetris';
-import { useTetrisGridPath } from './hooks/useTetrisGridPath';
+import { useTetrominoSkPath } from './hooks/useTetrominoSkPath';
 
 export const AnimatedBoard = () => {
   const { gestures, board, gridSkImage, game, gridManager, player } = useTetris();
-  const { skShapePath } = useTetrisGridPath(
+  const { skShapePath } = useTetrominoSkPath(
     player.tetromino,
     player.position,
-    board.gridConfig.value,
+    board.gridConfig.value.cell,
   );
   const { platButton } = useGameControls(game, board);
   const tetrominoColor = useDerivedValue(() => player.tetromino.value.color);
@@ -42,10 +43,6 @@ export const AnimatedBoard = () => {
         finalPoint = point(gridPoint.x, gridPoint.y - 1);
       }
     }
-    // console.log({
-    //   position: position.y,
-    //   final: finalPoint.y,
-    // });
     for (const cell of player.tetromino.value.shape) {
       skPath.addRRect(rrect(getCellUIRect(cell, board.gridConfig.value.cell.size), 5, 5));
     }
@@ -70,6 +67,7 @@ export const AnimatedBoard = () => {
           <ImageSVG svg={platButton.svg} rect={platButton.iconRect} color='red' />
         </Group>
 
+        <BoardInfo board={board} game={game} player={player} />
         <Group
           transform={[
             {

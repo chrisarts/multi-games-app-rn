@@ -1,7 +1,6 @@
 import { type SkPoint, point } from '@shopify/react-native-skia';
 import type { SharedValue } from 'react-native-reanimated';
 import * as TetrominoData from '../Data/Tetrominos.data';
-import * as Grid from './Grid.domain';
 
 export interface TetrisCollision {
   at: SkPoint;
@@ -18,33 +17,6 @@ export interface Tetromino {
   position: SkPoint;
   rotation: number;
 }
-
-const mapToTetrisGrid = (
-  shape: TetrominoData.TetrominoConfig,
-  gridConfig: Grid.GridSize,
-  cellSize: number,
-  name: string,
-): Grid.TetrisGrid => {
-  'worklet';
-  return {
-    name,
-    color: shape.color,
-    matrix: shape.value,
-    position: point(Math.floor((gridConfig.columns * cellSize) / 2), 0),
-    cellsMatrix: Grid.matrixToPoints(shape.value, shape.color),
-  };
-};
-
-export const getRandomTetromino = (
-  gridConfig: Grid.GridSize,
-  cellSize: number,
-): Grid.TetrisGrid => {
-  'worklet';
-  const index = Math.floor(Math.random() * TetrominoData.TetrominoNames.length);
-  const name = TetrominoData.TetrominoNames[index];
-  const shape = TetrominoData.TetrominosData[name]();
-  return mapToTetrisGrid(shape, gridConfig, cellSize, shape.name);
-};
 
 export const rotateTetromino = (shape: Tetromino): Tetromino => {
   'worklet';
@@ -97,22 +69,24 @@ const createTetromino = (config: TetrominoData.TetrominoConfig): Tetromino => {
   };
 };
 
-export const generateBag = () => {
+const lastTRandoms: [number, number, number] = [-1, -1, -1];
+export const getRandomTetromino = (): Tetromino => {
   'worklet';
-  const bag: Tetromino[] = [];
-  for (const config of TetrominoData.TetrominoNames) {
-    bag.push(createTetromino(TetrominoData.TetrominosData[config]()));
+  let nextIndex = Math.floor(Math.random() * TetrominoData.TetrominoNames.length);
+  while (lastTRandoms.includes(nextIndex)) {
+    nextIndex = Math.floor(Math.random() * TetrominoData.TetrominoNames.length);
   }
-  for (let i = bag.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i * 1));
-    [bag[i], bag[j]] = [bag[j], bag[i]];
-  }
-  return bag;
+  lastTRandoms[2] = lastTRandoms[1];
+  lastTRandoms[1] = lastTRandoms[0];
+  lastTRandoms[0] = nextIndex;
+  const name = TetrominoData.TetrominoNames[nextIndex];
+  const shape = TetrominoData.TetrominosData[name]();
+  return createTetromino(shape);
 };
 
-const fillBag = (bag: TetrominosBag) => {
+export const generateBag = () => {
   'worklet';
-  bag.value = generateBag();
+  return [getRandomTetromino(), getRandomTetromino(), getRandomTetromino()];
 };
 
 export const createTetrominoManager = (bag: TetrominosBag) => {
@@ -120,14 +94,17 @@ export const createTetrominoManager = (bag: TetrominosBag) => {
   return {
     fillBag: () => {
       'worklet';
-      fillBag(bag);
+      bag.value = generateBag();
     },
     nextTetromino: () => {
       'worklet';
-      if (bag.value.length === 0) {
-        fillBag(bag);
-      }
-      return bag.value.pop()!;
+      bag.modify((prev) => {
+        'worklet';
+        prev.push(getRandomTetromino());
+        return prev;
+      });
+      const next = bag.value.shift()!;
+      return next;
     },
   };
 };

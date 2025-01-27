@@ -7,6 +7,7 @@ export const useTetris = () => {
   const {
     actions,
     state: { board, game, player },
+    fonts,
     gridManager,
     gridSkImage,
   } = useGameState();
@@ -42,7 +43,6 @@ export const useTetris = () => {
         }
 
         actions.mergeCurrentTetromino();
-        actions.swapShapes();
       }
     }
   });
@@ -54,5 +54,6 @@ export const useTetris = () => {
     gridManager,
     game,
     gridSkImage,
+    fonts,
   };
 };

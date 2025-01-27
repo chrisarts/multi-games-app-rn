@@ -13,7 +13,7 @@ export const useTetrisFont = () => {
   const bold = {
     fontFamily: 'Digital',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 20,
   } as const;
 
   const fontBold = tetrisFonts ? matchFont(bold, tetrisFonts) : null;
@@ -48,10 +48,27 @@ export const useTetrisFont = () => {
       )
     : null;
 
+  const getFont = (size: number, weight: 'bold' | 'normal') => {
+    'worklet';
+    if (!tetrisFonts) return null;
+    return matchFont(
+      {
+        ...bold,
+        fontWeight: weight,
+        fontStyle: 'italic',
+        fontSize: size,
+      },
+      tetrisFonts,
+    );
+  };
+
   return {
     fontBold,
     fontRegular,
     fontItalic,
     fontItalicBold,
+    tetrisFonts,
+    getFont,
+    ready: !!fontBold && !!fontItalic && !!fontItalicBold && !!fontRegular,
   };
 };

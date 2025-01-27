@@ -86,7 +86,7 @@ export const getGridConfig = (
 ): GridConfig => {
   'worklet';
   const spacing = 3;
-  const canvasMaxWidth = screen.width * 0.8;
+  const canvasMaxWidth = screen.width * 0.75;
   const cellOuterSize = Math.floor(canvasMaxWidth / config.columns);
   const cellInnerSize = cellOuterSize - spacing;
 
@@ -98,8 +98,8 @@ export const getGridConfig = (
 
   const infoSquareRect = rect(
     1,
-    insets.bottom / 2,
-    screen.width * 0.2,
+    screen.height - canvasHeight + insets.bottom / 2,
+    screen.width * 0.24,
     screen.height * 0.2,
   );
 
@@ -164,12 +164,13 @@ export const createGridUIPath = (cells: SkRect[]) => {
 
 export const drawGridMatrix = (
   gridMatrix: GridMatrix,
-  gridConfig: Pick<GridConfig, 'size' | 'cell'>,
+  gridConfig: GridConfig,
   showEmptyCells: boolean,
 ) => {
   'worklet';
   const surface = Skia.Surface.Make(gridConfig.size.width, gridConfig.size.height);
   const canvas = surface?.getCanvas();
+
   for (const cell of gridMatrix.flat()) {
     if (!showEmptyCells && cell.value === 0) continue;
 
@@ -177,6 +178,7 @@ export const drawGridMatrix = (
     skPath.addRRect(rrect(getCellUIRect(cell.point, gridConfig.cell.size), 3, 3));
     const paint = Skia.Paint();
     paint.setColor(Skia.Color(cell.color));
+
     if (cell.value === 0) {
       paint.setStyle(PaintStyle.Stroke);
       paint.setColor(Skia.Color('white'));
@@ -186,8 +188,10 @@ export const drawGridMatrix = (
       skPath.simplify();
       skPath.computeTightBounds();
     }
+
     canvas?.drawPath(skPath, paint);
   }
+
   surface?.flush();
   return surface?.makeImageSnapshot() ?? null;
 };
@@ -197,6 +201,7 @@ const addTetrominoToGrid = (
   tetromino: Tetromino,
 ) => {
   'worklet';
+  let sweepLinesCount = 0;
   gridMatrix.set((prev) => {
     for (const cell of tetromino.shapes[tetromino.rotation]) {
       const mergePoint = add(cell, tetromino.position);
@@ -207,7 +212,6 @@ const addTetrominoToGrid = (
       };
     }
 
-    let sweepLinesCount = 0;
     for (let row = prev.length - 1; row >= 0; row--) {
       const isRowFull = prev[row].every((cell) => cell.value > 0);
       if (isRowFull) {
@@ -227,6 +231,7 @@ const addTetrominoToGrid = (
     }
     return prev;
   });
+  return sweepLinesCount;
 };
 
 const checkShapeCollisions = (
@@ -276,7 +281,7 @@ export const createGridManager = (grid: SharedValue<GridMatrix>) => {
   };
   const mergeTetromino = (tetromino: Tetromino) => {
     'worklet';
-    addTetrominoToGrid(grid, tetromino);
+    return addTetrominoToGrid(grid, tetromino);
   };
 
   return { checkCollisions, draw, mergeTetromino };

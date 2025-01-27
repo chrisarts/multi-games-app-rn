@@ -24,14 +24,17 @@ import {
   type Tetromino,
   createTetrominoManager,
   generateBag,
+  getRandomTetromino,
 } from '../../Domain/Tetromino.domain';
+import { useTetrisFont } from './useTetrisFont';
 
 export const useGameState = () => {
   const dimensions = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const fonts = useTetrisFont();
   const tetrominosBag = useSharedValue<Tetromino[]>(generateBag());
   const tetrominoManager = createTetrominoManager(tetrominosBag);
-  const currentTetromino = useSharedValue(tetrominoManager.nextTetromino());
+  const currentTetromino = useSharedValue(getRandomTetromino());
   const playerState: TetrisPlayerState = {
     position: {
       x: useSharedValue(currentTetromino.value.position.x),
@@ -43,7 +46,7 @@ export const useGameState = () => {
   };
   const gameConfig: TetrisGameConfig = {
     showHiddenCells: useSharedValue(true),
-    size: useSharedValue({ columns: 10, rows: 24 }),
+    size: useSharedValue({ columns: 10, rows: 22 }),
   };
 
   const gameState: TetrisGameState = {
@@ -101,7 +104,9 @@ export const useGameState = () => {
     'worklet';
     resetBoardState();
     resetGameState();
-    resetPlayerState();
+    if (gameState.gameOver.value) {
+      resetPlayerState();
+    }
   };
 
   const moveShapeXAxis = (sumX: number, absoluteX: number) => {
@@ -133,6 +138,7 @@ export const useGameState = () => {
 
   const swapShapes = () => {
     'worklet';
+    if (gameState.gameOver.value) return;
     resetPosition();
     gameState.turbo.value = false;
     playerState.tetromino.value = tetrominoManager.nextTetromino();
@@ -140,14 +146,19 @@ export const useGameState = () => {
 
   const mergeCurrentTetromino = () => {
     'worklet';
-    gridManager.mergeTetromino({
+    const sweepedLines = gridManager.mergeTetromino({
       ...playerState.tetromino.value,
       position: point(playerState.position.x.value, playerState.position.y.value),
     });
+    gameState.lines.value += sweepedLines;
     gridSkImage.value = gridManager.draw(
       gridConfig.value,
       gameConfig.showHiddenCells.value,
     );
+    if (playerState.position.y.value <= 1) {
+      onGameOver();
+    }
+    swapShapes();
   };
 
   useEffect(() => {
@@ -166,6 +177,7 @@ export const useGameState = () => {
     },
     gridManager,
     gridSkImage,
+    fonts,
     actions: {
       startNewGame,
       moveShapeXAxis,

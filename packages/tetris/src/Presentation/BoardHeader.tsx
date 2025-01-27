@@ -104,7 +104,7 @@ export const BoardHeader = ({ board, game }: BoardHeaderProps) => {
       const text = Skia.Path.MakeFromText(
         'Next',
         squareWidth.value * 0.25,
-        squareWidth.value * -0.17,
+        squareWidth.value * 0.17,
         fontItalicBold,
       );
       if (text) {

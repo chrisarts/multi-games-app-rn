@@ -4,22 +4,22 @@ import { type GridConfig, getCellUIRect } from '../../Domain/Grid.domain';
 import type { AnimatedPosition } from '../../Domain/Position.domain';
 import type { Tetromino } from '../../Domain/Tetromino.domain';
 
-export const useTetrisGridPath = (
+export const useTetrominoSkPath = (
   tetromino: SharedValue<Tetromino>,
   position: AnimatedPosition,
-  gridConfig: GridConfig,
+  cellConfig: GridConfig['cell'],
 ) => {
   const skShapePath = usePathValue((skPath) => {
     'worklet';
     for (const cell of tetromino.value.shape) {
-      skPath.addRRect(rrect(getCellUIRect(cell, gridConfig.cell.size), 5, 5));
+      skPath.addRRect(rrect(getCellUIRect(cell, cellConfig.size), 5, 5));
     }
     skPath.transform(
       processTransform3d([
         {
           translate: [
-            position.x.value * gridConfig.cell.size,
-            position.y.value * gridConfig.cell.size,
+            position.x.value * cellConfig.size,
+            position.y.value * cellConfig.size,
           ] as const,
         },
       ]),
