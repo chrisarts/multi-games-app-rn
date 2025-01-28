@@ -1,5 +1,4 @@
 import {
-  FitBox,
   Group,
   Image,
   PaintStyle,
@@ -19,13 +18,13 @@ import {
   useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated';
-import { type GridMatrix, getCellUIRect, gridSizeToMatrix } from '../Domain/Grid.domain';
+import { TetrominoColors } from '../Data/Tetrominos.data';
+import { type GridMatrix, gridSizeToMatrix } from '../Domain/Grid.domain';
 import type {
   TetrisBoardState,
   TetrisGameState,
   TetrisPlayerState,
 } from '../Domain/Tetris.domain';
-import type { TetrominosBag } from '../Domain/Tetromino.domain';
 import { useTetrisFont } from './hooks/useTetrisFont';
 
 interface BoardInfoProps {
@@ -77,9 +76,6 @@ export const BoardInfo = ({ board, game, player }: BoardInfoProps) => {
     <Group>
       <BoardInfoRect contentRect={nextShapesRect} text='next'>
         <NextShapesImage container={nextShapesRect} playerState={player} />
-        {/* <FitBox src={nextShapesRect.value} dst={nextShapesImageRect.value} fit='contain'>
-          <Image image={shapesImage} rect={nextShapesRect} />
-        </FitBox> */}
       </BoardInfoRect>
       <BoardInfoRect contentRect={linesRect} text='Lines'>
         <Text text={lines} font={fontItalicBold} />
@@ -97,10 +93,12 @@ interface NextShapesImageProps {
 }
 
 const NextShapesImage = ({ playerState, container }: NextShapesImageProps) => {
-  const gridMatrix = gridSizeToMatrix({ columns: 5, rows: 12 });
-
   const nextShapesImageRect = useDerivedValue(() =>
     rect(4, container.value.y * 0.25, container.value.width, container.value.height),
+  );
+  const gridMatrix = gridSizeToMatrix(
+    { columns: 5, rows: 12 },
+    nextShapesImageRect.value.height / 15,
   );
   const cellSize = useDerivedValue(() => nextShapesImageRect.value.height / 15);
 
@@ -145,15 +143,15 @@ const NextShapesImage = ({ playerState, container }: NextShapesImageProps) => {
 };
 
 const drawNextShapesGrid = (container: SkRect, gridMatrix: GridMatrix) => {
-  const cellSize = container.height / 15;
+  // const cellSize = container.height / 15;
   const surface = Skia.Surface.Make(container.width, container.height);
   const canvas = surface?.getCanvas();
 
   for (const cell of gridMatrix.flat()) {
     const skPath = Skia.Path.Make();
-    skPath.addRRect(rrect(getCellUIRect(cell.point, cellSize), 3, 3));
+    // skPath.addRRect(rrect(getCellUIRect(cell.point, cellSize), 3, 3));
+    skPath.addRRect(rrect(cell, 3, 3));
     const paint = Skia.Paint();
-    paint.setColor(Skia.Color(cell.color));
 
     if (cell.value === 0) {
       paint.setStyle(PaintStyle.Stroke);
@@ -163,6 +161,8 @@ const drawNextShapesGrid = (container: SkRect, gridMatrix: GridMatrix) => {
       paint.setStrokeCap(StrokeCap.Round);
       skPath.simplify();
       skPath.computeTightBounds();
+    } else {
+      paint.setColor(Skia.Color(TetrominoColors[cell.value]));
     }
 
     canvas?.drawPath(skPath, paint);
@@ -193,14 +193,6 @@ const BoardInfoRect = ({ text, contentRect, children }: BoardInfoRectProps) => {
       ] as const,
     },
   ]);
-  // const childrenTransform = useDerivedValue(() => [
-  //   {
-  //     translate: [
-  //       textTransform.value[0].translate[0],
-  //       textTransform.value[0].translate[1] * 2,
-  //     ] as const,
-  //   },
-  // ]);
 
   const rounded = useDerivedValue(() =>
     rrect(rect(0, 0, contentRect.value.width, contentRect.value.height), 5, 5),
@@ -218,33 +210,4 @@ const BoardInfoRect = ({ text, contentRect, children }: BoardInfoRectProps) => {
       {children}
     </Group>
   );
-};
-
-const drawNextShapes = (bag: TetrominosBag, cellSize: number) => {
-  'worklet';
-  const width = cellSize * 5;
-  const height = cellSize * 5 * 4;
-  const surface = Skia.Surface.MakeOffscreen(width, height);
-  const canvas = surface?.getCanvas();
-  let lastY = 0;
-  for (const shape of bag.value) {
-    const path = Skia.Path.Make();
-    const paint = Skia.Paint();
-    paint.setColor(Skia.Color(shape.color));
-    for (const cell of shape.shape) {
-      const drawRect = getCellUIRect(cell, cellSize, 1);
-      // const drawRect =
-      // rect(
-      //   cell.x * cellSize + 3,
-      //   cell.y * cellSize + lastY + 3,
-      //   cellSize,
-      //   cellSize,
-      // );
-      path.addRRect(rrect(drawRect, 5, 5));
-    }
-    lastY += path.getBounds().height + cellSize * 1.5;
-    canvas?.drawPath(path, paint);
-  }
-
-  return surface?.makeImageSnapshot() ?? null;
 };

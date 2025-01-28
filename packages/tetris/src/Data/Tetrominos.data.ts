@@ -1,4 +1,5 @@
 import { keysOf } from '@games/shared';
+import { point } from '@shopify/react-native-skia';
 
 const OBlock = () => {
   'worklet';
@@ -98,10 +99,51 @@ export const TetrominosData = {
   Z: ZBlock,
 } as const;
 
+const createTetromino = (config: TetrominoConfig) => {
+  'worklet';
+  const shapes = [config.value];
+
+  let stop = false;
+  while (!stop) {
+    const lastShape = shapes[shapes.length - 1];
+    const nextShape = lastShape
+      .map((_, iy) => lastShape.map((cells) => cells[iy]))
+      .map((row) => row.toReversed());
+
+    const nextShapeID = nextShape.flat().join('');
+    stop = shapes.some((shape) => shape.flat().join('') === nextShapeID);
+    shapes.push(nextShape);
+  }
+
+  const allShapes = shapes.map((shape) =>
+    shape
+      .flatMap((row, iy) => row.map((_, ix) => (_ > 0 ? point(ix, iy) : null)))
+      .filter((_) => _ !== null),
+  );
+  const maxX = allShapes[0].sort((a, b) => b.x - a.x)[0].x + 1;
+  const maxY = allShapes[0].sort((a, b) => b.y - a.y)[0].y + 1;
+
+  return {
+    color: config.color,
+    id: Object.keys(TetrominosData).indexOf(config.name) + 1,
+    shapes: allShapes,
+    position: point(maxX > maxY ? maxX : maxY, 0),
+    shape: allShapes[0],
+    rotation: 0,
+  };
+};
+
 export type TetrominoNames = keyof typeof TetrominosData;
 export const TetrominoNames = keysOf(TetrominosData);
+export const GameTetrominos = TetrominoNames.map((name) =>
+  createTetromino(TetrominosData[name]()),
+);
 
-export type TetrominoConfig = {
+export const TetrominoColors = Object.fromEntries(
+  GameTetrominos.map((shape) => [shape.id, shape.color] as const),
+);
+
+type TetrominoConfig = {
   name: string;
   value: number[][];
   color: string;

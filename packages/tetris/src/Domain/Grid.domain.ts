@@ -13,12 +13,13 @@ import {
 } from '@shopify/react-native-skia';
 import type { SharedValue } from 'react-native-reanimated';
 import type { EdgeInsets } from 'react-native-safe-area-context';
+import { TetrominoColors } from '../Data/Tetrominos.data';
 import type { Tetromino } from './Tetromino.domain';
 
 export interface TetrisCell {
-  point: SkPoint;
   value: number;
-  color: string;
+  x: number;
+  y: number;
 }
 export interface TetrisGrid {
   name: string;
@@ -52,31 +53,18 @@ export interface GridConfig extends GridSize {
   cell: CellConfig;
 }
 
-export const matrixToPoints = (
-  matrix: number[][],
-  color = 'rgba(131, 126, 126, 0.3)',
-): GridMatrix => {
+export const matrixToPoints = (matrix: number[][], cellSize: number): GridMatrix => {
   'worklet';
   return matrix.map((_, iy) =>
     _.map((value, ix) => ({
       point: point(ix, iy),
+      x: ix,
+      y: iy,
       value,
-      color,
+      width: cellSize,
+      height: cellSize,
     })),
   );
-};
-
-export const getCellUIRect = (
-  position: SkPoint,
-  cellSize: number,
-  spacing = -1,
-): SkRect => {
-  'worklet';
-  const x = position.x * cellSize;
-  const y = position.y * cellSize;
-  const width = cellSize + spacing;
-  const height = cellSize + spacing;
-  return rect(x, y, width, height);
 };
 
 export const getGridConfig = (
@@ -124,12 +112,13 @@ export const getGridConfig = (
   };
 };
 
-export const gridSizeToMatrix = (size: GridSize): GridMatrix => {
+export const gridSizeToMatrix = (size: GridSize, cellSize: number): GridMatrix => {
   'worklet';
   return matrixToPoints(
     Array(size.rows)
       .fill(0)
       .map(() => Array(size.columns).fill(0)),
+    cellSize,
   );
 };
 
@@ -147,19 +136,9 @@ export const getGridLayout = (
     matrix,
     color: config.defaultColor,
     position: { y: 0, x: Math.floor(columns / 3) },
-    cellsMatrix: matrixToPoints(matrix, config.defaultColor),
+    cellsMatrix: matrixToPoints(matrix, config.cell.size),
     name: 'Grid',
   };
-};
-
-export const createGridUIPath = (cells: SkRect[]) => {
-  'worklet';
-  const path = Skia.Path.Make();
-  for (const rect of cells) {
-    const cell = getCellUIRect(rect, rect.width);
-    path.addRRect(rrect(cell, 5, 5));
-  }
-  return path;
 };
 
 export const drawGridMatrix = (
@@ -175,9 +154,16 @@ export const drawGridMatrix = (
     if (!showEmptyCells && cell.value === 0) continue;
 
     const skPath = Skia.Path.Make();
-    skPath.addRRect(rrect(getCellUIRect(cell.point, gridConfig.cell.size), 3, 3));
+    // skPath.addRRect(rrect(getCellUIRect(cell.point, gridConfig.cell.size), 3, 3));
+    const cellRect = rect(
+      cell.x * gridConfig.cell.size,
+      cell.y * gridConfig.cell.size,
+      gridConfig.cell.innerSize,
+      gridConfig.cell.innerSize,
+    );
+    skPath.addRRect(rrect(cellRect, 3, 3));
     const paint = Skia.Paint();
-    paint.setColor(Skia.Color(cell.color));
+    paint.setColor(Skia.Color(TetrominoColors[cell.value] ?? 'white'));
 
     if (cell.value === 0) {
       paint.setStyle(PaintStyle.Stroke);
@@ -202,30 +188,26 @@ const addTetrominoToGrid = (
 ) => {
   'worklet';
   let sweepLinesCount = 0;
-  gridMatrix.set((prev) => {
+  gridMatrix.modify((prev) => {
+    'worklet';
     for (const cell of tetromino.shapes[tetromino.rotation]) {
       const mergePoint = add(cell, tetromino.position);
       prev[mergePoint.y][mergePoint.x] = {
-        color: tetromino.color,
-        point: mergePoint,
-        value: 1,
+        x: mergePoint.x,
+        y: mergePoint.y,
+        value: tetromino.id,
       };
     }
 
     for (let row = prev.length - 1; row >= 0; row--) {
       const isRowFull = prev[row].every((cell) => cell.value > 0);
       if (isRowFull) {
-        prev[row] = prev[row].map((x) => ({
-          point: x.point,
-          sweep: false,
-          color: 'rgba(131, 126, 126, 0.3)',
-          value: 0,
-        }));
+        prev[row] = prev[row].map(({ x, y }) => ({ x, y, value: 0 }));
         sweepLinesCount++;
       } else if (sweepLinesCount > 0) {
         prev[row + sweepLinesCount] = prev[row].slice().map((cell) => ({
           ...cell,
-          point: add(cell.point, point(0, sweepLinesCount)),
+          point: add(point(cell.x, cell.y), point(0, sweepLinesCount)),
         }));
       }
     }
@@ -234,47 +216,8 @@ const addTetrominoToGrid = (
   return sweepLinesCount;
 };
 
-const checkShapeCollisions = (
-  gridMatrix: SharedValue<GridMatrix>,
-  at: SkPoint,
-  shape: Tetromino,
-) => {
-  'worklet';
-  for (const shapeCell of shape.shapes[shape.rotation]) {
-    const gridPoint = add(at, shapeCell);
-    const gridRow = gridMatrix.value[gridPoint.y];
-    const gridCell = gridRow?.[gridPoint.x];
-
-    if (gridPoint.x < 0 || typeof gridCell === 'undefined') {
-      return {
-        at: gridPoint,
-        merge: gridPoint.y >= gridMatrix.value.length,
-        outsideGrid: true,
-      };
-    }
-
-    if (gridCell.value > 0) {
-      return {
-        at: gridPoint,
-        merge: true,
-        outsideGrid: false,
-      };
-    }
-  }
-
-  return {
-    outsideGrid: false,
-    merge: false,
-    at,
-  };
-};
-
 export const createGridManager = (grid: SharedValue<GridMatrix>) => {
   'worklet';
-  const checkCollisions = (at: SkPoint, shape: Tetromino) => {
-    'worklet';
-    return checkShapeCollisions(grid, at, shape);
-  };
   const draw = (config: GridConfig, showEmptyCells = false) => {
     'worklet';
     return drawGridMatrix(grid.value, config, showEmptyCells);
@@ -284,5 +227,5 @@ export const createGridManager = (grid: SharedValue<GridMatrix>) => {
     return addTetrominoToGrid(grid, tetromino);
   };
 
-  return { checkCollisions, draw, mergeTetromino };
+  return { draw, mergeTetromino };
 };

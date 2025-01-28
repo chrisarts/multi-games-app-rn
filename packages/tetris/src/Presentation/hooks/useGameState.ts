@@ -1,53 +1,25 @@
-import { type SkImage, add, point } from '@shopify/react-native-skia';
-import { useEffect } from 'react';
-import { useWindowDimensions } from 'react-native';
+import { Skia, add, point, rect, rrect } from '@shopify/react-native-skia';
 import {
   Easing,
   ReduceMotion,
   cancelAnimation,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  createGridManager,
-  getGridConfig,
-  gridSizeToMatrix,
-} from '../../Domain/Grid.domain';
-import type {
-  TetrisBoardState,
-  TetrisGameConfig,
-  TetrisGameState,
-  TetrisPlayerState,
-} from '../../Domain/Tetris.domain';
-import {
-  type Tetromino,
-  createTetrominoManager,
-  generateBag,
-  getRandomTetromino,
-} from '../../Domain/Tetromino.domain';
+import type { TetrisGameState } from '../../Domain/Tetris.domain';
+import type { Tetromino } from '../../Domain/Tetromino.domain';
+import { useBoardState } from './useBoardState';
+import { usePlayerState } from './usePlayerState';
 import { useTetrisFont } from './useTetrisFont';
 
 export const useGameState = () => {
-  const dimensions = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   const fonts = useTetrisFont();
-  const tetrominosBag = useSharedValue<Tetromino[]>(generateBag());
-  const tetrominoManager = createTetrominoManager(tetrominosBag);
-  const currentTetromino = useSharedValue(getRandomTetromino());
-  const playerState: TetrisPlayerState = {
-    position: {
-      x: useSharedValue(currentTetromino.value.position.x),
-      y: useSharedValue(currentTetromino.value.position.y),
-    },
-    tetromino: currentTetromino,
-    lastTouchedX: useSharedValue<number | null>(null),
-    bag: tetrominosBag,
-  };
-  const gameConfig: TetrisGameConfig = {
-    showHiddenCells: useSharedValue(true),
-    size: useSharedValue({ columns: 10, rows: 22 }),
-  };
+  const playerState = usePlayerState();
+  const board = useBoardState();
+  const ghostShapeSkPath = useSharedValue(
+    getGhostShapePath(playerState.tetromino.value, board.gridConfig.value.cell.size),
+  );
 
   const gameState: TetrisGameState = {
     gameOver: useSharedValue(false),
@@ -58,23 +30,7 @@ export const useGameState = () => {
     turbo: useSharedValue(false),
     startTime: useSharedValue(Date.now()),
   };
-  const gridConfig = useSharedValue(
-    getGridConfig(dimensions, insets, gameConfig.size.value),
-  );
-  const boardState: TetrisBoardState = {
-    gridConfig,
-    grid: useSharedValue(gridSizeToMatrix(gameConfig.size.value)),
-  };
 
-  const gridSkImage = useSharedValue<SkImage | null>(null);
-
-  const gridManager = createGridManager(boardState.grid);
-
-  const resetPosition = () => {
-    'worklet';
-    playerState.position.x.value = currentTetromino.value.position.x;
-    playerState.position.y.value = currentTetromino.value.position.y;
-  };
   const resetGameState = () => {
     'worklet';
     gameState.level.value = 1;
@@ -84,28 +40,12 @@ export const useGameState = () => {
     gameState.turbo.value = false;
     gameState.lines.value = 0;
   };
-  const resetBoardState = () => {
-    'worklet';
-    boardState.grid.value = gridSizeToMatrix(gridConfig.value);
-    gridSkImage.value = gridManager.draw(
-      gridConfig.value,
-      gameConfig.showHiddenCells.value,
-    );
-  };
-
-  const resetPlayerState = () => {
-    'worklet';
-    tetrominoManager.fillBag();
-    playerState.tetromino.value = tetrominoManager.nextTetromino();
-    resetPosition();
-  };
 
   const startNewGame = () => {
     'worklet';
-    resetBoardState();
     resetGameState();
     if (gameState.gameOver.value) {
-      resetPlayerState();
+      playerState.reset();
     }
   };
 
@@ -113,10 +53,8 @@ export const useGameState = () => {
     'worklet';
     const currentPos = point(playerState.position.x.value, playerState.position.y.value);
     const nextPosition = add(currentPos, point(sumX, 0));
-    const collision = gridManager.checkCollisions(
-      nextPosition,
-      playerState.tetromino.value,
-    );
+    const collision = board.checkCollisions(nextPosition, playerState.tetromino.value);
+
     if (!collision.outsideGrid && !collision.merge) {
       cancelAnimation(playerState.position.x);
       playerState.position.x.value = withTiming(nextPosition.x, {
@@ -136,54 +74,60 @@ export const useGameState = () => {
     gameState.turbo.value = false;
   };
 
-  const swapShapes = () => {
-    'worklet';
-    if (gameState.gameOver.value) return;
-    resetPosition();
-    gameState.turbo.value = false;
-    playerState.tetromino.value = tetrominoManager.nextTetromino();
-  };
-
   const mergeCurrentTetromino = () => {
     'worklet';
-    const sweepedLines = gridManager.mergeTetromino({
-      ...playerState.tetromino.value,
-      position: point(playerState.position.x.value, playerState.position.y.value),
-    });
-    gameState.lines.value += sweepedLines;
-    gridSkImage.value = gridManager.draw(
-      gridConfig.value,
-      gameConfig.showHiddenCells.value,
+    const sweepedLines = board.mergeTetromino(
+      playerState.tetromino.value,
+      point(playerState.position.x.value, playerState.position.y.value),
     );
+    gameState.lines.value += sweepedLines;
+    gameState.turbo.value = false;
     if (playerState.position.y.value <= 1) {
       onGameOver();
+      return;
     }
-    swapShapes();
+    playerState.nextTetromino();
+    ghostShapeSkPath.value = getGhostShapePath(
+      playerState.tetromino.value,
+      board.gridConfig.value.cell.size,
+    );
   };
 
-  useEffect(() => {
-    gridSkImage.value = gridManager.draw(
-      gridConfig.value,
-      gameConfig.showHiddenCells.value,
+  const dropPosition = useDerivedValue(() => {
+    const base = point(
+      playerState.tetromino.value.position.x,
+      board.gridConfig.value.rows - 1 - playerState.tetrominoMaxY.value,
     );
-  }, [gridSkImage, gridConfig, gridManager, gameConfig.showHiddenCells]);
+    if (board.grid.value[board.grid.value.length - 1].every((cell) => cell.value === 0)) {
+      console.log('ITS_CERO');
+      return base;
+    }
+    return point(playerState.position.x.value, playerState.position.y.value);
+  });
 
   return {
     state: {
-      config: gameConfig,
       game: gameState,
-      board: boardState,
-      player: playerState,
+      board,
+      dropPosition,
     },
-    gridManager,
-    gridSkImage,
+    ghostShapeSkPath,
+    player: playerState,
     fonts,
     actions: {
       startNewGame,
       moveShapeXAxis,
       onGameOver,
-      swapShapes,
       mergeCurrentTetromino,
     },
   };
+};
+
+const getGhostShapePath = (tetromino: Tetromino, cellSize: number) => {
+  const skPath = Skia.Path.Make();
+  for (const cell of tetromino.shape) {
+    const cellR = rect(cell.x * cellSize, cell.y * cellSize, cellSize - 1, cellSize - 1);
+    skPath.addRRect(rrect(cellR, 5, 5));
+  }
+  return skPath;
 };

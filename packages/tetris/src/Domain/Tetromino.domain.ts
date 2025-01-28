@@ -1,4 +1,4 @@
-import { type SkPoint, point } from '@shopify/react-native-skia';
+import type { SkPoint } from '@shopify/react-native-skia';
 import type { SharedValue } from 'react-native-reanimated';
 import * as TetrominoData from '../Data/Tetrominos.data';
 
@@ -18,6 +18,21 @@ export interface Tetromino {
   rotation: number;
 }
 
+const identity = (a: Tetromino): Tetromino => {
+  'worklet';
+  return {
+    color: a.color,
+    id: a.id,
+    position: {
+      x: a.position.x,
+      y: a.position.y,
+    },
+    rotation: a.rotation,
+    shape: a.shape,
+    shapes: a.shapes,
+  };
+};
+
 export const rotateTetromino = (shape: Tetromino): Tetromino => {
   'worklet';
   let rotation = shape.rotation + 1;
@@ -35,40 +50,6 @@ export const rotateTetromino = (shape: Tetromino): Tetromino => {
   };
 };
 
-const createTetromino = (config: TetrominoData.TetrominoConfig): Tetromino => {
-  'worklet';
-  const shapes = [config.value];
-
-  let stop = false;
-  while (!stop) {
-    const lastShape = shapes[shapes.length - 1];
-    const nextShape = lastShape
-      .map((_, iy) => lastShape.map((cells) => cells[iy]))
-      .map((row) => row.toReversed());
-
-    const nextShapeID = nextShape.flat().join('');
-    stop = shapes.some((shape) => shape.flat().join('') === nextShapeID);
-    shapes.push(nextShape);
-  }
-
-  const allShapes = shapes.map((shape) =>
-    shape
-      .flatMap((row, iy) => row.map((_, ix) => (_ > 0 ? point(ix, iy) : null)))
-      .filter((_) => _ !== null),
-  );
-  const maxX = allShapes[0].sort((a, b) => b.x - a.x)[0].x + 1;
-  const maxY = allShapes[0].sort((a, b) => b.y - a.y)[0].y + 1;
-
-  return {
-    color: config.color,
-    id: Object.keys(TetrominoData.TetrominosData).indexOf(config.name) + 1,
-    shapes: allShapes,
-    position: point(maxX > maxY ? maxX : maxY, 0),
-    shape: allShapes[0],
-    rotation: 0,
-  };
-};
-
 const lastTRandoms: [number, number, number] = [-1, -1, -1];
 export const getRandomTetromino = (): Tetromino => {
   'worklet';
@@ -79,9 +60,8 @@ export const getRandomTetromino = (): Tetromino => {
   lastTRandoms[2] = lastTRandoms[1];
   lastTRandoms[1] = lastTRandoms[0];
   lastTRandoms[0] = nextIndex;
-  const name = TetrominoData.TetrominoNames[nextIndex];
-  const shape = TetrominoData.TetrominosData[name]();
-  return createTetromino(shape);
+
+  return identity(TetrominoData.GameTetrominos[nextIndex]);
 };
 
 export const generateBag = () => {

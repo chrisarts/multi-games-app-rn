@@ -1,6 +1,11 @@
-import { processTransform3d, rrect, usePathValue } from '@shopify/react-native-skia';
+import {
+  processTransform3d,
+  rect,
+  rrect,
+  usePathValue,
+} from '@shopify/react-native-skia';
 import type { SharedValue } from 'react-native-reanimated';
-import { type GridConfig, getCellUIRect } from '../../Domain/Grid.domain';
+import type { GridConfig } from '../../Domain/Grid.domain';
 import type { AnimatedPosition } from '../../Domain/Position.domain';
 import type { Tetromino } from '../../Domain/Tetromino.domain';
 
@@ -12,7 +17,18 @@ export const useTetrominoSkPath = (
   const skShapePath = usePathValue((skPath) => {
     'worklet';
     for (const cell of tetromino.value.shape) {
-      skPath.addRRect(rrect(getCellUIRect(cell, cellConfig.size), 5, 5));
+      skPath.addRRect(
+        rrect(
+          rect(
+            cell.x * cellConfig.size,
+            cell.y * cellConfig.size,
+            cellConfig.size - 1,
+            cellConfig.size - 1,
+          ),
+          5,
+          5,
+        ),
+      );
     }
     skPath.transform(
       processTransform3d([
