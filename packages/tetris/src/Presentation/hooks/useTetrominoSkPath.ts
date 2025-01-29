@@ -17,18 +17,13 @@ export const useTetrominoSkPath = (
   const skShapePath = usePathValue((skPath) => {
     'worklet';
     for (const cell of tetromino.value.shape) {
-      skPath.addRRect(
-        rrect(
-          rect(
-            cell.x * cellConfig.size,
-            cell.y * cellConfig.size,
-            cellConfig.size - 1,
-            cellConfig.size - 1,
-          ),
-          5,
-          5,
-        ),
+      const skRect = rect(
+        cell.x * cellConfig.size,
+        cell.y * cellConfig.size,
+        cellConfig.size - 1,
+        cellConfig.size - 1,
       );
+      skPath.addRRect(rrect(skRect, 5, 5));
     }
     skPath.transform(
       processTransform3d([

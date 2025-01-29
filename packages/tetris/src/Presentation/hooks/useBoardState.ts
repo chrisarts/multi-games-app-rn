@@ -37,11 +37,6 @@ export const useBoardState = () => {
     gridSizeToMatrix(boardSize.value, gridConfig.value.cell.size),
   );
 
-  const reset = () => {
-    'worklet';
-    matrix.value = gridSizeToMatrix(gridConfig.value, gridConfig.value.cell.size);
-  };
-
   const checkCollisions = (at: SkPoint, tetromino: Tetromino) => {
     'worklet';
     for (const shapeCell of tetromino.shapes[tetromino.rotation]) {
@@ -83,16 +78,6 @@ export const useBoardState = () => {
     return matrix.value[row].every((cell) => isOccupiedCell(cell));
   };
 
-  // const setCellValue = (at: SkPoint, value: number) => {
-  //   'worklet';
-  //   matrix.value[at.y][at.x].value = value;
-  // };
-
-  // const isRowEmpty = (row: number) => {
-  //   'worklet';
-  //   return matrix.value[row].every((cell) => !isOccupiedCell(cell));
-  // };
-
   const moveCellDown = (at: SkPoint, toRow: number) => {
     'worklet';
     const cell = matrix.value[at.y][at.x];
@@ -104,21 +89,11 @@ export const useBoardState = () => {
     boardImage.value?.dispose();
     boardImage.value = drawBoard(matrix.value, gridConfig.value, showHiddenCells.value);
   };
-  draw();
 
-  const mergeTetromino = (tetromino: Tetromino, at: SkPoint) => {
+  const sweepLines = () => {
     'worklet';
-    let sweepLinesCount = 0;
     const grid = matrix.value;
-    for (const cell of tetromino.shapes[tetromino.rotation]) {
-      const mergePoint = add(cell, at);
-      grid[mergePoint.y][mergePoint.x] = {
-        x: mergePoint.x,
-        y: mergePoint.y,
-        value: tetromino.id,
-      };
-    }
-
+    let sweepLinesCount = 0;
     for (let row = grid.length - 1; row >= 0; row--) {
       if (isRowFull(row)) {
         grid[row] = grid[row].map(({ x, y }) => ({ x, y, value: 0 }));
@@ -130,19 +105,40 @@ export const useBoardState = () => {
           .map((cell) => moveCellDown(cell, sweepLinesCount));
       }
     }
-    draw();
+
     return sweepLinesCount;
   };
 
-  const getDistance = (at: SkPoint) => {
+  const mergeTetromino = (tetromino: Tetromino, at: SkPoint) => {
     'worklet';
-    let distance = 0;
-    do {
-      ++distance;
-    } while (!isOccupiedCell(point(at.x, distance + 1)));
+    const grid = matrix.value;
+    for (const cell of tetromino.shapes[tetromino.rotation]) {
+      const mergePoint = add(cell, at);
+      grid[mergePoint.y][mergePoint.x] = {
+        x: mergePoint.x,
+        y: mergePoint.y,
+        value: tetromino.id,
+      };
+    }
+  };
+
+  const getDistance = (at: SkPoint, tetromino: Tetromino) => {
+    'worklet';
+    let distance = at.y;
+    while (!checkCollisions(point(at.x, distance + 1), tetromino).merge) {
+      distance++;
+    }
 
     return distance;
   };
+
+  const reset = () => {
+    'worklet';
+    matrix.set(() => gridSizeToMatrix(gridConfig.value, gridConfig.value.cell.size));
+    draw();
+  };
+
+  draw();
 
   return {
     grid: matrix,
@@ -150,7 +146,9 @@ export const useBoardState = () => {
     boardImage,
     boardSize,
     showHiddenCells,
+    sweepLines,
     reset,
+    draw,
     checkCollisions,
     mergeTetromino,
     getDistance,

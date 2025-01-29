@@ -68,23 +68,3 @@ export const generateBag = () => {
   'worklet';
   return [getRandomTetromino(), getRandomTetromino(), getRandomTetromino()];
 };
-
-export const createTetrominoManager = (bag: TetrominosBag) => {
-  'worklet';
-  return {
-    fillBag: () => {
-      'worklet';
-      bag.value = generateBag();
-    },
-    nextTetromino: () => {
-      'worklet';
-      bag.modify((prev) => {
-        'worklet';
-        prev.push(getRandomTetromino());
-        return prev;
-      });
-      const next = bag.value.shift()!;
-      return next;
-    },
-  };
-};

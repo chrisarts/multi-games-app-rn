@@ -4,9 +4,7 @@ export const asString = <T>(x: T) => String(x);
 
 export function asRegExp(value: string | RegExp): RegExp {
   return typeof value === 'string'
-    ? new RegExp(
-        `^${value}${value.includes('$') || value.slice(-1) === '-' ? '' : '$'}`,
-      )
+    ? new RegExp(`^${value}${value.includes('$') || value.slice(-1) === '-' ? '' : '$'}`)
     : value;
 }
 

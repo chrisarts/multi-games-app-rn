@@ -1,3 +1,4 @@
+import { point } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import {
   type Tetromino,
@@ -42,9 +43,14 @@ export const usePlayerState = () => {
     () => tetromino.value.shape.sort((a, b) => b.y - a.y)[0].y,
   );
 
+  const absPosition = useDerivedValue(() =>
+    point(Math.round(position.x.value), Math.floor(position.y.value)),
+  );
+
   return {
     tetrominosBag,
     tetrominoMaxY,
+    absPosition,
     tetromino,
     position,
     lastTouchedX,

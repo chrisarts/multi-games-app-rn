@@ -1,108 +1,77 @@
 import {
   Group,
   Image,
-  PaintStyle,
   RoundedRect,
   type SkHostRect,
-  type SkRect,
   Skia,
-  StrokeCap,
-  StrokeJoin,
   Text,
   rect,
   rrect,
 } from '@shopify/react-native-skia';
 import type { ReactNode } from 'react';
-import {
-  type SharedValue,
-  useDerivedValue,
-  useSharedValue,
-} from 'react-native-reanimated';
-import { TetrominoColors } from '../Data/Tetrominos.data';
-import { type GridMatrix, gridSizeToMatrix } from '../Domain/Grid.domain';
-import type {
-  TetrisBoardState,
-  TetrisGameState,
-  TetrisPlayerState,
-} from '../Domain/Tetris.domain';
+import { type SharedValue, useDerivedValue } from 'react-native-reanimated';
+import type { GridConfig } from '../Domain/Grid.domain';
+import type { TetrisGameState } from '../Domain/Tetris.domain';
+import type { Tetromino } from '../Domain/Tetromino.domain';
+import { useTextInfoRect } from './hooks/useInfoRect';
 import { useTetrisFont } from './hooks/useTetrisFont';
 
 interface BoardInfoProps {
-  board: TetrisBoardState;
+  gridConfig: SharedValue<GridConfig>;
   game: TetrisGameState;
-  player: TetrisPlayerState;
+  tetrominosBag: SharedValue<Tetromino[]>;
 }
 
-export const BoardInfo = ({ board, game, player }: BoardInfoProps) => {
+export const BoardInfo = ({ gridConfig, game, tetrominosBag }: BoardInfoProps) => {
   const { fontItalicBold } = useTetrisFont();
-  const infoSquare = useDerivedValue(() => board.gridConfig.value.infoSquareRect);
+  const infoSquare = useDerivedValue(() => gridConfig.value.infoSquareRect);
   const nextShapesRect = useDerivedValue(() =>
     rect(
-      board.gridConfig.value.infoSquareRect.x,
-      board.gridConfig.value.content.y,
+      gridConfig.value.infoSquareRect.x,
+      gridConfig.value.content.y,
       infoSquare.value.width * 0.9,
-      board.gridConfig.value.infoSquareRect.width * 2.5,
+      gridConfig.value.infoSquareRect.width * 2.5,
     ),
   );
-  const linesRect = useDerivedValue(() =>
-    rect(
-      board.gridConfig.value.infoSquareRect.x,
-      nextShapesRect.value.y * 1.1 + nextShapesRect.value.height,
-      infoSquare.value.width * 0.9,
-      board.gridConfig.value.infoSquareRect.width,
-    ),
-  );
-  const scoreRect = useDerivedValue(() =>
-    rect(
-      board.gridConfig.value.infoSquareRect.x,
-      linesRect.value.y + linesRect.value.height * 1.2,
-      infoSquare.value.width * 0.9,
-      board.gridConfig.value.infoSquareRect.width,
-    ),
-  );
-  const maxPad = '000000';
-  const lines = useDerivedValue(() => {
-    const fullNumber = `${game.lines.value}`;
-    const lessPad = maxPad.length - fullNumber.length;
-    return fullNumber.padStart(lessPad, '0');
-  });
-  const level = useDerivedValue(() => {
-    const fullNumber = `${game.level.value}`;
-    const lessPad = maxPad.length - fullNumber.length;
-    return fullNumber.padStart(lessPad, '0');
-  });
+
+  const lines = useTextInfoRect(game.lines, nextShapesRect, infoSquare);
+  const level = useTextInfoRect(game.level, lines.skRect, infoSquare);
+  const score = useTextInfoRect(game.level, level.skRect, infoSquare);
 
   return (
     <Group>
       <BoardInfoRect contentRect={nextShapesRect} text='next'>
-        <NextShapesImage container={nextShapesRect} playerState={player} />
+        <NextShapesImage container={nextShapesRect} tetrominosBag={tetrominosBag} />
       </BoardInfoRect>
-      <BoardInfoRect contentRect={linesRect} text='Lines'>
-        <Text text={lines} font={fontItalicBold} />
+      <BoardInfoRect contentRect={lines.skRect} text='Lines'>
+        <Text text={lines.text} font={fontItalicBold} transform={lines.translate} />
       </BoardInfoRect>
-      <BoardInfoRect contentRect={scoreRect} text='Level'>
-        <Text text={level} font={fontItalicBold} />
+      <BoardInfoRect contentRect={level.skRect} text='Level'>
+        <Text text={level.text} font={fontItalicBold} transform={level.translate} />
+      </BoardInfoRect>
+      <BoardInfoRect contentRect={score.skRect} text='Score'>
+        <Text text={score.text} font={fontItalicBold} transform={score.translate} />
       </BoardInfoRect>
     </Group>
   );
 };
 
 interface NextShapesImageProps {
-  playerState: TetrisPlayerState;
+  tetrominosBag: SharedValue<Tetromino[]>;
   container: SharedValue<SkHostRect>;
 }
 
-const NextShapesImage = ({ playerState, container }: NextShapesImageProps) => {
+const NextShapesImage = ({ tetrominosBag, container }: NextShapesImageProps) => {
   const nextShapesImageRect = useDerivedValue(() =>
     rect(4, container.value.y * 0.25, container.value.width, container.value.height),
   );
-  const gridMatrix = gridSizeToMatrix(
-    { columns: 5, rows: 12 },
-    nextShapesImageRect.value.height / 15,
-  );
+  // const gridMatrix = gridSizeToMatrix(
+  //   { columns: 5, rows: 12 },
+  //   nextShapesImageRect.value.height / 15,
+  // );
   const cellSize = useDerivedValue(() => nextShapesImageRect.value.height / 15);
 
-  const image = useSharedValue(drawNextShapesGrid(container.value, gridMatrix));
+  // const image = useSharedValue(drawNextShapesGrid(container.value, gridMatrix));
 
   const shapesImage = useDerivedValue(() => {
     const surface = Skia.Surface.MakeOffscreen(
@@ -111,7 +80,7 @@ const NextShapesImage = ({ playerState, container }: NextShapesImageProps) => {
     );
     const canvas = surface?.getCanvas();
     let lastCellY = 0;
-    for (const shape of playerState.bag.value) {
+    for (const shape of tetrominosBag.value) {
       const path = Skia.Path.Make();
       const maxY = shape.shape.sort((a, b) => b.y - a.y)[0].y;
       const midX = Math.round(shape.shape.sort((a, b) => b.y - a.y)[0].x / 2);
@@ -136,40 +105,10 @@ const NextShapesImage = ({ playerState, container }: NextShapesImageProps) => {
 
   return (
     <Group>
-      <Image image={image} rect={nextShapesImageRect} />
+      {/* <Image image={image} rect={nextShapesImageRect} /> */}
       <Image image={shapesImage} rect={nextShapesImageRect} />
     </Group>
   );
-};
-
-const drawNextShapesGrid = (container: SkRect, gridMatrix: GridMatrix) => {
-  // const cellSize = container.height / 15;
-  const surface = Skia.Surface.Make(container.width, container.height);
-  const canvas = surface?.getCanvas();
-
-  for (const cell of gridMatrix.flat()) {
-    const skPath = Skia.Path.Make();
-    // skPath.addRRect(rrect(getCellUIRect(cell.point, cellSize), 3, 3));
-    skPath.addRRect(rrect(cell, 3, 3));
-    const paint = Skia.Paint();
-
-    if (cell.value === 0) {
-      paint.setStyle(PaintStyle.Stroke);
-      paint.setColor(Skia.Color('white'));
-      paint.setStrokeWidth(0.2);
-      paint.setStrokeJoin(StrokeJoin.Round);
-      paint.setStrokeCap(StrokeCap.Round);
-      skPath.simplify();
-      skPath.computeTightBounds();
-    } else {
-      paint.setColor(Skia.Color(TetrominoColors[cell.value]));
-    }
-
-    canvas?.drawPath(skPath, paint);
-  }
-
-  surface?.flush();
-  return surface?.makeImageSnapshot() ?? null;
 };
 
 interface BoardInfoRectProps {
@@ -211,3 +150,33 @@ const BoardInfoRect = ({ text, contentRect, children }: BoardInfoRectProps) => {
     </Group>
   );
 };
+
+// const drawNextShapesGrid = (container: SkRect, gridMatrix: GridMatrix) => {
+//   const cellSize = container.height / 15;
+//   const surface = Skia.Surface.Make(container.width, container.height);
+//   const canvas = surface?.getCanvas();
+
+//   for (const cell of gridMatrix.flat()) {
+//     const skPath = Skia.Path.Make();
+//     const skRect = rect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
+//     skPath.addRRect(rrect(skRect, 3, 3));
+//     const paint = Skia.Paint();
+
+//     if (cell.value === 0) {
+//       paint.setStyle(PaintStyle.Stroke);
+//       paint.setColor(Skia.Color('white'));
+//       paint.setStrokeWidth(0.2);
+//       paint.setStrokeJoin(StrokeJoin.Round);
+//       paint.setStrokeCap(StrokeCap.Round);
+//       skPath.simplify();
+//       skPath.computeTightBounds();
+//     } else {
+//       paint.setColor(Skia.Color(TetrominoColors[cell.value]));
+//     }
+
+//     canvas?.drawPath(skPath, paint);
+//   }
+
+//   surface?.flush();
+//   return surface?.makeImageSnapshot() ?? null;
+// };
